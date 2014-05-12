@@ -1,4 +1,8 @@
-module.exports = function(app, passport) {
+'use strict';
+
+var passport = require('passport');
+
+module.exports = function(app) {
 
   // =====================================
   // HOME PAGE (with login links) ========

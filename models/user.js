@@ -4,10 +4,12 @@ var async = require('async');
 var db = require('../lib/connection');
 
 var User = function(params) {
+  if (!params) throw new Error('Missing properties');
   if (!params.name) throw new Error('No name');
   if (!params.email) throw new Error('No email');
   this.name = params.name;
   this.email = params.email.toLowerCase();
+  this.password = params.password;
   this.friendsPokes = params.friendsPokes ? params.friendsPokes : {};
   this.bannedUsers = params.bannedUsers ? params.bannedUsers : {};
   this.score = params.score || 0;
@@ -16,10 +18,11 @@ var User = function(params) {
 };
 
 User.findById = function(email, callback) {
-  this.get(email.toLowerCase(), function(err, result) {
+  db.get(email.toLowerCase(), function(err, result) {
     if (err) return callback(err);
     if (!result || !result.value) return callback(null, null);
     result.value.cas = result.cas;
+    result.value.email = email;
     callback(null, new User(result.value));
   });
 };
@@ -38,10 +41,11 @@ User.prototype.save = function(callback) {
 User.prototype.toDbJSON = function() {
   return {
     name: this.name,
+    password: this.password,
     friendsPokes: this.friendsPokes,
     bannedUsers: this.bannedUsers,
     score: this.score,
-    date: this.date
+    date: this.date,
   };
 };
 

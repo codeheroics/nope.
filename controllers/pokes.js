@@ -1,6 +1,5 @@
 'use strict';
 
-
 var Poke = require('../models/poke');
 var User = require('../models/user');
 

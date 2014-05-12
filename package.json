@@ -11,14 +11,19 @@
   "dependencies": {
     "adaro": "^0.1.5",
     "async": "^0.8.0",
+    "bcrypt": "latest",
+    "connect-flash": "^0.1.1",
     "couchbase": "^1.2.1",
     "dustjs-helpers": "^1.2.0",
     "dustjs-linkedin": "^2.3.5",
+    "ejs": "^1.0.0",
     "express": "~3.4.4",
     "kraken-js": "^0.7.0",
     "less": "^1.7.0",
     "makara": "^0.3.4",
-    "nconf": "^0.6.8"
+    "nconf": "^0.6.8",
+    "passport": "~0.1.17",
+    "passport-local": "~0.1.6"
   },
   "devDependencies": {
     "grunt": "^0.4.4",
