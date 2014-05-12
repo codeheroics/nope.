@@ -45,7 +45,7 @@ User.prototype.toDbJSON = function() {
     friendsPokes: this.friendsPokes,
     bannedUsers: this.bannedUsers,
     score: this.score,
-    date: this.date,
+    date: this.date
   };
 };
 
