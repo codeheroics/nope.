@@ -11,6 +11,7 @@ var User = function(params) {
   this.friendsPokes = params.friendsPokes ? params.friendsPokes : {};
   this.bannedUsers = params.bannedUsers ? params.bannedUsers : {};
   this.score = params.score || 0;
+  this.date = params.date ? params.date : new Date();
   this.cas = params.cas || null;
 };
 
@@ -38,7 +39,9 @@ User.prototype.toDbJSON = function() {
   return {
     name: this.name,
     friendsPokes: this.friendsPokes,
-    score: this.score
+    bannedUsers: this.bannedUsers,
+    score: this.score,
+    date: this.date
   };
 };
 
