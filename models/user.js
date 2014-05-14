@@ -49,6 +49,15 @@ User.prototype.toDbJSON = function() {
   };
 };
 
+User.prototype.toPublicJSON = function() {
+  return {
+    name: this.name,
+    friendsPokes: this.friendsPokes,
+    score: this.score,
+    date: this.date
+  };
+};
+
 User.prototype.hasFriend = function(email) {
   return this.friendsPokes[email.toLowerCase()];
 };
