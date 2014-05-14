@@ -3,17 +3,18 @@
 
 var User = require('../models/user');
 
-module.exports = function (app) {
+var isLoggedIn = require('../lib/utils/middlewares').isLoggedInJSON;
 
-  // before getting here, check whether user is logged (if not, exit)
-
-  // Dunno why I would want to get infos on a user
-  /*app.get('/:email', function(req, res, next) {
-    User.findById(req.params.email, function(err, user) {
+module.exports = function(app) {
+  // Send a friend request
+  // TODO check email validity to avoid querying empty slots ?
+  app.post('/friends/:friendEmail', isLoggedIn, function(req, res, next) {
+    var friendEmail = req.params.friendEmail.toLowerCase().trim();
+    req.user.sendFriendRequest(friendEmail, function(err, status) {
       if (err) return next(err);
-
-      if (!user.hasFriend(req.loggedInUser)) return next(new Error('Cannot get information on that user'));
+      // TODO Send an e-mail to the unexisting user ? --> Propose this in-app to the current user ?
+      return res.jsonp({message: status});
     });
-  });*/
+  });
 
 };

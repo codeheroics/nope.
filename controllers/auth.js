@@ -1,6 +1,7 @@
 'use strict';
 
 var passport = require('passport');
+var isLoggedIn = require('../lib/utils/middlewares').isLoggedInWeb;
 
 module.exports = function(app) {
 
@@ -63,15 +64,4 @@ module.exports = function(app) {
     req.logout();
     res.redirect('/');
   });
-
-  // route middleware to make sure
-  function isLoggedIn(req, res, next) {
-
-    // if user is authenticated in the session, carry on
-    if (req.isAuthenticated())
-      return next();
-
-    // if they aren't redirect them to the home page
-    res.redirect('/');
-  }
 };
