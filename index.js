@@ -19,7 +19,6 @@ app.requestStart = function requestStart(server) {
 
 
 app.requestBeforeRoute = function requestBeforeRoute(server) {
-  server.set('view engine', 'ejs'); // set up ejs for templating
   server.use(passport.initialize());
   server.use(passport.session()); // persistent login sessions
   server.use(flash()); // use connect-flash for flash messages stored in session

@@ -23,16 +23,16 @@
 			<div class="well">
 				<h3><span class="fa fa-user"></span> Local</h3>
 
-				<% if (user.email) { %>
+				{#user.email}
 					<p>
-						<strong>email</strong>: <%= user.email %><br>
-						<strong>password</strong>: <%= user.password %>
+						<strong>email</strong>: {user.email}<br>
+						<strong>password</strong>: {user.password}
 					</p>
 
 					<a href="/unlink/local" class="btn btn-default">Unlink</a>
-				<% } else { %>
+				{:else}
 					<a href="/connect/local" class="btn btn-default">Connect Local</a>
-				<% } %>
+				{/user.email}
 
 			</div>
 		</div>
