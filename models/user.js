@@ -23,7 +23,8 @@ User.FRIEND_STATUSES.NOT_FOUND = 'Not found';
 User.FRIEND_STATUSES.PENDING = 'Pending';
 
 User.findById = function(email, callback) {
-  db.get(email.toLowerCase(), function(err, result) {
+  email = email.toLowerCase();
+  db.get(email, function(err, result) {
     if (err) return callback(err);
     if (!result || !result.value) return callback(null, null);
     result.value.cas = result.cas;
@@ -73,6 +74,7 @@ User.prototype.hasBanned = function(email) {
 };
 
 User.prototype.setPokingAt = function(email, opponentWonPoints) {
+  email = email.toLowerCase();
   var oldPoke = this.friendsPokes[email];
   this.friendsPokes[email] = {
     date: new Date(),
@@ -83,6 +85,7 @@ User.prototype.setPokingAt = function(email, opponentWonPoints) {
 };
 
 User.prototype.setPokedBy = function(email, wonPoints) {
+  email = email.toLowerCase();
   var oldPoke = this.friendsPokes[email];
   this.friendsPokes[email] = {
     date: new Date(),
@@ -135,6 +138,7 @@ User.prototype.pokeAt = function(email, callback) {
 
 User.prototype.sendFriendRequest = function(email, callback) {
   var currentUser = this;
+  email = email.toLowerCase();
   User.findById(email, function(err, potentialFriend) {
     if (err) return callback(err);
 
@@ -158,14 +162,23 @@ User.prototype.sendFriendRequest = function(email, callback) {
 };
 
 User.prototype.removeFromPendingUsers = function(email) {
+  email = email.toLowerCase();
   this.pendingUsers = this.pendingUsers.filter(function(userEmail) {
     return userEmail !== email;
   });
 };
 
 User.prototype.rejectFriendRequest = function(email) {
+  email = email.toLowerCase();
   this.removeFromPendingUsers(email);
   this.bannedUsers.push(email);
+};
+
+User.prototype.unban = function(email) {
+  email = email.toLowerCase();
+  this.bannedUsers = this.bannedUsers.filter(function(bannedEmail) {
+    return bannedEmail !== email;
+  });
 };
 
 module.exports = User;

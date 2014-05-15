@@ -12,6 +12,7 @@ module.exports = function (app) {
   });
 
   app.post('/pokes/:opponentEmail', isLoggedIn, function(req, res, next) {
+    if (req.query.acceptFriend) req.user.removeFromPendingUsers(req.params.opponentEmail); // Needs to be in the query to accept friend
     req.user.pokeAt(req.params.opponentEmail.toLowerCase().trim(), function(err) {
       if (err) return next(err);
       res.jsonp({message: 'ok'});
