@@ -21,7 +21,8 @@ var User = function(params) {
 User.FRIEND_STATUSES = {
   BANNED: 'Banned',
   NOT_FOUND: 'Not found',
-  PENDING: 'Pending'
+  PENDING: 'Pending',
+  FRIEND: 'Friend'
 };
 
 User.findById = function(email, callback) {
@@ -147,6 +148,10 @@ User.prototype.sendFriendRequest = function(email, callback) {
     if (!potentialFriend) return callback(null, User.FRIEND_STATUSES.NOT_FOUND);
     if (potentialFriend.bannedUsers.indexOf(currentUser.email) !== -1) {
       return callback(null, User.FRIEND_STATUSES.BANNED);
+    }
+    var friendsEmails = Object.keys(potentialFriend.friends);
+    if (friendsEmails.indexOf(currentUser.email) !== -1) {
+      return callback(null, User.FRIEND_STATUSES.FRIEND);
     }
 
     currentUser.setPokingAt(potentialFriend);
