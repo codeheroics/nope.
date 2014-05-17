@@ -18,9 +18,11 @@ var User = function(params) {
   this.cas = params.cas || null;
 };
 
-User.FRIEND_STATUSES.BANNED = 'Banned';
-User.FRIEND_STATUSES.NOT_FOUND = 'Not found';
-User.FRIEND_STATUSES.PENDING = 'Pending';
+User.FRIEND_STATUSES = {
+  BANNED: 'Banned',
+  NOT_FOUND: 'Not found',
+  PENDING: 'Pending'
+};
 
 User.findById = function(email, callback) {
   email = email.toLowerCase();
