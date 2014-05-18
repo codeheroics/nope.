@@ -94,8 +94,8 @@ User.prototype.setPokedBy = function(email, date, wonPoints) {
   this.friendsPokes[email] = {
     date: date,
     isPokingMe: true,
-    myScore: oldPoke.myScore + wonPoints,
-    opponentScore: oldPoke.opponentScore
+    myScore: oldPoke ? oldPoke.myScore + wonPoints : wonPoints,
+    opponentScore: oldPoke ? oldPoke.opponentScore : 0
   };
 };
 
@@ -120,7 +120,7 @@ User.prototype.pokeAt = function(email, callback) {
     var selfPoke = self.friendsPokes[opponentUserPoke.email];
 
     if (!opponentUserPoke) return callback(new Error('This should not happen'));
-    if (opponentUserPoke.isPokingMe) return callback(new Error('This should not happen either'));
+    if (opponentUserPoke.isPokingMe) return callback(new Error('Already poked back'));
 
     // okay, we can poke
 
@@ -131,7 +131,7 @@ User.prototype.pokeAt = function(email, callback) {
     var wonPoints = isFirstPoke ? 0 : Math.round(time - selfPoke.date.getTime() / 1000);
 
     self.setPokingAt(email, date, wonPoints);
-    userPoked.setPokedBy(email, date, wonPoints);
+    userPoked.setPokedBy(self.email, date, wonPoints);
 
     async.parallel([
       function(cbParallel) { userPoked.save(cbParallel); },
