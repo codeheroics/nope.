@@ -99,9 +99,9 @@ User.prototype.setPokedBy = function(email, date, wonPoints) {
   };
 };
 
-User.prototype.pokeAt = function(email, callback) {
+User.prototype.pokeAt = function(opponentEmail, callback) {
   var self = this;
-  User.findById(email, function(err, userPoked) {
+  User.findById(opponentEmail, function(err, userPoked) {
     if (err) return callback(err);
     if (!userPoked) return callback(null, User.FRIEND_STATUSES.NOT_FOUND);
 
@@ -109,15 +109,16 @@ User.prototype.pokeAt = function(email, callback) {
       if (userPoked.hasBanned(self.email)) {
         return callback(null, User.FRIEND_STATUSES.BANNED);
       }
-      return self.sendFriendRequest(email, callback);
+      return self.sendFriendRequest(opponentEmail, callback);
     }
 
     var opponentUserPoke = userPoked.friendsPokes[self.email];
 
-    if (self.friendsPokes[opponentUserPoke.email]) {
-      self.friendsPokes[opponentUserPoke.email] = {};
+    var isFirstPoke = self.friendsPokes[opponentEmail] ? false : true; // Very first poke
+    if (!self.friendsPokes[opponentEmail]) {
+      self.friendsPokes[opponentEmail] = {};
     }
-    var selfPoke = self.friendsPokes[opponentUserPoke.email];
+    var selfPoke = self.friendsPokes[opponentEmail];
 
     if (!opponentUserPoke) return callback(new Error('This should not happen'));
     if (opponentUserPoke.isPokingMe) return callback(new Error('Already poked back'));
@@ -126,11 +127,9 @@ User.prototype.pokeAt = function(email, callback) {
 
     var date = new Date();
     var time = date.getTime();
+    var wonPoints = isFirstPoke ? 0 : Math.round((time - new Date(selfPoke.date).getTime()) / 1000);
 
-    var isFirstPoke = selfPoke ? false : true; // Very first poke
-    var wonPoints = isFirstPoke ? 0 : Math.round(time - selfPoke.date.getTime() / 1000);
-
-    self.setPokingAt(email, date, wonPoints);
+    self.setPokingAt(opponentEmail, date, wonPoints);
     userPoked.setPokedBy(self.email, date, wonPoints);
 
     async.parallel([
