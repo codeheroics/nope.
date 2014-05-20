@@ -1,5 +1,6 @@
 'use strict';
 
+var couchbase   = require('couchbase');
 var async       = require('async');
 var validator   = require('validator');
 var db          = require('../lib/connection');
@@ -47,7 +48,11 @@ User.prototype.save = function(callback) {
     options.cas = this.cas;
   }
 
-  db.set(this.email.toLowerCase(), this.toDbJSON(), options, callback);
+  var saved = false;
+  async.whilst
+  db.set(this.email.toLowerCase(), this.toDbJSON(), options, function(err) {
+
+  });
 };
 
 User.prototype.toDbJSON = function() {
@@ -138,19 +143,54 @@ User.prototype.pokeAt = function(opponentEmail, callback) {
     var time = date.getTime();
     var wonPoints = isFirstPoke ? 0 : Math.round((time - new Date(selfPoke.date).getTime()) / 1000);
 
-    self.setPokingAt(opponentEmail, date, wonPoints);
-    userPoked.setPokedBy(self.email, date, wonPoints);
+    // From here, this can be repeated in case of CAS error
 
-    async.parallel([
-      function(cbParallel) { userPoked.save(cbParallel); },
-      function(cbParallel) { self.save(cbParallel); }
-    ], function(err) {
-      if (err) return callback(err);
+    async.series(
+      [
+        function manageUserPoked(cbSeries) {
+          async.retry(
+            3,
+            function updateUserPoked(cbRetry) {
+              userPoked.setPokedBy(self.email, date, wonPoints);
+              userPoked.save(function(err, result) {
+                if (err && err.code === couchbase.errors.keyAlreadyExists) {
+                  User.findById(userPoked.email, function(errGet, updateUserPoked) {
+                    if (errGet) return cbRetry(errGet);
+                    userPoked = updateUserPoked;
+                  });
+                }
+              });
+            },
+            cbSeries
+          );
+        },
 
-      // TODO EMIT AN EVENT
-      console.log('should emit event to convey that an user was poked'); // TODO
-      callback();
-    });
+        function manageUserPoking(cbSeries) {
+          async.retry(
+            3,
+            function updateUserPoking(cbRetry) {
+              self.setPokingAt(opponentEmail, date, wonPoints);
+              self.save(function(err, result) {
+                if (err && err.code === couchbase.errors.keyAlreadyExists) {
+                  User.findById(self.email, function(errGet, pokingUser) {
+                    if (errGet) return cbRetry(errGet);
+                    self = pokingUser;
+                  });
+                }
+              });
+            },
+            cbSeries
+          );
+        }
+      ],
+      function(err) {
+        if (err) return callback(err);
+
+        // TODO EMIT AN EVENT
+        console.log('should emit event to convey that an user was poked'); // TODO
+        callback();
+      }
+    );
   });
 };
 
