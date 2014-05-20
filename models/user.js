@@ -1,7 +1,8 @@
 'use strict';
 
-var async = require('async');
-var db = require('../lib/connection');
+var async       = require('async');
+var validator   = require('validator');
+var db          = require('../lib/connection');
 
 var User = function(params) {
   if (!params) throw new Error('Missing properties');
@@ -23,6 +24,7 @@ User.FRIEND_STATUSES = {
   NOT_FOUND: 'Not found',
   PENDING: 'Pending',
   FRIEND: 'Friend',
+  NOT_FRIEND: 'Not Friend',
   SELF: 'SELF'
 };
 
@@ -38,7 +40,7 @@ User.findById = function(email, callback) {
 };
 
 User.prototype.save = function(callback) {
-  if (!this.email) return callback(new Error('No mail'));
+  if (!validator.isEmail(this.email)) return callback(new Error('Invalid email'));
 
   var options = {};
   if (this.cas) {
@@ -70,11 +72,15 @@ User.prototype.toPublicJSON = function() {
 };
 
 User.prototype.hasFriend = function(email) {
-  return this.friendsPokes[email.toLowerCase()];
+  return this.friendsPokes[email.toLowerCase()] ? true : false;
 };
 
 User.prototype.hasBanned = function(email) {
-  return this.bannedUsers[email.toLowerCase()];
+  return this.bannedUsers[email.toLowerCase()] ? true : false;
+};
+
+User.prototype.hasPending = function(email) {
+  return this.pendingUsers.indexOf(email) !== -1;
 };
 
 User.prototype.setPokingAt = function(email, date, opponentWonPoints) {
@@ -109,7 +115,10 @@ User.prototype.pokeAt = function(opponentEmail, callback) {
       if (userPoked.hasBanned(self.email)) {
         return callback(null, User.FRIEND_STATUSES.BANNED);
       }
-      return self.sendFriendRequest(opponentEmail, callback);
+      if (userPoked.hasPending(self.email)) {
+        return callback(null, User.FRIEND_STATUSES.PENDING);
+      }
+      return callback(null, User.FRIEND_STATUSES.NOT_FRIEND);
     }
 
     var opponentUserPoke = userPoked.friendsPokes[self.email];
@@ -162,8 +171,7 @@ User.prototype.sendFriendRequest = function(email, callback) {
       // Already friends!
       return callback(null, User.FRIEND_STATUSES.FRIEND);
     }
-    if (potentialFriend.pendingUsers.indexOf(currentUser.email) !== -1) {
-      // Already pending!
+    if (potentialFriend.hasPending(currentUser.email)) {
       return callback(null, User.FRIEND_STATUSES.PENDING);
     }
 

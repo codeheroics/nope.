@@ -23,7 +23,8 @@
     "makara": "^0.3.4",
     "nconf": "^0.6.8",
     "passport": "~0.1.17",
-    "passport-local": "~0.1.6"
+    "passport-local": "~0.1.6",
+    "validator": "^3.12.0"
   },
   "devDependencies": {
     "grunt": "^0.4.4",
