@@ -15,10 +15,6 @@ module.exports = function (app) {
   app.post('/pokes', isLoggedIn, function(req, res, next) {
     if (!validator.isEmail(req.body.friendEmail)) return res.jsonp(400, {message: 'Invalid E-mail'});
 
-    // Needs to be in the query to accept friend
-    if (req.query.acceptFriend || req.body.acceptFriend) {
-      req.user.removeFromPendingUsers(req.body.opponentEmail);
-    }
     req.user.pokeAt(req.body.friendEmail.toLowerCase().trim(), function(err, result) {
       if (err) return next(err);
       res.jsonp({ message: result });
