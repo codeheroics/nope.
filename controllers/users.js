@@ -5,10 +5,12 @@ var User        = require('../models/user');
 var isLoggedIn  = require('../lib/utils/middlewares').isLoggedInJSON;
 
 module.exports = function(app) {
+  app.get('/users/:email', isLoggedIn, function(req, res, next) {
+
+  });
+
   // Send a friend request
-  // TODO check email validity to avoid querying empty slots ?
   app.post('/friends', isLoggedIn, function(req, res, next) {
-    // TODO Add email validator
     if (!validator.isEmail(req.body.friendEmail)) return res.jsonp(400, {message: 'Invalid E-mail'});
     var friendEmail = req.body.friendEmail.toLowerCase().trim();
     req.user.sendFriendRequest(friendEmail, function(err, status) {

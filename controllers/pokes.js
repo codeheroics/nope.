@@ -21,7 +21,7 @@ module.exports = function (app) {
     }
     req.user.pokeAt(req.body.friendEmail.toLowerCase().trim(), function(err, result) {
       if (err) return next(err);
-      res.jsonp({message: result});
+      res.jsonp({ message: result });
     });
   });
 };
