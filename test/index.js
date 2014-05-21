@@ -1,4 +1,4 @@
-/*global describe:false, it:false, before:false, after:false, afterEach:false*/
+/*global describe:false, it:false, before:false, beforeEach:false, after:false, afterEach:false*/
 
 'use strict';
 
