@@ -221,7 +221,7 @@ User.prototype.sendFriendRequest = function(email, callback) {
       return callback(null, User.FRIEND_STATUSES.PENDING);
     }
 
-    currentUser.setPokingAt(potentialFriend.email, new Date(), 0);
+    currentUser.setPokingAt(potentialFriend.email, Date.now(), 0);
     potentialFriend.pendingUsers.push(currentUser.email);
     console.log('should emit event to convey that a friend request was sent');
 
