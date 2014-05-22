@@ -26,8 +26,21 @@ User.FRIEND_STATUSES = {
   PENDING: 'Pending',
   FRIEND: 'Friend',
   NOT_FRIEND: 'Not Friend',
-  SELF: 'SELF'
+  SELF: 'Self'
 };
+
+var FriendError = User.FriendError = function(status) {
+  this.name = 'FriendError';
+  this.message = 'There was an error due to the user status: ' + status;
+  this.status = status;
+};
+User.FriendError.prototype = new Error();
+
+var PokeError = User.PokeError = function(message) {
+  this.name = 'PokeError';
+  this.message = 'There was an error while poking: ' + message;
+};
+User.PokeError.prototype = new Error();
 
 User.findById = function(email, callback) {
   email = email.toLowerCase();
@@ -114,18 +127,18 @@ User.prototype.pokeAt = function(opponentEmail, callback) {
 
     if (!userPoked.hasFriend(self.email)) {
       if (userPoked.hasBanned(self.email)) {
-        return callback(null, User.FRIEND_STATUSES.BANNED);
+        return callback(new FriendError(User.FRIEND_STATUSES.BANNED));
       }
       if (userPoked.hasPending(self.email)) {
-        return callback(null, User.FRIEND_STATUSES.PENDING);
+        return callback(new FriendError(User.FRIEND_STATUSES.PENDING));
       }
-      return callback(null, User.FRIEND_STATUSES.NOT_FRIEND);
+      return callback(new FriendError(User.FRIEND_STATUSES.NOT_FRIEND));
     }
 
     var opponentUserPoke = userPoked.friendsPokes[self.email];
 
     if (!opponentUserPoke) return callback(new Error('This should not happen'));
-    if (opponentUserPoke.isPokingMe) return callback(new Error('Already poked back'));
+    if (opponentUserPoke.isPokingMe) return callback(new PokeError('Already poked back'));
 
     // okay, we can poke
 
@@ -203,22 +216,22 @@ User.prototype.pokeAt = function(opponentEmail, callback) {
 User.prototype.sendFriendRequest = function(email, callback) {
   var currentUser = this;
   email = email.toLowerCase();
-  if (email === this.email) return callback(null, User.FRIEND_STATUSES.SELF);
+  if (email === this.email) return callback(new FriendError(User.FRIEND_STATUSES.SELF));
 
   User.findById(email, function(err, potentialFriend) {
     if (err) return callback(err);
 
-    if (!potentialFriend) return callback(null, User.FRIEND_STATUSES.NOT_FOUND);
+    if (!potentialFriend) return callback(new FriendError(User.FRIEND_STATUSES.NOT_FOUND));
     if (potentialFriend.bannedUsers.indexOf(currentUser.email) !== -1) {
-      return callback(null, User.FRIEND_STATUSES.BANNED);
+      return callback(new FriendError(User.FRIEND_STATUSES.BANNED));
     }
     var friendsEmails = Object.keys(currentUser.friendsPokes);
     if (friendsEmails.indexOf(currentUser.email) !== -1) {
       // Already friends!
-      return callback(null, User.FRIEND_STATUSES.FRIEND);
+      return callback(new FriendError(User.FRIEND_STATUSES.FRIEND));
     }
     if (potentialFriend.hasPending(currentUser.email)) {
-      return callback(null, User.FRIEND_STATUSES.PENDING);
+      return callback(new FriendError(User.FRIEND_STATUSES.PENDING));
     }
 
     currentUser.setPokingAt(potentialFriend.email, Date.now(), 0);
@@ -230,7 +243,7 @@ User.prototype.sendFriendRequest = function(email, callback) {
       function(cbParallel) { potentialFriend.save(cbParallel); }
     ], function(err) {
       if (err) return callback(err);
-      callback(null, User.FRIEND_STATUSES.PENDING);
+      callback(new FriendError(User.FRIEND_STATUSES.PENDING));
     });
   });
 };
