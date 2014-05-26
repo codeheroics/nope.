@@ -76,10 +76,19 @@ User.prototype.toDbJSON = function() {
   };
 };
 
+User.prototype.toSelfJSON = function() {
+  return {
+    name: this.name,
+    score: this.score,
+    created: this.created,
+    bannedUsers: this.bannedUsers,
+    pendingUsers: this.pendingUsers
+  };
+};
+
 User.prototype.toPublicJSON = function() {
   return {
     name: this.name,
-    friendsPokes: this.friendsPokes,
     score: this.score,
     created: this.created
   };

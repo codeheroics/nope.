@@ -9,7 +9,7 @@ var isLoggedIn = require('../lib/utils/middlewares').isLoggedInJSON;
 module.exports = function (app) {
 
   app.get('/pokes', isLoggedIn, function(req, res) {
-    res.jsonp(req.user.toPublicJSON());
+    res.jsonp(req.user.friendsPokes);
   });
 
   app.post('/pokes', isLoggedIn, function(req, res, next) {
@@ -23,7 +23,7 @@ module.exports = function (app) {
         return res.jsonp(500, { message: err.message });
       }
       if (err) return next(err);
-      res.jsonp({ message: 'OK'});
+      res.jsonp({ message: 'OK' });
     });
   });
 };
