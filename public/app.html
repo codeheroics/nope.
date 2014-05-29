@@ -1,0 +1,332 @@
+<!DOCTYPE HTML>
+<!--
+	TXT 2.5 by HTML5 UP
+	html5up.net | @n33co
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Poke Ninja</title>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+		<meta name="description" content="" />
+		<meta name="keywords" content="" />
+		<link href="http://fonts.googleapis.com/css?family=Open+Sans:400,700|Open+Sans+Condensed:700" rel="stylesheet" />
+		<script src="js/jquery.min.js"></script>
+		<script src="js/config.js"></script>
+		<script src="js/skel.min.js"></script>
+		<script src="js/skel-panels.min.js"></script>
+		<script src="js/handlebars.js"></script>
+		<script src="js/ember.min.js"></script>
+		<script src="js/ember-data.min.js"></script>
+		<noscript>
+			<link rel="stylesheet" href="css/skel-noscript.css" />
+			<link rel="stylesheet" href="css/style.css" />
+			<link rel="stylesheet" href="css/style-desktop.css" />
+		</noscript>
+		<!--[if lte IE 9]><link rel="stylesheet" href="css/ie9.css" /><![endif]-->
+		<!--[if lte IE 8]><script src="js/html5shiv.js"></script><link rel="stylesheet" href="css/ie8.css" /><![endif]-->
+		<!--[if lte IE 7]><link rel="stylesheet" href="css/ie7.css" /><![endif]-->
+	</head>
+	<body>
+		<script type="text/x-handlebars">
+			<!-- Header -->
+				<header id="header">
+					<div class="logo">
+						<div>
+							<h1><a href="#" id="logo">A Game of Pokes</a></h1>
+							<span class="byline">Only one can win...</span>
+						</div>
+					</div>
+				</header>
+			<!-- /Header -->
+
+			<!-- Nav -->
+				<nav id="nav" class="skel-panels-fixed">
+					<ul>
+						<li>{{#link-to "index" }}Home{{/link-to}}</li>
+						<li>{{#link-to "opponents"}}Friends{{/link-to}}</li>
+						<li>{{#link-to "history"}}History{{/link-to}}</li>
+						<li>{{#link-to "profile"}}Profile{{/link-to}}</li>
+						<li>{{#link-to "help"}}Help{{/link-to}}</li>
+						<li>{{#link-to "about"}}About{{/link-to}}</li>
+					</ul>
+				</nav>
+			<!-- /Nav -->
+
+			<!-- Main -->
+				<div id="main-wrapper">
+					<div id="main" class="container">
+						<div class="row">
+							<div class="12u skel-cell-important">
+								<div class="content">
+									{{outlet}}
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			<!-- /Main -->
+		</script>
+
+		<script type="text/x-handlebars" data-template-name="index">
+			<section class="is-highlight">
+				<ul class="special">
+					<li>{{#link-to "opponents" class="fa fa-group solo"}}<span>Poke...</span>{{/link-to}}</li>
+					{{#if opponentPokingMe}}
+						<li>
+							{{#link-to "opponentPokes" opponentPokingMe.id class="fa fa-share solo"}}<span>Poke back</span>{{/link-to}}
+						</li>
+					{{else}}
+						<li><a href="#" class="fa fa-check solo"><span>Poke back</span></a></li>
+					{{/if}}
+				</ul>
+				<header>
+					<h2>You are a master poker...</h2>
+					<span class="byline">
+						{{#if opponentPokingMe}}
+							But {{opponentPokingMe.name}} is poking you! Strike back!
+						{{else}}
+							And you have poked all your opponents. Keep going!
+						{{/if}}
+					</span>
+				</header>
+			</section>
+		</script>
+
+		<script type="text/x-handlebars" data-template-name="login">
+
+			<h1><span class="fa fa-sign-in"></span> Login</h1>
+
+			{{#if message}}
+				<div class="alert alert-danger">{{message}}</div>
+			{{/if}}
+
+			<!-- LOGIN FORM -->
+			<form action="/login" method="post">
+				<div class="form-group">
+					<label>Email</label>
+					<input type="text" class="form-control" name="email">
+				</div>
+				<div class="form-group">
+					<label>Password</label>
+					<input type="password" class="form-control" name="password">
+				</div>
+
+				<button type="submit" class="btn btn-warning btn-lg">Login</button><input type="hidden" name="_csrf" value="{{_csrf}}"/>
+			</form>
+
+			<hr>
+
+			<p>Need an account? {{#link-to 'signup'}}Signup{{/link-to}}</p>
+		</script>
+
+		<script type="text/x-handlebars" data-template-name="signup">
+			<h1><span class="fa fa-sign-in"></span> Signup</h1>
+
+			{{#if message}}
+				<div class="alert alert-danger">{{message}}</div>
+			{{/if}}
+
+			<!-- LOGIN FORM -->
+			<form action="/signup" method="post">
+				<div class="form-group">
+					<label>Email</label>
+					<input type="text" class="form-control" name="email">
+				</div>
+				<div class="form-group">
+					<label>Name</label>
+					<input type="text" class="form-control" name="name">
+				</div>
+				<div class="form-group">
+					<label>Password</label>
+					<input type="password" class="form-control" name="password">
+				</div>
+
+				<button type="submit" class="btn btn-warning btn-lg">Signup</button>
+				<input type="hidden" name="_csrf" value="{{_csrf}}"/>
+			</form>
+
+			<hr>
+
+			<p>Already have an account? {{#link-to 'login'}}Login{{/link-to}}</p>
+
+		</script>
+
+		<script type="text/x-handlebars" data-template-name="opponents">
+				<section>
+					<h2 class="major"><span>Friends</span></h2>
+					<ul class="style2">
+						{{#each}}
+							<li>
+								<article class="is-post-summary">
+									<h3>
+										{{#link-to 'opponentPokes' id}}
+											{{#if isScoring}}
+												<i class="fa fa-hand-o-right"></i>
+											{{else}}
+												<i class="fa fa-check"></i>
+											{{/if}}
+											{{name}}
+										{{/link-to}}
+									</h3>
+								</article>
+							</li>
+						{{/each}}
+					</ul>
+				</section>
+			<!-- /Recent Posts -->
+		</script>
+
+		<script type="text/x-handlebars" data-template-name="opponentPokes">
+			<!-- Recent Posts -->
+				<section>
+					<h2 class="major"><span>VS {{name}}</span></h2>
+					<div style="display:flex; border-radius: 8px;">
+						{{#if isWinning }}
+							<div class="score score-left winning">
+								{{name}}<br>{{scoreFor}}
+							</div>
+							<div class="score score-right losing">
+								You<br>{{scoreAgainst}}
+							</div>
+						{{else}}
+							<div class="score score-left losing">
+								{{name}}<br>{{scoreFor}}
+							</div>
+							<div class="score score-right winning">
+								You<br>{{scoreAgainst}}
+							</div>
+					{{/if}}
+					</div>
+
+					{{#if isScoring}}
+							<a href="#" class="pokeActions needsPokeBack button button-big">Poke back</a>
+					{{else}}
+							<a href="#" class="pokeActions hasPokedBack button button-alt2 button-big">
+							Your opponent has not poked back yet!</a>
+					{{/if}}
+
+					<ul class="style2">
+						{{#each poke in pokes}}
+							<li>
+								<article class="is-post-summary">
+									{{#if poke.isReceived}}
+										>> POKE :( {{poke.date}}
+									{{else}}
+										<< POKE :) {{poke.date}}
+									{{/if}}
+								</article>
+							</li>
+						{{/each}}
+					</ul>
+				</section>
+			<!-- /Recent Posts -->
+		</script>
+
+		<script type="text/x-handlebars" data-template-name="history">
+			<!-- Recent Posts -->
+				<section>
+					<h2 class="major"><span>Last Pokes</span></h2>
+					<ul class="style2">
+						{{#each}}
+							<li>
+								<article class="is-post-summary">
+									<h3>
+										{{#if isReceived}} <a href="#">{{opponent.name}}</a> poked you
+										{{else}} You poked <a href="#">{{opponent.name}}</a>{{/if}}
+									</h3>
+									<ul class="meta">
+										<li class="fa fa-clock-o">{{date}}</li>
+										<li class="fa fa-comments">{{#if isReceived}}{{opponent.name}}{{else}}You{{/if}} earned {{points}} points</li>
+									</ul>
+								</article>
+							</li>
+						{{/each}}
+					</ul>
+				</section>
+			<!-- /Recent Posts -->
+		</script>
+
+		<script type="text/x-handlebars" data-template-name="profile">
+			<!-- Features -->
+				<section class="is-features">
+					<h2 class="major"><span>My Profile</span></h2>
+					<div>
+						<div class="row">
+							<div style="margin: auto; float:none;">
+
+								<!-- Feature -->
+									<section class="is-feature">
+										<a href="#" class="image image-centered image-user"><img {{bindAttr src="avatar"}} /></a>
+										<h3>{{name}}</h3>
+										<ul>
+											<li>E-mail: {{email}}</li>
+										</ul>
+									</section>
+								<!-- /Feature -->
+
+							</div>
+						</div>
+						<div class="row">
+							<div class="12u">
+
+								<div class="actions">
+									<a href="#" class="button button-big">Do Something</a>
+									<a href="#" class="button button-alt button-big">Think About It</a>
+								</div>
+
+							</div>
+						</div>
+					</div>
+				</section>
+			<!-- /Features -->
+		</script>
+
+		<script type="text/x-handlebars" data-template-name="help">
+			<section>
+				<h2 class="major"><span>Help</span></h2>
+				<article class="is-post-summary">
+					<h3>
+						You need help. To poke at people.
+					</h3>
+					I thought the app was simple enough :(
+				</article>
+			</section>
+		</script>
+
+		<script type="text/x-handlebars" data-template-name="about">
+			<section style="text-align:center;">
+				<div>
+					<!-- Contact -->
+						<section>
+							<h2 class="major"><span>Talk about the game</span></h2>
+							<ul class="contact">
+								<li><a class="fa fa-facebook solo" href="#"><span>Facebook</span></a></li>
+								<li><a class="fa fa-twitter solo" href="#"><span>Twitter</span></a></li>
+								<li><a class="fa fa-linkedin solo" href="#"><span>LinkedIn</span></a></li>
+								<li><a class="fa fa-google-plus solo" href="#"><span>Google+</span></a></li>
+							</ul>
+						</section>
+					<!-- /Contact -->
+				</div>
+
+				<!-- Copyright -->
+					<div id="copyright">
+						&copy; A Game of Pokes | Design: <a href="http://html5up.net/">HTML5 UP</a>
+					</div>
+				<!-- /Copyright -->
+			</section>
+		</script>
+
+		<script src="js/app.js"></script>
+		<script src="js/router.js"></script>
+		<script src="js/models/poke.js"></script>
+		<script src="js/models/opponent.js"></script>
+		<script src="js/models/user.js"></script>
+		<script src="js/controllers/index.js"></script>
+		<script src="js/controllers/opponentPokes.js"></script>
+		<script src="js/controllers/login.js"></script>
+		<script src="js/controllers/signup.js"></script>
+		<script src="js/lib/pokeServerManager.js"></script>
+	</body>
+</html>
