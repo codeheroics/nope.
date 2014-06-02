@@ -14,39 +14,56 @@ PokeGame.Router.map(function() {
   this.resource('about', { path: '/about'});
 });
 
-PokeGame.IndexRoute = Ember.Route.extend({
-  model: function() {
-    return this.store.find('opponent');
-  },
-  setupController: function(controller, opponents) {
-    controller.set('model', opponents);
-    if (Ember.isNone(this.get('pokeServerManager'))) {
-      this.set('pokeServerManager', PokeGame.PokeServerManager.create());
+PokeGame.ApplicationRoute = Ember.Route.extend(Ember.SimpleAuth.ApplicationRouteMixin);
+
+PokeGame.IndexRoute = Ember.Route.extend(
+  Ember.SimpleAuth.AuthenticatedRouteMixin,
+  {
+    model: function() {
+      return this.store.find('opponent');
+    },
+    setupController: function(controller, opponents) {
+      controller.set('model', opponents);
+      if (Ember.isNone(this.get('pokeServerManager'))) {
+        this.set('pokeServerManager', PokeGame.PokeServerManager.create());
+      }
+      this.get('pokeServerManager').getPokes(this.store);
     }
-    this.get('pokeServerManager').getPokes(this.store);
   }
-});
+);
 
-PokeGame.HistoryRoute = Ember.Route.extend({
-  model: function() {
-    return this.store.find('poke');
+PokeGame.HistoryRoute = Ember.Route.extend(
+  Ember.SimpleAuth.AuthenticatedRouteMixin,
+  {
+    model: function() {
+      return this.store.find('poke');
+    }
   }
-});
+);
 
-PokeGame.ProfileRoute = Ember.Route.extend({
-  model: function() {
-    return this.store.find('user', 1);
+PokeGame.ProfileRoute = Ember.Route.extend(
+  Ember.SimpleAuth.AuthenticatedRouteMixin,
+  {
+    model: function() {
+      return this.store.find('user', 1);
+    }
   }
-});
+);
 
-PokeGame.OpponentPokesRoute = Ember.Route.extend({
-  model: function(params) {
-    return this.store.find('opponent', params.opponent_id);
+PokeGame.OpponentPokesRoute = Ember.Route.extend(
+  Ember.SimpleAuth.AuthenticatedRouteMixin,
+  {
+    model: function(params) {
+      return this.store.find('opponent', params.opponent_id);
+    }
   }
-});
+);
 
-PokeGame.OpponentsRoute = Ember.Route.extend({
-  model: function() {
-    return this.store.find('opponent');
+PokeGame.OpponentsRoute = Ember.Route.extend(
+  Ember.SimpleAuth.AuthenticatedRouteMixin,
+  {
+    model: function() {
+      return this.store.find('opponent');
+    }
   }
-});
+);

@@ -2,6 +2,8 @@ var SERVER_URL = 'http://localhost:8000';
 var USERS_ROUTE = SERVER_URL + '/users';
 var SELF_ROUTE = USERS_ROUTE + '?me';
 var POKES_ROUTE = SERVER_URL + '/pokes';
+var LOGIN_ROUTE = SERVER_URL + '/login';
+var CALLBACK_NAME = 'pokecb';
 
 PokeGame.PokeServerManager = Ember.Object.extend({
   updateSelfInfos: function() {
