@@ -1,26 +1,51 @@
 'use strict';
 
 var passport = require('passport');
-var isLoggedIn = require('../lib/utils/middlewares').isLoggedInWeb;
+var moment = require('moment');
+var jwt = require('jwt-simple');
+var config = require('config');
+var log = require('winston');
 
 module.exports = function(app) {
+  var isLoggedIn = require('../lib/utils/middlewares')(app).isLoggedIn;
 
-  // =====================================
-  // LOGIN ===============================
-  // =====================================
-  // show the login form
-  app.get('/login', function(req, res) {
+  var outputLoginError = function(req, res) {
+    res.jsonp(
+      401,
+      {
+        title: 'Unauthorized',
+        detail: 'Login needed'
+      }
+    );
+   };
 
-    // render the page and pass in any flash data if it exists
-    res.render('login', { message: req.flash('loginMessage') });
-  });
+   var createAndOutputToken = function(req, res, next) {
+    if (!req.user || !req.user.email) {
+      log.error('Tried creating token with no user email', req.user);
+      return outputLoginError(req, res);
+    }
+      var token = jwt.encode({
+        email: req.user.email
+      }, config.jwtTokenSecret);
+
+      res.jsonp(token);
+   };
+
+   // Route to check if logged in
+   app.get('/login', isLoggedIn, function(req, res, next) {
+    res.jsonp(200, {});
+   });
 
   // process the login form
-  app.post('/login', passport.authenticate('local-login', {
-    successRedirect : '/profile', // redirect to the secure profile section
-    failureRedirect : '/login', // redirect back to the signup page if there is an error
-    failureFlash : true // allow flash messages
-  }));
+  app.post('/login', function(req, res, next) {
+    passport.authenticate('local-login', function(err, user) {
+      if (err) log.error(err.message, err);
+      if (err || !user) return outputLoginError(req, res);
+
+      req.user = user;
+      createAndOutputToken(req, res);
+    })(req, res);
+  });
 
   // =====================================
   // SIGNUP ==============================
@@ -45,9 +70,6 @@ module.exports = function(app) {
   // we will want this protected so you have to be logged in to visit
   // we will use route middleware to verify this (the isLoggedIn function)
   app.get('/profile', isLoggedIn, function(req, res) {
-    res.jsonp({
-      user : req.user // get the user out of session and pass to template
-    });
   });
 
   // =====================================
@@ -55,6 +77,6 @@ module.exports = function(app) {
   // =====================================
   app.get('/logout', function(req, res) {
     req.logout();
-    res.redirect('/');
+    //res.redirect('/');
   });
 };

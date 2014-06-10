@@ -4,9 +4,8 @@ var validator = require('validator');
 var Poke      = require('../models/poke');
 var User      = require('../models/user');
 
-var isLoggedIn = require('../lib/utils/middlewares').isLoggedInJSON;
-
 module.exports = function (app) {
+  var isLoggedIn = require('../lib/utils/middlewares')(app).isLoggedIn;
 
   app.get('/pokes', isLoggedIn, function(req, res) {
     res.jsonp(req.user.friendsPokes);

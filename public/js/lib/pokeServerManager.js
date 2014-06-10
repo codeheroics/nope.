@@ -1,3 +1,5 @@
+'use strict';
+
 var SERVER_URL = 'http://localhost:8000';
 var USERS_ROUTE = SERVER_URL + '/users';
 var SELF_ROUTE = USERS_ROUTE + '?me';
@@ -18,18 +20,32 @@ PokeGame.PokeServerManager = Ember.Object.extend({
 
   getPokes: function(store) {
     var storedPokes = store.find('poke');
-    $.getJSON(POKES_ROUTE + '?callback=?')
+    $.ajax(
+      {
+        dataType: 'jsonp',
+        jsonp: CALLBACK_NAME,
+        headers: {
+          'x-access-token': window.localStorage.getItem('token')
+        },
+        url: POKES_ROUTE
+      }
+    )
       .done(function(dataPokes) {
         alert('done');
         for (var email in dataPokes) {
           if (!dataPokes.hasOwnProperty(email)) continue;
           var dataPoke = dataPokes[email];
           var pokeId = dataPoke.time + email;
-          if (store.recordIsLoaded(App.Poke, pokeId)) return;
+          if (store.recordIsLoaded(PokeGame.Poke, pokeId)) return;
           store.push('poke', dataPoke);
-          var opponent = store.find('opponent', email);
-          opponent.pokes.push(pokeId);
-          opponent.save();
+
+            ////////// WIP HERE
+
+          var opponent = store.all('opponent', {email: email});
+          console.log(opponent);
+          // console.log(opponent.get('pokes'))
+          // opponent.pokes.push(pokeId);
+          // opponent.save();
         }
         // Compare and update (a poke can be identified with its timestamp)
       })

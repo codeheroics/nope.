@@ -3,6 +3,7 @@
 var kraken    = require('kraken-js');
 var app       = {};
 
+var config    = require('config');
 var flash     = require('connect-flash');
 var passport  = require('passport');
 require('./lib/passport')(passport);
@@ -14,13 +15,13 @@ app.configure = function configure(nconf, next) {
 
 
 app.requestStart = function requestStart(server) {
+  server.set('jwtTokenSecret', config.jwtTokenSecret);
   // Run before most express middleware has been registered.
 };
 
 
 app.requestBeforeRoute = function requestBeforeRoute(server) {
   server.use(passport.initialize());
-  server.use(passport.session()); // persistent login sessions
   server.use(flash()); // use connect-flash for flash messages stored in session
 
   // required for passport

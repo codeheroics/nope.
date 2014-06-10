@@ -2,9 +2,10 @@
 
 var validator   = require('validator');
 var User        = require('../models/user');
-var isLoggedIn  = require('../lib/utils/middlewares').isLoggedInJSON;
 
 module.exports = function(app) {
+  var isLoggedIn  = require('../lib/utils/middlewares')(app).isLoggedIn;
+
   app.get('/users', isLoggedIn, function(req, res, next) {
     if (!req.query.me) return res.jsonp(403, {message: 'Invalid'});
     res.jsonp(req.user.toSelfJSON());

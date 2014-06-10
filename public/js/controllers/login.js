@@ -3,7 +3,7 @@
 PokeGame.LoginController = Ember.Controller.extend(
   Ember.SimpleAuth.LoginControllerMixin,
   {
-    authenticatorFactory: 'ember-simple-auth-authenticator:oauth2-password-grant',
+    authenticatorFactory: 'authenticator:custom',
     message: function() {
       return 'bouh';
     }.property('message'),
@@ -12,6 +12,3 @@ PokeGame.LoginController = Ember.Controller.extend(
     }.property('csrf')
   }
 );
-
-PokeGame.LoginController = Ember.ObjectController.extend({
-});
