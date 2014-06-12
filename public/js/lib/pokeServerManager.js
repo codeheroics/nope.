@@ -1,27 +1,48 @@
 'use strict';
 
-var SERVER_URL = 'http://localhost:8000';
-var USERS_ROUTE = SERVER_URL + '/users';
-var SELF_ROUTE = USERS_ROUTE + '?me';
-var POKES_ROUTE = SERVER_URL + '/pokes';
-var LOGIN_ROUTE = SERVER_URL + '/login';
-var CALLBACK_NAME = 'pokecb';
-
 PokeGame.PokeServerManager = Ember.Object.extend({
-  updateSelfInfos: function() {
-    $.getJSON(SELF_ROUTE)
+  updateSelfInfos: function(store) {
+    $.ajax(
+      {
+        dataType: 'jsonp',
+        jsonp: CALLBACK_NAME,
+        headers: {
+          'x-access-token': window.localStorage.getItem('token')
+        },
+        url: SELF_ROUTE
+      }
+    )
       .done(function(data) {
-
+        store.find('user', 1)
+          .then(
+            function foundUser(user) {
+              return Promise.resolve(user);
+            },
+            function didNotFindUser() {
+              var user = store.createRecord('user', {
+                id: 1
+              });
+              return Promise.resolve(user);
+            }
+          )
+          .then(
+            function(user) {
+              user.set('name', data.name);
+              user.set('email', data.email);
+              user.set('avatar', data.avatar);
+              // user.set points ?
+              user.save();
+            }
+          );
       })
-      .fail(function(jqXHR, textStatus, errorThrown) {
-        // :(
+      .fail(function() {
+        console.log('Failed at getting user self infos :(');
       });
   },
 
   getPokes: function(store) {
     var updateData = function(dataPoke, email) {
     var pokeId = dataPoke.time.toString() + email;
-
     store.find('poke', pokeId)
       .then(
         function foundPoke(data) { console.log('Do nothing'); },
@@ -69,7 +90,6 @@ PokeGame.PokeServerManager = Ember.Object.extend({
     };
 
 
-    var storedPokes = store.find('poke');
     $.ajax(
       {
         dataType: 'jsonp',

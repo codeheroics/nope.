@@ -79,6 +79,7 @@ User.prototype.toDbJSON = function() {
 User.prototype.toSelfJSON = function() {
   return {
     name: this.name,
+    email: this.email,
     score: this.score,
     created: this.created,
     bannedUsers: this.bannedUsers,

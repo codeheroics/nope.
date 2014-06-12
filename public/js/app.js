@@ -1,6 +1,12 @@
-/* global Ember */
-/* global DS */
 'use strict';
+
+// CONFIG TODO MOVE SOMEWHERE SEPARATE
+var SERVER_URL = 'http://localhost:8000';
+var USERS_ROUTE = SERVER_URL + '/users';
+var SELF_ROUTE = USERS_ROUTE + '?me';
+var POKES_ROUTE = SERVER_URL + '/pokes';
+var LOGIN_ROUTE = SERVER_URL + '/login';
+var CALLBACK_NAME = 'pokecb';
 
 var CustomAuthenticator = Ember.SimpleAuth.Authenticators.Base.extend({
   restore: function(data) {
@@ -21,7 +27,6 @@ var CustomAuthenticator = Ember.SimpleAuth.Authenticators.Base.extend({
     });
   },
   authenticate: function(options) {
-    console.log('options', options);
     return new Ember.RSVP.Promise(function(resolve, reject) {
       $.ajax(
         {
@@ -37,6 +42,7 @@ var CustomAuthenticator = Ember.SimpleAuth.Authenticators.Base.extend({
       )
         .done(function(data) {
           window.localStorage.setItem('token', data);
+          window.localStorage.setItem('email', options.identification); // FIME
           resolve();
         })
         .fail(function(a, b, c) {
@@ -49,6 +55,7 @@ var CustomAuthenticator = Ember.SimpleAuth.Authenticators.Base.extend({
   invalidate: function() {
     return new Ember.RSVP.Promise(function(resolve) {
       window.localStorage.removeItem('token');
+      window.localStorage.removeItem('email');
       resolve();
     });
   }
@@ -72,14 +79,14 @@ Ember.Application.initializer({
       container,
       application,
       {
-        crossOriginWhitelist: ['http://localhost:8000'],
+        crossOriginWhitelist: [SERVER_URL],
         authorizerFactory: 'authorizer:custom'
       }
     );
   }
 });
 
-var PokeGame = Ember.Application.create({
+window.PokeGame = Ember.Application.create({
   LOG_TRANSITIONS: true
 });
 

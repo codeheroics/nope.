@@ -14,7 +14,9 @@ PokeGame.Router.map(function() {
   this.resource('about', { path: '/about'});
 });
 
-PokeGame.ApplicationRoute = Ember.Route.extend(Ember.SimpleAuth.ApplicationRouteMixin);
+PokeGame.ApplicationRoute = Ember.Route.extend(
+  Ember.SimpleAuth.ApplicationRouteMixin
+);
 
 PokeGame.IndexRoute = Ember.Route.extend(
   Ember.SimpleAuth.AuthenticatedRouteMixin,
@@ -45,7 +47,23 @@ PokeGame.ProfileRoute = Ember.Route.extend(
   Ember.SimpleAuth.AuthenticatedRouteMixin,
   {
     model: function() {
-      return this.store.find('user', 1);
+      var store = this.store;
+      return this.store.find('user', 1).then(
+        function foundUser(user) {
+          return user;
+        },
+        function didNotFindUser() {
+          var user = store.createRecord('user', {
+            id: 1,
+            email: window.localStorage.getItem('email')
+          });
+
+          var pokeServerManager = PokeGame.PokeServerManager.create();
+          pokeServerManager.updateSelfInfos(store);
+
+          return user;
+        }
+      );
     }
   }
 );

@@ -7,7 +7,7 @@ module.exports = function(app) {
   var isLoggedIn  = require('../lib/utils/middlewares')(app).isLoggedIn;
 
   app.get('/users', isLoggedIn, function(req, res, next) {
-    if (!req.query.me) return res.jsonp(403, {message: 'Invalid'});
+    if (req.query.me === undefined) return res.jsonp(403, {message: 'Invalid'});
     res.jsonp(req.user.toSelfJSON());
   });
 
