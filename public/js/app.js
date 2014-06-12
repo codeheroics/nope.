@@ -83,4 +83,7 @@ var PokeGame = Ember.Application.create({
   LOG_TRANSITIONS: true
 });
 
-PokeGame.ApplicationAdapter = DS.FixtureAdapter.extend();
+PokeGame.ApplicationSerializer = DS.LSSerializer.extend();
+PokeGame.ApplicationAdapter = DS.LSAdapter.extend({
+  namespace: 'pokeNS'
+});

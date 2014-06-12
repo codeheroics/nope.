@@ -25,21 +25,18 @@ PokeGame.PokeServerManager = Ember.Object.extend({
     store.find('poke', pokeId)
       .then(
         function foundPoke(data) { console.log('Do nothing'); },
-        function notFoundPoke(something) {
+        function notFoundPoke() {
           // Poke not found, creating a record for it
           var pokeRecord = store.createRecord('poke', {
             id: pokeId,
-            opponent: email,
             isReceived: dataPoke.isPokingMe,
             date: new Date(dataPoke.time),
             points: 0
           });
 
-
           store.find('opponent', email)
             .then(
               function foundOpponent(opponent) {
-                opponent.set('pokes', (opponent.pokes || []).concat(store.all('poke', pokeId)));
                 opponent.set('isScoring', dataPoke.isPokingMe);
                 opponent.set('scoreFor', 0);
                 opponent.set('scoreAgainst', 0);
@@ -62,9 +59,8 @@ PokeGame.PokeServerManager = Ember.Object.extend({
                 function(pokes) {
                   pokes.pushObject(pokeRecord);
                   opponent.save();
-                  pokeRecord.poponent = opponent;
+                  pokeRecord.set('opponent', opponent);
                   pokeRecord.save();
-
                 }
               );
             });
@@ -89,7 +85,6 @@ PokeGame.PokeServerManager = Ember.Object.extend({
           if (!dataPokes.hasOwnProperty(email)) continue;
 
           var dataPoke = dataPokes[email];
-          console.log('Executing update data for ' + email)
           updateData(dataPoke, email);
         }
         // Compare and update (a poke can be identified with its timestamp)

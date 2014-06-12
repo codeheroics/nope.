@@ -4,7 +4,7 @@ PokeGame.Poke = DS.Model.extend({
   date:             DS.attr('date', { defaultValue: Date.now }),
   points:           DS.attr('number')
 });
-
+/*
 PokeGame.Poke.FIXTURES = [
   {
     id:               '1402529967087eclaerhout@gmail.com',
@@ -32,3 +32,4 @@ PokeGame.Poke.FIXTURES = [
     points:           42
   }
 ];
+*/

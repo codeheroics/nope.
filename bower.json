@@ -23,9 +23,11 @@
     "jquery": "~2.1.1",
     "ember": "~1.5.1",
     "ember-data": "1.0.0-beta.7",
-    "handlebars": "~1.3.0"
+    "handlebars": "~1.3.0",
+    "ember-localstorage-adapter": "git@github.com:musicist288/ember-localstorage-adapter.git#ef83d09b63cc7912c5609e25dcd96eb9466d5a41"
   },
   "resolutions": {
-    "ember": "~1.5.1"
+    "ember": "~1.5.1",
+    "jquery": "~2.1.1"
   }
 }

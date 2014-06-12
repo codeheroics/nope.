@@ -7,7 +7,7 @@ PokeGame.Opponent = DS.Model.extend({
   pokes:          DS.hasMany('poke', { async: true }),
   isScoring:      DS.attr('boolean')
 });
-
+/*
 PokeGame.Opponent.FIXTURES = [
   {
     id:             'eclaerhout@gmail.com',
@@ -34,3 +34,4 @@ PokeGame.Opponent.FIXTURES = [
     isScoring:    false
   }
 ];
+*/

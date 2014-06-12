@@ -5,7 +5,7 @@ PokeGame.User = DS.Model.extend({
   totalScore:     DS.attr('number', { defaultValue: 0 }),
   totalPokes:     DS.attr('number', { defaultValue: 0 })
 });
-
+/*
 PokeGame.User.FIXTURES = [{
   id:             1,
   email:          'hugo@agbonon.fr',
@@ -16,3 +16,4 @@ PokeGame.User.FIXTURES = [{
   pokes:          [],
   isScoring:      false
 }];
+*/
