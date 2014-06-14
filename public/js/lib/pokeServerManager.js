@@ -42,51 +42,31 @@ PokeGame.PokeServerManager = Ember.Object.extend({
 
   getPokes: function(store) {
     var updateData = function(dataPoke, email) {
-    var pokeId = dataPoke.time.toString() + email;
-    store.find('poke', pokeId)
-      .then(
-        function foundPoke(data) { console.log('Do nothing'); },
-        function notFoundPoke() {
-          // Poke not found, creating a record for it
-          var pokeRecord = store.createRecord('poke', {
-            id: pokeId,
-            isReceived: dataPoke.isPokingMe,
-            date: new Date(dataPoke.time),
-            points: 0
-          });
+      var pokeId = dataPoke.time.toString() + email;
+      var foundPoke = store.hasRecordForId('poke', pokeId);
+      if (foundPoke) return console.log('do nothin');
 
-          store.find('opponent', email)
-            .then(
-              function foundOpponent(opponent) {
-                opponent.set('isScoring', dataPoke.isPokingMe);
-                opponent.set('scoreFor', 0);
-                opponent.set('scoreAgainst', 0);
-                return Promise.resolve(opponent);
-              },
-              function notFoundOpponent() {
-                var opponentRecord = store.createRecord('opponent', {
-                  id: email,
-                  email: email,
-                  name: 'BB',
-                  scoreFor: 0,
-                  scoreAgainst: 0,
-                  isScoring: dataPoke.isPokingMe
-                });
-                return Promise.resolve(opponentRecord);
-              }
-            )
-            .then(function(opponent) {
-              return opponent.get('pokes').then(
-                function(pokes) {
-                  pokes.pushObject(pokeRecord);
-                  opponent.save();
-                  pokeRecord.set('opponent', opponent);
-                  pokeRecord.save();
-                }
-              );
-            });
-        }
-      );
+      // Poke not found, creating a record for it
+      var pokeRecord = store.update('poke', {
+        id: pokeId,
+        isReceived: dataPoke.isPokingMe,
+        time: dataPoke.time,
+        points: 0
+      });
+
+      var opponentRecord = store.update('opponent', {
+        id: email,
+        email: email,
+        name: 'BB',
+        scoreFor: 0,
+        scoreAgainst: 0,
+        isScoring: dataPoke.isPokingMe
+      });
+
+      opponentRecord.get('pokes').pushObject(pokeRecord);
+      opponentRecord.save();
+      pokeRecord.set('opponent', opponentRecord);
+      pokeRecord.save();
     };
 
 

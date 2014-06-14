@@ -1,7 +1,8 @@
 PokeGame.Poke = DS.Model.extend({
-  opponent:         DS.belongsTo('opponent', { async: true }),
+  opponent:         DS.belongsTo('opponent', { async: false }),
   isReceived:       DS.attr('boolean'),
-  date:             DS.attr('date', { defaultValue: Date.now }),
+  time:             DS.attr('number'),
+  date:             function() {return new Date(this.get('time')); }.property('date'),
   points:           DS.attr('number')
 });
 /*

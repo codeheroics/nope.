@@ -4,7 +4,7 @@ PokeGame.Opponent = DS.Model.extend({
   avatar:         DS.attr('string'),
   scoreFor:       DS.attr('number', { defaultValue: 0 }),
   scoreAgainst:   DS.attr('number', { defaultValue: 0 }),
-  pokes:          DS.hasMany('poke', { async: true }),
+  pokes:          DS.hasMany('poke', { async: false }),
   isScoring:      DS.attr('boolean')
 });
 /*
