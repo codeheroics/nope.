@@ -43,8 +43,6 @@ PokeGame.PokeServerManager = Ember.Object.extend({
   getPokes: function(store) {
     var updateData = function(dataPoke, email) {
       var pokeId = dataPoke.time.toString() + email;
-      var foundPoke = store.hasRecordForId('poke', pokeId);
-      if (foundPoke) return console.log('do nothin');
 
       // Poke not found, creating a record for it
       var pokeRecord = store.update('poke', {
@@ -93,7 +91,6 @@ PokeGame.PokeServerManager = Ember.Object.extend({
         alert('failed :(');
         // :(
       });
-
   }
 });
 /*

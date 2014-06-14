@@ -183,7 +183,7 @@
 		<script type="text/x-handlebars" data-template-name="opponentPokes">
 			<!-- Recent Posts -->
 				<section>
-					<h2 class="major"><span>VS {{name}}</span></h2>
+					<h2 class="major"><span>VS {{name}} ({{email}})</span></h2>
 					<div style="display:flex; border-radius: 8px;">
 						{{#if isWinning }}
 							<div class="score score-left winning">
@@ -203,10 +203,10 @@
 					</div>
 
 					{{#if isScoring}}
-							<a href="#" class="pokeActions needsPokeBack button button-big">Poke back</a>
+							<button class="pokeActions needsPokeBack button button-big" {{action 'poke' model}}>Poke back</button>
 					{{else}}
-							<a href="#" class="pokeActions hasPokedBack button button-alt2 button-big">
-							Your opponent has not poked back yet!</a>
+							<button type="button" class="pokeActions hasPokedBack button button-big" style="border:0;" disabled>
+							Your opponent has not poked back yet!</button>
 					{{/if}}
 
 					<ul class="style2">

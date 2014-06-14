@@ -1064,10 +1064,10 @@
 		width: 100%;
 	}
 
-	.hasPokedBack {
+	.hasPokedBack, .hasPokedBack:hover {
 		background-color: #ccd5d0;
 	}
 
-	.needsPokeBack {
+	.needsPokeBack, .needsPokeBack:hover {
 		background-color: #a0a3d8;
 	}
