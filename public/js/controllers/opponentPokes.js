@@ -25,10 +25,12 @@ PokeGame.OpponentPokesController = Ember.ObjectController.extend({
             opponent: opponent
           });
 
-          opponent.isScoring = false;
-          opponent.get('pokes').pushObject(pokeRecord);
-          pokeRecord.save();
-          opponent.save();
+          opponent.set('isScoring',false);
+          opponent.get('pokes').then(function(pokes) {
+            pokes.pushObject(pokeRecord);
+            pokeRecord.save();
+            opponent.save();
+          });
         })
         .fail(function() {
           alert('Could not reach the server :('); // FIXME FIND ALERT BOX

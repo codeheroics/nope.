@@ -1,5 +1,5 @@
 PokeGame.Poke = DS.Model.extend({
-  opponent:         DS.belongsTo('opponent', { async: false }),
+  opponent:         DS.belongsTo('opponent', { async: true }),
   isReceived:       DS.attr('boolean'),
   time:             DS.attr('number'),
   date:             function() {return new Date(this.get('time')); }.property('date'),
