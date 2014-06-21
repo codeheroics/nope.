@@ -44,29 +44,41 @@ PokeGame.PokeServerManager = Ember.Object.extend({
     var updateData = function(dataPoke, email) {
       var pokeId = dataPoke.time.toString() + email;
 
-      // Poke not found, creating a record for it
-      var pokeRecord = store.update('poke', {
-        id: pokeId,
-        isReceived: dataPoke.isPokingMe,
-        time: dataPoke.time,
-        points: 0
-      });
+      store.find('poke', pokeId).then(
+        function() { /* exit */ },
+        function() {
+          var pokeRecord = store.createRecord('poke', {
+            id: pokeId,
+            isReceived: dataPoke.isPokingMe,
+            time: dataPoke.time,
+            points: 0
+          });
 
-      var opponentRecord = store.update('opponent', {
-        id: email,
-        email: email,
-        name: 'BB',
-        scoreFor: 0,
-        scoreAgainst: 0,
-        isScoring: dataPoke.isPokingMe
-      });
-
-      opponentRecord.get('pokes').then(function(pokes) {
-        pokes.pushObject(pokeRecord);
-        opponentRecord.save();
-        pokeRecord.set('opponent', opponentRecord);
-        pokeRecord.save();
-      });
+          store.find('opponent', email).then(
+            function(opponentRecord) {
+              return Promise.resolve(opponentRecord);
+            },
+            function() {
+              // Not found, updating the store definition
+              var opponentRecord = store.update('opponent', {
+                id: email,
+                email: email,
+                name: 'BB',
+                scoreFor: 0,
+                scoreAgainst: 0,
+                isScoring: dataPoke.isPokingMe
+              });
+              return Promise.resolve(opponentRecord);
+            }
+          ).then(function(opponentRecord) {
+            pokeRecord.set('opponent', opponentRecord);
+            opponentRecord.get('pokes').then(function(pokes) {
+              pokes.pushObject(pokeRecord);
+              opponentRecord.save();
+              pokeRecord.save();
+            });
+          });
+        });
     };
 
 
@@ -81,12 +93,12 @@ PokeGame.PokeServerManager = Ember.Object.extend({
       }
     )
       .done(function(dataPokes) {
-        for (var email in dataPokes) {
-          if (!dataPokes.hasOwnProperty(email)) continue;
+          for (var email in dataPokes) {
+            if (!dataPokes.hasOwnProperty(email)) continue;
 
-          var dataPoke = dataPokes[email];
-          updateData(dataPoke, email);
-        }
+            var dataPoke = dataPokes[email];
+            updateData(dataPoke, email);
+          }
         // Compare and update (a poke can be identified with its timestamp)
       })
       .fail(function(a, b, c) {console.log(a, b, c);
