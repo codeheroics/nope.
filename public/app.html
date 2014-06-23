@@ -14,9 +14,9 @@
 		<script src="components/jquery/dist/jquery.js"></script>
 		<script src="components/handlebars/handlebars.min.js"></script>
 		<script src="components/ember/ember.js"></script>
-		<script src="components/ember-data/ember-data.js"></script>
 		<script src="components/ember-simple-auth/ember-simple-auth.js"></script>
-		<script src="components/ember-localstorage-adapter/localstorage_adapter.js"></script>
+		<script src="components/ember-model/ember-model.js"></script>
+		<script src="components/ember-model-localstorage-adapter/ember-model-localstorage-adapter.js"></script>
 
 		<script src="js/config.js"></script>
 		<script src="js/skel.min.js"></script>
@@ -187,17 +187,22 @@
 					<div style="display:flex; border-radius: 8px;">
 						{{#if isWinning }}
 							<div class="score score-left winning">
+								<img {{bind-attr src="avatar"}} /><br>
 								{{name}}<br>{{scoreFor}}
 							</div>
 							<div class="score score-right losing">
+								<img {{bind-attr src="avatar"}} /><br>
 								You<br>{{scoreAgainst}}
 							</div>
 						{{else}}
 							<div class="score score-left losing">
+								<img {{bind-attr src="avatar"}} /><br>
 								{{name}}<br>{{scoreFor}}
 							</div>
 							<div class="score score-right winning">
-								You<br>{{scoreAgainst}}
+								<img {{bind-attr src="avatar"}} /><br>
+								You<br>{{scoreAgainst}}<br>
+								(FIXME avatar of opponent currently used here)
 							</div>
 					{{/if}}
 					</div>
@@ -235,8 +240,10 @@
 							<li>
 								<article class="is-post-summary">
 									<h3>
-										{{#if isReceived}} <a href="#">{{opponent.name}}</a> poked you
-										{{else}} You poked <a href="#">{{opponent.name}}</a>{{/if}}
+										{{#link-to 'opponentPokes' opponent}}
+											{{#if isReceived}}{{opponent.name}} poked you
+											{{else}} You poked {{opponent.name}}{{/if}}
+										{{/link-to}}
 									</h3>
 									<ul class="meta">
 										<li class="fa fa-clock-o">{{date}}</li>
@@ -260,7 +267,7 @@
 
 								<!-- Feature -->
 									<section class="is-feature">
-										<a href="#" class="image image-centered image-user"><img {{bindAttr src="avatar"}} /></a>
+										<a href="#" class="image image-centered image-user"><img {{bind-attr src="avatar"}} /></a>
 										<h3>{{#if name}}{{name}}{{/if}}</h3>
 										<ul>
 											<li>E-mail: {{email}}</li>

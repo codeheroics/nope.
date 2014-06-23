@@ -1,84 +1,81 @@
 'use strict';
 
 PokeGame.PokeServerManager = Ember.Object.extend({
-  updateSelfInfos: function(store) {
-    $.ajax(
-      {
-        dataType: 'jsonp',
-        jsonp: CALLBACK_NAME,
-        headers: {
-          'x-access-token': window.localStorage.getItem('token')
-        },
-        url: SELF_ROUTE
-      }
-    )
-      .done(function(data) {
-        store.find('user', 1)
-          .then(
-            function foundUser(user) {
-              return Promise.resolve(user);
-            },
-            function didNotFindUser() {
-              var user = store.createRecord('user', {
-                id: 1
-              });
-              return Promise.resolve(user);
-            }
-          )
-          .then(
-            function(user) {
-              user.set('name', data.name);
-              user.set('email', data.email);
-              user.set('avatar', data.avatar);
-              // user.set points ?
-              user.save();
-            }
-          );
-      })
-      .fail(function() {
-        console.log('Failed at getting user self infos :(');
-      });
+  updateSelfInfos: function() {
+    return new Promise(function(resolve, reject) {
+      $.ajax(
+        {
+          dataType: 'jsonp',
+          jsonp: CALLBACK_NAME,
+          headers: {
+            'x-access-token': window.localStorage.getItem('token')
+          },
+          url: SELF_ROUTE
+        }
+      )
+        .done(function(data) {
+          var user = PokeGame.User.find(1);
+
+          if (user.isLoaded) {
+            return user;
+          } else {
+            user = PokeGame.User.create({
+              id: 1
+            });
+          }
+
+          user.set('name', data.name);
+          user.set('email', data.email);
+          user.set('avatar', data.avatar || DEFAULT_AVATAR);
+          resolve(user.save());
+        })
+        .fail(function() {
+          console.log('Failed at getting user self infos :(');
+          reject();
+        });
+    });
   },
 
-  getPokes: function(store) {
+  getPokes: function() {
     var updateData = function(dataPoke, email) {
       var pokeId = dataPoke.time.toString() + email;
 
-      store.find('poke', pokeId).then(
-        function() { /* exit */ },
-        function() {
-          var pokeRecord = store.createRecord('poke', {
-            id: pokeId,
-            isReceived: dataPoke.isPokingMe,
-            time: dataPoke.time,
-            points: 0
-          });
+      var poke = PokeGame.Poke.find(pokeId);
 
-          store.find('opponent', email).then(
-            function(opponentRecord) {
-              return Promise.resolve(opponentRecord);
-            },
-            function() {
-              // Not found, updating the store definition
-              var opponentRecord = store.update('opponent', {
-                id: email,
-                email: email,
-                name: 'BB',
-                scoreFor: 0,
-                scoreAgainst: 0,
-                isScoring: dataPoke.isPokingMe
-              });
-              return Promise.resolve(opponentRecord);
-            }
-          ).then(function(opponentRecord) {
-            pokeRecord.set('opponent', opponentRecord);
-            opponentRecord.get('pokes').then(function(pokes) {
-              pokes.pushObject(pokeRecord);
-              opponentRecord.save();
-              pokeRecord.save();
-            });
-          });
+      if (poke.isLoaded) return; // exit
+
+      var pokeRecord = PokeGame.Poke.create({
+        id: pokeId,
+        isReceived: dataPoke.isPokingMe,
+        time: dataPoke.time,
+        points: 0
+      });
+
+      var opponent = PokeGame.Opponent.find(email);
+      if (!opponent.isLoaded) {
+        opponent = PokeGame.Opponent.create({
+          id: email,
+          email: email,
+          name: 'BB',
+          scoreFor: 0,
+          scoreAgainst: 0,
+          isScoring: dataPoke.isPokingMe,
+          avatar: DEFAULT_AVATAR
         });
+      }
+      opponent.get('pokes').create({
+        id: pokeId,
+        isReceived: dataPoke.isPokingMe,
+        time: dataPoke.time,
+        points: 0
+      });
+
+      pokeRecord.set('opponent', opponent);
+
+
+      return opponent.save().then(function() {
+        return pokeRecord.save();
+      });
     };
 
 

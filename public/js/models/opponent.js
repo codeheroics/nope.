@@ -1,12 +1,18 @@
-PokeGame.Opponent = DS.Model.extend({
-  email:          DS.attr('string'),
-  name:           DS.attr('string'),
-  avatar:         DS.attr('string'),
-  scoreFor:       DS.attr('number', { defaultValue: 0 }),
-  scoreAgainst:   DS.attr('number', { defaultValue: 0 }),
-  pokes:          DS.hasMany('poke', { async: true }),
-  isScoring:      DS.attr('boolean')
+PokeGame.Opponent = Ember.Model.extend({
+  id:             Ember.attr(), // string
+  email:          Ember.attr(), // string
+  name:           Ember.attr(), // string
+  avatar:         Ember.attr(), // string
+  scoreFor:       Ember.attr(Number), // { defaultValue: 0 }),
+  scoreAgainst:   Ember.attr(Number), // { defaultValue: 0 }),
+  pokes:          Ember.hasMany('PokeGame.Poke', { key: 'pokesIds', embedded: true }),
+  isScoring:      Ember.attr() // boolean
 });
+
+PokeGame.Opponent.reopenClass({
+  adapter: Ember.LocalStorageAdapter.create()
+});
+
 /*
 PokeGame.Opponent.FIXTURES = [
   {

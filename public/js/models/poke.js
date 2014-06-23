@@ -1,10 +1,16 @@
-PokeGame.Poke = DS.Model.extend({
-  opponent:         DS.belongsTo('opponent', { async: true }),
-  isReceived:       DS.attr('boolean'),
-  time:             DS.attr('number'),
+PokeGame.Poke = Ember.Model.extend({
+  id:               Ember.attr(), // string
+  opponent:         Ember.belongsTo('PokeGame.Opponent', { key: 'opponentId', embedded: true }),
+  isReceived:       Ember.attr(), // boolean
+  time:             Ember.attr(Number),
   date:             function() {return new Date(this.get('time')); }.property('date'),
-  points:           DS.attr('number')
+  points:           Ember.attr(Number)
 });
+
+PokeGame.Poke.reopenClass({
+  adapter: Ember.LocalStorageAdapter.create()
+});
+
 /*
 PokeGame.Poke.FIXTURES = [
   {

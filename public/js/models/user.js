@@ -1,10 +1,16 @@
-PokeGame.User = DS.Model.extend({
-  name:           DS.attr('string'),
-  email:          DS.attr('string'),
-  avatar:         DS.attr('string'),
-  totalScore:     DS.attr('number', { defaultValue: 0 }),
-  totalPokes:     DS.attr('number', { defaultValue: 0 })
+PokeGame.User = Ember.Model.extend({
+  id:             Ember.attr(), // string
+  name:           Ember.attr(), // string
+  email:          Ember.attr(), // string
+  avatar:         Ember.attr(), // string
+  totalScore:     Ember.attr(Number), // { defaultValue: 0 }
+  totalPokes:     Ember.attr(Number) // { defaultValue: 0 }
 });
+
+PokeGame.User.reopenClass({
+  adapter: Ember.LocalStorageAdapter.create()
+});
+
 /*
 PokeGame.User.FIXTURES = [{
   id:             1,

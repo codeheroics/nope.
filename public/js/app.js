@@ -8,6 +8,8 @@ var POKES_ROUTE = SERVER_URL + '/pokes';
 var LOGIN_ROUTE = SERVER_URL + '/login';
 var CALLBACK_NAME = 'pokecb';
 
+var DEFAULT_AVATAR = 'http://www.gravatar.com/avatar/00000000000000000000000000000000';
+
 var CustomAuthenticator = Ember.SimpleAuth.Authenticators.Base.extend({
   restore: function(data) {
     return new Ember.RSVP.Promise(function(resolve, reject) {
@@ -90,7 +92,7 @@ window.PokeGame = Ember.Application.create({
   LOG_TRANSITIONS: true
 });
 
-PokeGame.ApplicationSerializer = DS.LSSerializer.extend();
-PokeGame.ApplicationAdapter = DS.LSAdapter.extend({
-  namespace: 'pokeNS'
-});
+// PokeGame.ApplicationSerializer = DS.LSSerializer.extend();
+// PokeGame.ApplicationAdapter = DS.LSAdapter.extend({
+//   namespace: 'pokeNS'
+// });

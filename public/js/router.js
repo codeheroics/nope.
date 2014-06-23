@@ -22,14 +22,16 @@ PokeGame.IndexRoute = Ember.Route.extend(
   Ember.SimpleAuth.AuthenticatedRouteMixin,
   {
     model: function() {
-      return this.store.find('opponent');
+      var opponents = PokeGame.Opponent.find();
+      console.log(opponents);
+      return PokeGame.Opponent.find();
     },
     setupController: function(controller, opponents) {
       controller.set('model', opponents);
       if (Ember.isNone(this.get('pokeServerManager'))) {
         this.set('pokeServerManager', PokeGame.PokeServerManager.create());
       }
-      this.get('pokeServerManager').getPokes(this.store);
+      this.get('pokeServerManager').getPokes();
     }
   }
 );
@@ -38,7 +40,8 @@ PokeGame.HistoryRoute = Ember.Route.extend(
   Ember.SimpleAuth.AuthenticatedRouteMixin,
   {
     model: function() {
-      return this.store.find('poke');
+      console.log(PokeGame.Poke.find());
+      return PokeGame.Poke.find();
     }
   }
 );
@@ -47,23 +50,11 @@ PokeGame.ProfileRoute = Ember.Route.extend(
   Ember.SimpleAuth.AuthenticatedRouteMixin,
   {
     model: function() {
-      var store = this.store;
-      return this.store.find('user', 1).then(
-        function foundUser(user) {
-          return user;
-        },
-        function didNotFindUser() {
-          var user = store.createRecord('user', {
-            id: 1,
-            email: window.localStorage.getItem('email')
-          });
+      var user = PokeGame.User.find(1);
+      if (user.isLoaded) return user;
 
-          var pokeServerManager = PokeGame.PokeServerManager.create();
-          pokeServerManager.updateSelfInfos(store);
-
-          return user;
-        }
-      );
+      var pokeServerManager = PokeGame.PokeServerManager.create();
+      return pokeServerManager.updateSelfInfos();
     }
   }
 );
@@ -72,7 +63,8 @@ PokeGame.OpponentPokesRoute = Ember.Route.extend(
   Ember.SimpleAuth.AuthenticatedRouteMixin,
   {
     model: function(params) {
-      return this.store.find('opponent', params.opponent_id);
+      console.log(PokeGame.Opponent.find(params.opponent_id))
+      return PokeGame.Opponent.find(params.opponent_id);
     }
   }
 );
@@ -81,7 +73,8 @@ PokeGame.OpponentsRoute = Ember.Route.extend(
   Ember.SimpleAuth.AuthenticatedRouteMixin,
   {
     model: function() {
-      return this.store.find('opponent');
+      console.log(PokeGame.Opponent.find())
+      return PokeGame.Opponent.find();
     }
   }
 );
