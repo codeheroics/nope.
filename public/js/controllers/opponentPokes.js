@@ -2,7 +2,6 @@
 PokeGame.OpponentPokesController = Ember.ObjectController.extend({
   actions: {
     poke: function(opponent) {
-      var store = this.store;
       $.ajax(
         {
           dataType: 'jsonp',
@@ -17,7 +16,7 @@ PokeGame.OpponentPokesController = Ember.ObjectController.extend({
       )
         .done(function(dataPoke) {
           var pokeId = dataPoke.time.toString() + opponent.get('email');
-          var pokeRecord = store.createRecord('poke', {
+          var pokeRecord = PokeGame.Poke.create({
             id: pokeId,
             isReceived: dataPoke.isPokingMe,
             time: dataPoke.time,
@@ -26,10 +25,10 @@ PokeGame.OpponentPokesController = Ember.ObjectController.extend({
           });
 
           opponent.set('isScoring',false);
-          opponent.get('pokes').then(function(pokes) {
-            pokes.pushObject(pokeRecord);
-            pokeRecord.save();
-            opponent.save();
+          opponent.get('pokes').create(pokeRecord.toJSON());
+
+          return opponent.save().then(function() {
+            return pokeRecord.save();
           });
         })
         .fail(function() {
