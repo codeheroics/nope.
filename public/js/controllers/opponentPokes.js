@@ -20,12 +20,12 @@ PokeGame.OpponentPokesController = Ember.ObjectController.extend({
             id: pokeId,
             isReceived: dataPoke.isPokingMe,
             time: dataPoke.time,
-            points: 0,
-            opponent: opponent
+            points: 0
           });
 
           opponent.set('isScoring',false);
           opponent.get('pokes').create(pokeRecord.toJSON());
+          pokeRecord.set('opponent', opponent);
 
           return opponent.save().then(function() {
             return pokeRecord.save();

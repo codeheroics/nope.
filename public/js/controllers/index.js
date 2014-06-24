@@ -3,5 +3,5 @@ PokeGame.IndexController = Ember.ArrayController.extend({
     var opponents = this.get('model');
     var scoringOpponents = opponents.filterBy('isScoring', true);
     return scoringOpponents.length > 0 ? scoringOpponents[0] : null;
-  }.property('opponents.@each.isScoring')
+  }.property('model.@each.isScoring')
 });
