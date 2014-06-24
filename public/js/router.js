@@ -22,17 +22,15 @@ PokeGame.IndexRoute = Ember.Route.extend(
   Ember.SimpleAuth.AuthenticatedRouteMixin,
   {
     model: function() {
-      var opponents = PokeGame.Opponent.find();
-      console.log(opponents);
-      return PokeGame.Opponent.find();
-    },
-    setupController: function(controller, opponents) {
-      controller.set('model', opponents);
       if (Ember.isNone(this.get('pokeServerManager'))) {
         this.set('pokeServerManager', PokeGame.PokeServerManager.create());
       }
-      this.get('pokeServerManager').getPokes();
-    }
+        // return PokeGame.Opponent.find();
+
+      return this.get('pokeServerManager').getPokes().then(function() {
+        return PokeGame.Opponent.find();
+      });
+    },
   }
 );
 
@@ -40,7 +38,6 @@ PokeGame.HistoryRoute = Ember.Route.extend(
   Ember.SimpleAuth.AuthenticatedRouteMixin,
   {
     model: function() {
-      console.log(PokeGame.Poke.find());
       return PokeGame.Poke.find();
     }
   }
@@ -63,7 +60,6 @@ PokeGame.OpponentPokesRoute = Ember.Route.extend(
   Ember.SimpleAuth.AuthenticatedRouteMixin,
   {
     model: function(params) {
-      console.log(PokeGame.Opponent.find(params.opponent_id))
       return PokeGame.Opponent.find(params.opponent_id);
     }
   }
@@ -73,7 +69,6 @@ PokeGame.OpponentsRoute = Ember.Route.extend(
   Ember.SimpleAuth.AuthenticatedRouteMixin,
   {
     model: function() {
-      console.log(PokeGame.Opponent.find())
       return PokeGame.Opponent.find();
     }
   }

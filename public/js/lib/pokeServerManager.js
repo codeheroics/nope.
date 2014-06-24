@@ -42,7 +42,7 @@ PokeGame.PokeServerManager = Ember.Object.extend({
 
       var poke = PokeGame.Poke.find(pokeId);
 
-      if (poke.isLoaded) return; // exit
+      if (poke.isLoaded) return Promise.resolve(poke); // exit
 
       var pokeRecord = PokeGame.Poke.create({
         id: pokeId,
@@ -79,28 +79,31 @@ PokeGame.PokeServerManager = Ember.Object.extend({
     };
 
 
-    $.ajax(
-      {
-        dataType: 'jsonp',
-        jsonp: CALLBACK_NAME,
-        headers: {
-          'x-access-token': window.localStorage.getItem('token')
-        },
-        url: POKES_ROUTE
-      }
-    )
-      .done(function(dataPokes) {
-          for (var email in dataPokes) {
-            if (!dataPokes.hasOwnProperty(email)) continue;
-
+    return new Promise(function(resolve, reject) {
+      $.ajax(
+        {
+          dataType: 'jsonp',
+          jsonp: CALLBACK_NAME,
+          headers: {
+            'x-access-token': window.localStorage.getItem('token')
+          },
+          url: POKES_ROUTE
+        }
+      )
+        .done(function(dataPokes) {
+          var email = Object.keys(dataPokes);
+          var promises = email.map(function(email) {
             var dataPoke = dataPokes[email];
-            updateData(dataPoke, email);
-          }
-        // Compare and update (a poke can be identified with its timestamp)
-      })
-      .fail(function(a, b, c) {console.log(a, b, c);
-        alert('failed :(');
-        // :(
+            return updateData(dataPoke, email);
+          });
+
+          return resolve(Promise.all(promises));
+        })
+        .fail(function(a, b, c) {
+          alert('failed :(');
+          reject();
+          // :(
+        });
       });
   }
 });
