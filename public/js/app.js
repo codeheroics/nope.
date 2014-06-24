@@ -88,6 +88,14 @@ Ember.Application.initializer({
   }
 });
 
+Ember.Handlebars.registerBoundHelper('dateFormat', function(date, format) {
+  return moment(date).format(format);
+});
+
+Ember.Handlebars.registerBoundHelper('relativeDateFormat', function(date) {
+  return moment(date).fromNow();
+});
+
 window.PokeGame = Ember.Application.create({
   LOG_TRANSITIONS: true
 });

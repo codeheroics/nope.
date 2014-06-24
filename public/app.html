@@ -12,6 +12,7 @@
 		<meta name="keywords" content="" />
 		<link href="http://fonts.googleapis.com/css?family=Open+Sans:400,700|Open+Sans+Condensed:700" rel="stylesheet" />
 		<script src="components/jquery/dist/jquery.js"></script>
+		<script src="components/moment/moment.js"></script>
 		<script src="components/handlebars/handlebars.min.js"></script>
 		<script src="components/ember/ember.js"></script>
 		<script src="components/ember-simple-auth/ember-simple-auth.js"></script>
@@ -219,9 +220,9 @@
 							<li>
 								<article class="is-post-summary">
 									{{#if poke.isReceived}}
-										>> POKE :( {{poke.date}}
+										>> POKE :( {{relativeDateFormat poke.date}}
 									{{else}}
-										<< POKE :) {{poke.date}}
+										<< POKE :) {{relativeDateFormat poke.date}}
 									{{/if}}
 								</article>
 							</li>
@@ -325,6 +326,7 @@
 		<script src="js/models/user.js"></script>
 		<script src="js/controllers/index.js"></script>
 		<script src="js/controllers/opponentPokes.js"></script>
+		<script src="js/controllers/history.js"></script>
 		<script src="js/controllers/login.js"></script>
 		<script src="js/controllers/signup.js"></script>
 		<script src="js/lib/pokeServerManager.js"></script>
