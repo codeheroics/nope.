@@ -1,6 +1,6 @@
 PokeGame.Poke = Ember.Model.extend({
   id:               Ember.attr(), // string
-  opponent:         Ember.belongsTo('PokeGame.Opponent', { key: 'opponentId', embedded: true }),
+  opponent:         Ember.belongsTo('PokeGame.Opponent', { key: 'opponentId' }),
   isReceived:       Ember.attr(), // boolean
   time:             Ember.attr(Number),
   date:             function() {return new Date(this.get('time')); }.property('date'),

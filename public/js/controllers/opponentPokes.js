@@ -24,7 +24,7 @@ PokeGame.OpponentPokesController = Ember.ObjectController.extend({
           });
 
           opponent.set('isScoring',false);
-          opponent.get('pokes').create(pokeRecord.toJSON());
+          opponent.get('pokes').pushObject(pokeRecord);
           pokeRecord.set('opponent', opponent);
 
           return opponent.save().then(function() {
