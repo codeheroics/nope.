@@ -41,9 +41,17 @@ PokeGame.OpponentPokesController = Ember.ObjectController.extend({
     var scoreFor = this.get('model.scoreFor');
     var scoreAgainst = this.get('model.scoreAgainst');
     return scoreFor > scoreAgainst;
-  }.property('model.isWinning'),
+  }.property('model.isWinning'), // FIXME
 
   pokes: function() {
     return this.get('model.pokes').toArray().reverse();
-  }.property('pokes')
+  }.property('pokes'),
+
+  scoreFor: function() {
+    return this.get('model.scoreFor').toLocaleString();
+  }.property('scoreFor'),
+
+  scoreAgainst: function() {
+    return this.get('model.scoreAgainst').toLocaleString();
+  }.property('scoreAgainst')
 });

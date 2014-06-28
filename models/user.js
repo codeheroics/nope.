@@ -191,7 +191,9 @@ User.prototype.pokeAt = function(opponentEmail, callback) {
       self.removeFromPendingUsers(opponentEmail);
       wonPoints = 0;
     } else {
-      wonPoints = Math.round((time - self.friendsPokes[opponentEmail].time) / 1000);
+      // 1 point per poke + 1 point per hour
+      var oneHour = 1000 * 60 * 60;
+      wonPoints = Math.floor((time - self.friendsPokes[opponentEmail].time) / oneHour) + 1;
     }
 
     // From here, this can be repeated in case of CAS error
