@@ -56,7 +56,7 @@ PokeGame.PokeServerManager = Ember.Object.extend({
         opponent = PokeGame.Opponent.create({
           id: email,
           email: email,
-          name: 'BB',
+          name: dataPoke.opponentName,
           avatar: DEFAULT_AVATAR
         });
       }

@@ -107,25 +107,53 @@ User.prototype.hasPending = function(email) {
   return this.pendingUsers.indexOf(email) !== -1;
 };
 
-User.prototype.setPokingAt = function(email, time, opponentWonPoints) {
-  email = email.toLowerCase();
+/**
+ * [setPokingAt description]
+ * @param {String|User} userPoked    user poked. can be string for email if user does not exist yet.
+ * @param {[type]} time              [description]
+ * @param {[type]} opponentWonPoints [description]
+ */
+User.prototype.setPokingAt = function(userPoked, time, opponentWonPoints) {
+  var email, name;
+  if (userPoked instanceof User) {
+    email = userPoked.email;
+    name = userPoked.name.trim();
+  } else {
+    email = userPoked;
+  }
+  email = email.toLowerCase().trim();
   var oldPoke = this.friendsPokes[email];
   this.friendsPokes[email] = {
     time: time,
     myScore: oldPoke ? oldPoke.myScore : 0,
     opponentScore: oldPoke ? oldPoke.opponentScore + opponentWonPoints : 0,
-    isPokingMe: false
+    isPokingMe: false,
+    opponentName: name
   };
 };
 
-User.prototype.setPokedBy = function(email, time, wonPoints) {
-  email = email.toLowerCase();
+/**
+ * [setPokedBy description]
+ * @param {String|User} userPoking    user poking. can be string for email if user does not exist yet.
+ * @param {[type]} time       [description]
+ * @param {[type]} wonPoints  [description]
+ */
+User.prototype.setPokedBy = function(userPoking, time, wonPoints) {
+  var email, name;
+  if (userPoking instanceof User) {
+    email = userPoking.email;
+    name = userPoking.name.trim();
+  } else {
+    email = userPoking;
+  }
+  email = email.toLowerCase().trim();
   var oldPoke = this.friendsPokes[email];
   this.friendsPokes[email] = {
     time: time,
     isPokingMe: true,
     myScore: oldPoke ? oldPoke.myScore + wonPoints : wonPoints,
-    opponentScore: oldPoke ? oldPoke.opponentScore : 0
+    opponentScore: oldPoke ? oldPoke.opponentScore : 0,
+    opponentName: name
   };
 };
 
@@ -172,7 +200,7 @@ User.prototype.pokeAt = function(opponentEmail, callback) {
           async.retry(
             3,
             function updateUserPoked(cbRetry) {
-              userPoked.setPokedBy(self.email, time, wonPoints);
+              userPoked.setPokedBy(self, time, wonPoints);
               userPoked.save(function(errSave, result) {
                 // There was an error saving due to the CAS : We'll update the object and retry saving
                 if (errSave && errSave.code === couchbase.errors.keyAlreadyExists) {
@@ -194,7 +222,7 @@ User.prototype.pokeAt = function(opponentEmail, callback) {
           async.retry(
             3,
             function updateUserPoking(cbRetry) {
-              self.setPokingAt(opponentEmail, time, wonPoints);
+              self.setPokingAt(userPoked, time, wonPoints);
               self.save(function(errSave, result) {
                 // There was an error saving due to the CAS : We'll update the object and retry saving
                 if (errSave && errSave.code === couchbase.errors.keyAlreadyExists) {
