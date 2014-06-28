@@ -20,7 +20,7 @@ PokeGame.OpponentPokesController = Ember.ObjectController.extend({
             id: pokeId,
             isReceived: dataPoke.isPokingMe,
             time: dataPoke.time,
-            points: 0
+            points: dataPoke.points
           });
 
           opponent.set('isScoring',false);

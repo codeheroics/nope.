@@ -127,6 +127,7 @@ User.prototype.setPokingAt = function(userPoked, time, opponentWonPoints) {
     time: time,
     myScore: oldPoke ? oldPoke.myScore : 0,
     opponentScore: oldPoke ? oldPoke.opponentScore + opponentWonPoints : 0,
+    points: opponentWonPoints || 0,
     isPokingMe: false,
     opponentName: name
   };
@@ -152,6 +153,7 @@ User.prototype.setPokedBy = function(userPoking, time, wonPoints) {
     time: time,
     isPokingMe: true,
     myScore: oldPoke ? oldPoke.myScore + wonPoints : wonPoints,
+    points: wonPoints || 0,
     opponentScore: oldPoke ? oldPoke.opponentScore : 0,
     opponentName: name
   };
