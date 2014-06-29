@@ -24,6 +24,9 @@ PokeGame.OpponentPokesController = Ember.ObjectController.extend({
           });
 
           opponent.set('isScoring',false);
+          opponent.set('scoreFor', dataPoke.opponentScore);
+          opponent.set('scoreAgainst', dataPoke.myScore); // In case data was not up to date
+          opponent.set('pokesCpt', dataPoke.pokesCpt);
           opponent.get('pokes').pushObject(pokeRecord);
           pokeRecord.set('opponent', opponent);
 
@@ -45,13 +48,13 @@ PokeGame.OpponentPokesController = Ember.ObjectController.extend({
 
   pokes: function() {
     return this.get('model.pokes').toArray().reverse();
-  }.property('pokes'),
+  }.property('model.pokes'),
 
   scoreFor: function() {
     return this.get('model.scoreFor').toLocaleString();
-  }.property('scoreFor'),
+  }.property('model.scoreFor'),
 
   scoreAgainst: function() {
     return this.get('model.scoreAgainst').toLocaleString();
-  }.property('scoreAgainst')
+  }.property('model.scoreAgainst')
 });

@@ -16,6 +16,7 @@ var User = function(params) {
   this.bannedUsers = params.bannedUsers ? params.bannedUsers : [];
   this.pendingUsers = params.pendingUsers ? params.pendingUsers : [];
   this.score = params.score || 0;
+  this.totalPokes = params.totalPokes || 0;
   this.created = params.created ? params.created : Date.now();
   this.cas = params.cas || null;
 };
@@ -72,6 +73,7 @@ User.prototype.toDbJSON = function() {
     bannedUsers: this.bannedUsers,
     pendingUsers: this.pendingUsers,
     score: this.score,
+    totalPokes: this.totalPokes,
     created: this.created
   };
 };
@@ -80,8 +82,9 @@ User.prototype.toSelfJSON = function() {
   return {
     name: this.name,
     email: this.email,
-    score: this.score,
     created: this.created,
+    score: this.score,
+    totalPokes: this.totalPokes,
     bannedUsers: this.bannedUsers,
     pendingUsers: this.pendingUsers
   };
@@ -91,6 +94,7 @@ User.prototype.toPublicJSON = function() {
   return {
     name: this.name,
     score: this.score,
+    totalPokes: this.totalPokes,
     created: this.created
   };
 };
@@ -128,6 +132,7 @@ User.prototype.setPokingAt = function(userPoked, time, opponentWonPoints) {
     myScore: oldPoke ? oldPoke.myScore : 0,
     opponentScore: oldPoke ? oldPoke.opponentScore + opponentWonPoints : 0,
     points: opponentWonPoints || 0,
+    pokesCpt: oldPoke ? ++oldPoke.pokesCpt : 0,
     isPokingMe: false,
     opponentName: name
   };
@@ -154,6 +159,7 @@ User.prototype.setPokedBy = function(userPoking, time, wonPoints) {
     isPokingMe: true,
     myScore: oldPoke ? oldPoke.myScore + wonPoints : wonPoints,
     points: wonPoints || 0,
+    pokesCpt: oldPoke.pokesCpt || 0,
     opponentScore: oldPoke ? oldPoke.opponentScore : 0,
     opponentName: name
   };
@@ -205,6 +211,7 @@ User.prototype.pokeAt = function(opponentEmail, callback) {
             3,
             function updateUserPoked(cbRetry) {
               userPoked.setPokedBy(self, time, wonPoints);
+              userPoked.score += wonPoints;
               userPoked.save(function(errSave, result) {
                 // There was an error saving due to the CAS : We'll update the object and retry saving
                 if (errSave && errSave.code === couchbase.errors.keyAlreadyExists) {
@@ -227,6 +234,7 @@ User.prototype.pokeAt = function(opponentEmail, callback) {
             3,
             function updateUserPoking(cbRetry) {
               self.setPokingAt(userPoked, time, wonPoints);
+              self.totalPokes++;
               self.save(function(errSave, result) {
                 // There was an error saving due to the CAS : We'll update the object and retry saving
                 if (errSave && errSave.code === couchbase.errors.keyAlreadyExists) {
