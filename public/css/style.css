@@ -1071,3 +1071,14 @@
 	.needsPokeBack, .needsPokeBack:hover {
 		background-color: #a0a3d8;
 	}
+
+	p.pokesSent {
+		font-size: 7em;
+		text-align: center;
+		margin: 0.35em;
+	}
+
+	legend.pokesSent {
+		margin:auto;
+		font-size: 2em;
+	}
