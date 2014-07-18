@@ -19,6 +19,7 @@ var User = function(params) {
   this.totalPokes = params.totalPokes || 0;
   this.created = params.created ? params.created : Date.now();
   this.cas = params.cas || null;
+  this.sparks = params.sparks || [];
 };
 
 User.FRIEND_STATUSES = {
@@ -74,7 +75,8 @@ User.prototype.toDbJSON = function() {
     pendingUsers: this.pendingUsers,
     score: this.score,
     totalPokes: this.totalPokes,
-    created: this.created
+    created: this.created,
+    sparks: this.sparks
   };
 };
 

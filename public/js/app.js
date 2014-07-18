@@ -2,10 +2,12 @@
 
 // CONFIG TODO MOVE SOMEWHERE SEPARATE
 var SERVER_URL = 'http://localhost:8000';
+var REALTIME_SERVER_URL = 'http://localhost:8080';
 var USERS_ROUTE = SERVER_URL + '/users';
 var SELF_ROUTE = USERS_ROUTE + '?me';
 var POKES_ROUTE = SERVER_URL + '/pokes';
 var LOGIN_ROUTE = SERVER_URL + '/login';
+var PRIMUS_ROUTE = REALTIME_SERVER_URL;
 var CALLBACK_NAME = 'pokecb';
 
 var DEFAULT_AVATAR = 'http://www.gravatar.com/avatar/00000000000000000000000000000000';

@@ -103,23 +103,3 @@ PokeGame.PokeServerManager = Ember.Object.extend({
       });
   }
 });
-/*
-function PokeServerManager() {}
-
-PokeServerManager.prototype.updateSelfInfos = function() {
-};
-
-PokeServerManager.prototype.getPokes = function() {
-};
-
-PokeServerManager.prototype.pokeAt = function(email) {
-  $.post(POKES_ROUTE + '/' + email)
-    .done(function(data) {
-      // Get new data (scores, etc) to update
-    })
-    .fail(function(jqXHR, textStatus, errorThrown) {
-      // :(
-    });
-};
-
-*/
