@@ -14,10 +14,9 @@ PokeGame.Router.map(function() {
   this.resource('about', { path: '/about' });
 });
 
-function connectToPrimus() {
-    if (PokeGame.serverManager || PokeGame.realTimeManager) return;
-    PokeGame.serverManager = PokeGame.PokeServerManager.create();
-    PokeGame.realTimeManager = PokeGame.RealTimeManager.create();
+function createServerManager() {
+  if (PokeGame.serverManager) return;
+  PokeGame.serverManager = PokeGame.PokeServerManager.create();
 }
 
 
@@ -25,7 +24,7 @@ PokeGame.ApplicationRoute = Ember.Route.extend(
   Ember.SimpleAuth.ApplicationRouteMixin, {
     actions: {
       sessionAuthenticationSucceeded: function(transition, queryParams) {
-        connectToPrimus();
+        createServerManager();
         this._super(transition, queryParams);
       }
     }
@@ -35,7 +34,7 @@ PokeGame.ApplicationRoute = Ember.Route.extend(
 PokeGame.AuthenticatedRouteMixin = Ember.Mixin.create(
   Ember.SimpleAuth.AuthenticatedRouteMixin, {
     beforeModel: function(transition, queryParams) {
-      connectToPrimus();
+      createServerManager();
       this._super(transition, queryParams);
     }
   }
@@ -45,9 +44,8 @@ PokeGame.IndexRoute = Ember.Route.extend(
   PokeGame.AuthenticatedRouteMixin,
   {
     model: function() {
-      PokeGame.serverManager.getPokes().then(function() {
-        return PokeGame.Opponent.find();
-      });
+      //PokeGame.serverManager.getAllPokes();
+      return PokeGame.Opponent.find();
     },
   }
 );

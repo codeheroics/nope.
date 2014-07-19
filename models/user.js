@@ -320,4 +320,16 @@ User.prototype.unban = function(email) {
   });
 };
 
+User.prototype.addSpark = function(sparkId, callback) {
+  this.sparks.push(sparkId);
+  this.save(callback);
+};
+
+User.prototype.removeSpark = function(sparkId, callback) {
+  var sparkIndex = this.sparks.indexOf(sparkId);
+  if (sparkIndex === -1) return;
+  this.sparks.splice(sparkIndex, 1);
+  this.save(callback);
+};
+
 module.exports = User;
