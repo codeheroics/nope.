@@ -45,14 +45,14 @@ primus.on('connection', function connection(spark) {
         user.sparks.forEach(function(sparkId) {
           var spark = primus.spark(sparkId);
           console.log(spark, sparkId);
-          if (spark) spark.write(formatPokeDataForPrimus(pokeData));
+          if (spark) spark.write(formatPokeDataForPrimus(pokeData, opponentId));
         });
 
         User.findById(opponentId, function(err, opponent) {
           if (err || !opponent) return console.error('Error fetching email ' + email, err);
           opponent.sparks.forEach(function(opponentSparkId) {
             var opponentSpark = primus.spark(opponentSparkId);
-            if (opponentSpark) opponentSpark.write(formatPokeDataForPrimus(opponent.friendsPokes[email]));
+            if (opponentSpark) opponentSpark.write(formatPokeDataForPrimus(opponent.friendsPokes[email], email));
           });
         });
       });
