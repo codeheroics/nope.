@@ -34,8 +34,10 @@ PokeGame.ApplicationRoute = Ember.Route.extend(
 PokeGame.AuthenticatedRouteMixin = Ember.Mixin.create(
   Ember.SimpleAuth.AuthenticatedRouteMixin, {
     beforeModel: function(transition, queryParams) {
-      createServerManager();
       this._super(transition, queryParams);
+      if (this.get('session').get('isAuthenticated')) {
+        createServerManager();
+      }
     }
   }
 );
@@ -44,7 +46,6 @@ PokeGame.IndexRoute = Ember.Route.extend(
   PokeGame.AuthenticatedRouteMixin,
   {
     model: function() {
-      //PokeGame.serverManager.getAllPokes();
       return PokeGame.Opponent.find();
     },
   }
