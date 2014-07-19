@@ -255,11 +255,7 @@ User.prototype.pokeAt = function(opponentEmail, callback) {
         }
       ],
       function(err) {
-        if (err) return callback(err);
-
-        // TODO EMIT AN EVENT
-        console.log('should emit event to convey that an user was poked'); // TODO
-        callback(null, self.friendsPokes[opponentEmail]);
+        callback(err, self.friendsPokes[opponentEmail]);
       }
     );
   });

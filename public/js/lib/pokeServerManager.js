@@ -73,6 +73,7 @@ PokeGame.PokeServerManager = Ember.Object.extend({
     opponent.set('isScoring', dataPoke.isPokingMe);
     opponent.set('scoreFor', dataPoke.opponentScore);
     opponent.set('scoreAgainst', dataPoke.myScore);
+    opponent.set('pokesCpt', dataPoke.pokesCpt);
     var pokes = opponent.get('pokes').pushObject(pokeRecord);
 
     pokeRecord.set('opponent', opponent);

@@ -44,7 +44,6 @@ primus.on('connection', function connection(spark) {
 
         user.sparks.forEach(function(sparkId) {
           var spark = primus.spark(sparkId);
-          console.log(spark, sparkId);
           if (spark) spark.write(formatPokeDataForPrimus(pokeData, opponentId));
         });
 
@@ -69,7 +68,6 @@ primus.on('connection', function connection(spark) {
         }
         user = null;
         email = null;
-        console.log(spark.id, 'is gone');
       });
     });
   });
