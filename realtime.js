@@ -1,9 +1,10 @@
 'use strict';
-var express = require('express');
+var express    = require('express');
 var bodyParser = require('body-parser');
-var User = require('./models/user');
-
-var app = express();
+var async      = require('async');
+var User       = require('./models/user');
+var SparkUser  = require('./models/sparkUser');
+var app        = express();
 
 app.use(express.static(__dirname + '/public'));
 app.use(bodyParser.json());
@@ -24,34 +25,78 @@ primus.authorize(require('./lib/utils/middlewares')(app).checkWebSocketLogin);
 primus.on('connection', function connection(spark) {
   // Can't keep the same user object in memory,
   // We remove it once his job is done, then get it again.
-  var user = spark.request.user;
+
   var email = spark.request.user.email;
-  user.addSpark(spark.id, function(err) {
-    if (err) return console.error('addSpark error:', err);
-    user = null;
-  });
+  SparkUser.findById(email, function(err, sparkUser) {
+    if (err) return console.error('SparkUser error', err);
+    if (!sparkUser) sparkUser = new SparkUser({email: email});
 
-  spark.on('data', function received(opponentId) {
+    spark.request.user = null;
+    sparkUser.addSpark(spark.id, function(err) {
+      if (err) return console.error('addSpark error:', err);
 
-    User.findById(email, function(err, user) {
-      if (err || !user) return console.error('Error fetching email ' + email, err);
-      user.pokeAt(opponentId, function(err, pokeData) {
-        if (err) {
-          console.log('Error when ' + user.email + ' tried to poke ' + opponentId, err);
-          spark.write('Nope, will not do that');
-          return;
-        }
+      spark.on('data', function received(opponentId) {
+        SparkUser.findById(email, function(err, sparkUser) {
+          if (err || !sparkUser) return console.error('sparkuser error', err, sparkUser);
 
-        user.sparks.forEach(function(sparkId) {
-          var spark = primus.spark(sparkId);
-          if (spark) spark.write(formatPokeDataForPrimus(pokeData, opponentId));
-        });
+          async.auto({
+            poke: function(cbAuto) { // sends back pokeData
+              User.findById(email, function(err, user) {
+                if (err || !user) return console.error('Error fetching email ' + email, err);
+                user.pokeAt(opponentId, cbAuto);
+              });
+            },
 
-        User.findById(opponentId, function(err, opponent) {
-          if (err || !opponent) return console.error('Error fetching email ' + email, err);
-          opponent.sparks.forEach(function(opponentSparkId) {
-            var opponentSpark = primus.spark(opponentSparkId);
-            if (opponentSpark) opponentSpark.write(formatPokeDataForPrimus(opponent.friendsPokes[email], email));
+            notifyPoking: ['poke', function(cbAuto, results) {
+              var pokeData = results.poke;
+
+              // First give data back to this spark
+              spark.write(formatPokeDataForPrimus(pokeData, opponentId));
+
+              // Then to the others
+              sparkUser.sparks.forEach(function(sparkId) {
+                if (sparkId === spark.id) return;
+                var pokingSpark = primus.spark(sparkId);
+                if (pokingSpark) {
+                  pokingSpark.write(formatPokeDataForPrimus(pokeData, opponentId));
+                } else {
+                  sparkUser.removeSpark(sparkId, function(){}); // FIXME
+                }
+              });
+              cbAuto();
+            }],
+
+            notifyPoked: ['poke', function(cbAuto, pokeData) {
+              async.parallel({
+                opponent: function(cbParallel) {
+                  User.findById(opponentId, cbParallel);
+                },
+                sparkOpponent: function(cbParallel) {
+                  SparkUser.findById(opponentId, cbParallel);
+                }
+              }, function(err, results) {
+                var opponent = results.opponent;
+                var sparkOpponent = results.sparkOpponent;
+                if (err || !opponent || !sparkOpponent) {
+                  return console.error('Error fetching email ' + email, err, opponent, sparkOpponent);
+                }
+
+                sparkOpponent.sparks.forEach(function(opponentSparkId) {
+                  var opponentSpark = primus.spark(opponentSparkId);
+                  if (opponentSpark) {
+                    opponentSpark.write(formatPokeDataForPrimus(opponent.friendsPokes[email], email));
+                   } else {
+                    sparkOpponent.removeSpark(opponentSparkId, function() {}); // FIXME
+                  }
+                });
+                cbAuto();
+              });
+            }]
+          }, function(err) {
+            if (err) {
+              console.log('Error when ' + email + ' tried to poke ' + opponentId, err);
+              spark.write('Nope, will not do that');
+            }
           });
         });
       });
@@ -59,15 +104,12 @@ primus.on('connection', function connection(spark) {
   });
 
   spark.on('end', function endSparkConnection() {
-    User.findById(email, function(err, user) {
-      if (err || !user) return console.error('Error fetching email ' + email, err);
-      user.removeSpark(spark.id, function(err) {
+    SparkUser.findById(email, function(err, sparkUser) {
+      if (err || !sparkUser) return console.error('Error fetching email ' + email, err);
+      sparkUser.removeSpark(spark.id, function(err) {
         if (err) {
-          // NO RETURN IS WANTED, BUT DO NOT FORGET IT
           console.error('removeSpark error:', err);
         }
-        user = null;
-        email = null;
       });
     });
   });
@@ -83,5 +125,5 @@ function formatPokeDataForPrimus(pokeData, email) {
 }
 
 server.listen(8080, function () {
-  console.log('Open http://localhost:8080 in your browser');
+  console.log(new Date(), 'realtime.js has started');
 });

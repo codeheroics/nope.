@@ -3,7 +3,7 @@
 var couchbase   = require('couchbase');
 var async       = require('async');
 var validator   = require('validator');
-var db          = require('../lib/connection');
+var db          = require('../lib/connection').db;
 
 var User = function(params) {
   if (!params) throw new Error('Missing properties');
@@ -19,7 +19,6 @@ var User = function(params) {
   this.totalPokes = params.totalPokes || 0;
   this.created = params.created ? params.created : Date.now();
   this.cas = params.cas || null;
-  this.sparks = params.sparks || [];
 };
 
 User.FRIEND_STATUSES = {
@@ -75,8 +74,7 @@ User.prototype.toDbJSON = function() {
     pendingUsers: this.pendingUsers,
     score: this.score,
     totalPokes: this.totalPokes,
-    created: this.created,
-    sparks: this.sparks
+    created: this.created
   };
 };
 
@@ -314,18 +312,6 @@ User.prototype.unban = function(email) {
   this.bannedUsers = this.bannedUsers.filter(function(bannedEmail) {
     return bannedEmail !== email;
   });
-};
-
-User.prototype.addSpark = function(sparkId, callback) {
-  this.sparks.push(sparkId);
-  this.save(callback);
-};
-
-User.prototype.removeSpark = function(sparkId, callback) {
-  var sparkIndex = this.sparks.indexOf(sparkId);
-  if (sparkIndex === -1) return;
-  this.sparks.splice(sparkIndex, 1);
-  this.save(callback);
 };
 
 module.exports = User;
