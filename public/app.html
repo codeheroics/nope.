@@ -6,7 +6,7 @@
 -->
 <html>
 	<head>
-		<title>Poke Ninja</title>
+		<title>Nope.</title>
 		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
 		<meta name="description" content="" />
 		<meta name="keywords" content="" />
@@ -39,8 +39,8 @@
 				<header id="header">
 					<div class="logo">
 						<div>
-							<h1><a href="#" id="logo">A Game of Pokes</a></h1>
-							<span class="byline">Only one can win...</span>
+							<h1><a href="#" id="logo">Nope.</a></h1>
+							<span class="byline">You will (probably) not get the last word.</span>
 						</div>
 					</div>
 				</header>
@@ -87,12 +87,16 @@
 					{{/if}}
 				</ul>
 				<header>
-					<h2>You are a master poker...</h2>
+					{{#if opponentPokingMe}}
+						<h2>Nope.</h2>
+					{{else}}
+						<h2>Yep.</h2>
+					{{/if}}
 					<span class="byline">
 						{{#if opponentPokingMe}}
-							But {{opponentPokingMe.name}} is poking you! Strike back!
+							{{opponentPokingMe.name}} currently has the last word.
 						{{else}}
-							And you have poked all your opponents. Keep going!
+							You got the last word. For now.
 						{{/if}}
 					</span>
 				</header>
@@ -211,14 +215,14 @@
 					</div>
 
 					{{#if isScoring}}
-							<button class="pokeActions needsPokeBack button button-big" {{action 'poke' model}}>Poke back</button>
+							<button class="pokeActions needsPokeBack button button-big" {{action 'poke' model}}>Nope.</button>
 					{{else}}
 							<button type="button" class="pokeActions hasPokedBack button button-big" style="border:0;" disabled>
-							Your opponent has not poked back yet!</button>
+							Yep. No retort yet.</button>
 					{{/if}}
 
 					<p class="pokesSent">{{pokesCpt}}</p>
-					<div style="text-align: center;"><legend class="pokesSent">pokes sent</legend></div>
+					<div style="text-align: center;"><legend class="pokesSent">nopes sent</legend></div>
 				</section>
 			<!-- /Recent Posts -->
 		</script>
@@ -226,15 +230,15 @@
 		<script type="text/x-handlebars" data-template-name="history">
 			<!-- Recent Posts -->
 				<section>
-					<h2 class="major"><span>Last Pokes</span></h2>
+					<h2 class="major"><span>History of Nopes.</span></h2>
 					<ul class="style2">
 						{{#each}}
 							<li>
 								<article class="is-post-summary">
 									<h3>
 										{{#link-to 'opponentPokes' opponent}}
-											{{#if isReceived}}{{opponent.name}} poked you
-											{{else}} You poked {{opponent.name}}{{/if}}
+											{{#if isReceived}}{{opponent.name}} told you : "Nope."
+											{{else}} "Nope." did you tell to {{opponent.name}}.{{/if}}
 										{{/link-to}}
 									</h3>
 									<ul class="meta">
@@ -279,9 +283,9 @@
 				<h2 class="major"><span>Help</span></h2>
 				<article class="is-post-summary">
 					<h3>
-						You need help. To poke at people.
+						Nope.
 					</h3>
-					I thought the app was simple enough :(
+					No help page for you. An hint at how this works : Invite people you know, and start telling them... "Nope."
 				</article>
 			</section>
 		</script>
@@ -291,7 +295,7 @@
 				<div>
 					<!-- Contact -->
 						<section>
-							<h2 class="major"><span>Talk about the game</span></h2>
+							<h2 class="major"><span>Talk about Nope.</span></h2>
 							<ul class="contact">
 								<li><a class="fa fa-facebook solo" href="#"><span>Facebook</span></a></li>
 								<li><a class="fa fa-twitter solo" href="#"><span>Twitter</span></a></li>
