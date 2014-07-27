@@ -13,7 +13,9 @@ PokeGame.OpponentPokesController = Ember.ObjectController.extend({
   }.property('model.scoreFor', 'model.scoreAgainst'), // FIXME
 
   pokes: function() {
-    return this.get('model.pokes').toArray().reverse();
+    var pokes = this.get('model.pokes');
+    if (!pokes) return [];
+    return pokes.toArray().reverse();
   }.property('model.pokes'),
 
   scoreFor: function() {
