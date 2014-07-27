@@ -35,7 +35,7 @@ var CustomAuthenticator = Ember.SimpleAuth.Authenticators.Base.extend({
       $.ajax(
         {
           dataType: 'jsonp',
-          method: 'post',
+          method: 'POST',
           jsonp: CALLBACK_NAME,
           url: LOGIN_ROUTE,
           data: {
@@ -46,11 +46,11 @@ var CustomAuthenticator = Ember.SimpleAuth.Authenticators.Base.extend({
       )
         .done(function(data) {
           window.localStorage.setItem('token', data);
-          window.localStorage.setItem('email', options.identification); // FIME
+          window.localStorage.setItem('email', options.identification); // FIXME
           resolve();
         })
         .fail(function(a, b, c) {
-          alert('failed login');
+          alert('failed login :(');
           console.log(a, b, c);
           reject('failed');
         });
