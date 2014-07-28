@@ -7,38 +7,10 @@ PokeGame.Opponent = Ember.Model.extend({
   scoreAgainst:   Ember.attr(Number), // { defaultValue: 0 }),
   pokes:          Ember.hasMany('PokeGame.Poke', { key: 'pokesIds' }),
   pokesCpt:       Ember.attr(Number),
-  isScoring:      Ember.attr() // boolean
+  isScoring:      Ember.attr(), // boolean
+  status:         Ember.attr() // string : "friend", "pending", "blocked"
 });
 
 PokeGame.Opponent.reopenClass({
   adapter: Ember.LocalStorageAdapter.create()
 });
-
-/*
-PokeGame.Opponent.FIXTURES = [
-  {
-    id:             'eclaerhout@gmail.com',
-    email:          'eclaerhout@gmail.com',
-    name:           'Emilie',
-    avatar:         'http://agbonon.fr/img/Hugo_Agbonon.jpg',
-    scoreFor:       4242,
-    scoreAgainst:   1242,
-    pokes:          [
-      '1402529967087eclaerhout@gmail.com',
-      '1402530067256eclaerhout@gmail.com',
-      '1402530099444eclaerhout@gmail.com'
-    ],
-    isScoring:      true
-  },
-  {
-    id:           'maxime.nempont@gmail.com',
-    email:        'maxime.nempont@gmail.com',
-    name:         'Maxime',
-    avatar:       'http://agbonon.fr/img/Hugo_Agbonon.jpg',
-    scoreFor:     2000,
-    scoreAgainst: 3000,
-    pokes:        ['maxime.nempont@gmail.com'],
-    isScoring:    false
-  }
-];
-*/

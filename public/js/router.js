@@ -2,12 +2,17 @@
 /* global Ember */
 'use strict';
 
+PokeGame.Router.reopen({
+  rootURL: '/app.html'
+});
+
 PokeGame.Router.map(function() {
   this.resource('index', { path: '/'  });
   this.resource('login', { path: '/login' });
   this.resource('signup', { path: '/signup' });
   this.resource('opponentPokes', { path: '/opponents/:opponent_id/pokes' });
   this.resource('opponents', { path: '/opponents' });
+  this.resource('newOpponent', { path: '/opponents/new' });
   this.resource('history', { path: '/history' });
   this.resource('profile', { path: '/profile' });
   this.resource('help', { path: '/help' });
@@ -85,7 +90,11 @@ PokeGame.OpponentsRoute = Ember.Route.extend(
   PokeGame.AuthenticatedRouteMixin,
   {
     model: function() {
-      return PokeGame.Opponent.find();
+      return PokeGame.Opponent.findQuery({status: 'friend'});
     }
   }
+);
+
+PokeGame.NewOpponentRoute = Ember.Route.extend(
+  PokeGame.AuthenticatedRouteMixin
 );

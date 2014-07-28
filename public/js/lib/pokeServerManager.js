@@ -74,6 +74,7 @@ PokeGame.PokeServerManager = Ember.Object.extend({
     opponent.set('scoreFor', dataPoke.opponentScore);
     opponent.set('scoreAgainst', dataPoke.myScore);
     opponent.set('pokesCpt', dataPoke.pokesCpt);
+    opponent.set('status', 'friend');
     var pokes = opponent.get('pokes').pushObject(pokeRecord);
 
     pokeRecord.set('opponent', opponent);
@@ -146,5 +147,27 @@ PokeGame.PokeServerManager = Ember.Object.extend({
         // :(
       });
     });
-  }
-});
+  },
+
+  addOpponent: function(email) {
+
+    $.ajax(
+      {
+        dataType: 'jsonp',
+        data: { friendEmail: email },
+        jsonp: CALLBACK_NAME,
+        method: 'POST',
+        headers: {
+          'x-access-token': window.localStorage.getItem('token')
+        },
+        url: USERS_ROUTE
+      }
+    )
+      .done(function(dataPoke) {
+
+      })
+      .fail(function() {
+        alert('Could not reach the server :('); // FIXME FIND ALERT BOX
+      });
+   }
+ });

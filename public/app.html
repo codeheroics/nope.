@@ -49,12 +49,17 @@
 			<!-- Nav -->
 				<nav id="nav" class="skel-panels-fixed">
 					<ul>
-						<li>{{#link-to "index" }}Home{{/link-to}}</li>
-						<li>{{#link-to "opponents"}}Friends{{/link-to}}</li>
-						<li>{{#link-to "history"}}History{{/link-to}}</li>
-						<li>{{#link-to "profile"}}Profile{{/link-to}}</li>
-						<li>{{#link-to "help"}}Help{{/link-to}}</li>
-						<li>{{#link-to "about"}}About{{/link-to}}</li>
+						{{#if session.isAuthenticated}}
+							<li>{{#link-to "index" }}Home{{/link-to}}</li>
+							<li>{{#link-to "opponents"}}Friends{{/link-to}}</li>
+							<li>{{#link-to "history"}}History{{/link-to}}</li>
+							<li>{{#link-to "profile"}}Profile{{/link-to}}</li>
+							<li>{{#link-to "help"}}Help{{/link-to}}</li>
+							<li>{{#link-to "about"}}About{{/link-to}}</li>
+							<li><a href="#" {{ action 'invalidateSession' }}>Logout</a></li>
+						{{else}}
+							<li>{{#link-to 'login'}}Login{{/link-to}}</li>
+						{{/if}}
 					</ul>
 				</nav>
 			<!-- /Nav -->
@@ -141,7 +146,7 @@
 			<form action="/signup" method="post">
 				<div class="form-group">
 					<label>Email</label>
-					<input type="text" class="form-control" name="email">
+					<input type="email" class="form-control" name="email">
 				</div>
 				<div class="form-group">
 					<label>Name</label>
@@ -163,28 +168,37 @@
 		</script>
 
 		<script type="text/x-handlebars" data-template-name="opponents">
+			<section>
+				<h2 class="major"><span>Friends</span></h2>
+				{{#link-to 'newOpponent' class="addUser button button-big"}}Add a friend{{/link-to}}
+				<ul class="style2">
+					{{#each}}
+						<li>
+							<h3>
+								{{#link-to 'opponentPokes' id}}
+									{{#if isScoring}}
+										<i class="fa fa-hand-o-right"></i>
+									{{else}}
+										<i class="fa fa-check"></i>
+									{{/if}}
+									{{name}}
+								{{/link-to}}
+							</h3>
+						</li>
+					{{/each}}
+				</ul>
+			</section>
+		</script>
+
+		<script type="text/x-handlebars" data-template-name="newOpponent">
 				<section>
-					<h2 class="major"><span>Friends</span></h2>
-					<ul class="style2">
-						{{#each}}
-							<li>
-								<article class="is-post-summary">
-									<h3>
-										{{#link-to 'opponentPokes' id}}
-											{{#if isScoring}}
-												<i class="fa fa-hand-o-right"></i>
-											{{else}}
-												<i class="fa fa-check"></i>
-											{{/if}}
-											{{name}}
-										{{/link-to}}
-									</h3>
-								</article>
-							</li>
-						{{/each}}
-					</ul>
+					<h2 class="major"><span>Add a friend</span></h2>
+					<div class="form-group">
+						<label>Email</label>
+						<input type="email" class="form-control" name="email">
+					</div>
+					<button class="addUser button button-big" {{action 'addOpponent'}}>Add</button>
 				</section>
-			<!-- /Recent Posts -->
 		</script>
 
 		<script type="text/x-handlebars" data-template-name="opponentPokes">
@@ -321,6 +335,7 @@
 		<script src="js/models/user.js"></script>
 		<script src="js/controllers/index.js"></script>
 		<script src="js/controllers/opponentPokes.js"></script>
+		<script src="js/controllers/newOpponent.js"></script>
 		<script src="js/controllers/history.js"></script>
 		<script src="js/controllers/login.js"></script>
 		<script src="js/controllers/signup.js"></script>
