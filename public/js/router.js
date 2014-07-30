@@ -42,6 +42,7 @@ PokeGame.AuthenticatedRouteMixin = Ember.Mixin.create(
       this._super(transition, queryParams);
       if (this.get('session').get('isAuthenticated')) {
         createServerManager();
+        PokeGame.serverManager.updateSelfInfos();
       }
     }
   }

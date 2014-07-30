@@ -10,5 +10,5 @@ PokeGame.IndexController = Ember.ArrayController.extend({
   pendingOpponents: function() {
     var opponents = this.get('model');
     return opponents.filterBy('status', 'pending');
-  }.property('model')
+  }.property('model.@each')
 });

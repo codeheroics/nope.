@@ -12,6 +12,9 @@ var CALLBACK_NAME = 'pokecb';
 
 var DEFAULT_AVATAR = 'http://www.gravatar.com/avatar/00000000000000000000000000000000';
 
+var PENDING_USERS_KEY = 'pendingUsers';
+var IGNORED_USERS_KEY = 'ignoredUsers';
+
 var CustomAuthenticator = Ember.SimpleAuth.Authenticators.Base.extend({
   restore: function(data) {
     return new Ember.RSVP.Promise(function(resolve, reject) {

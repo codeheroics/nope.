@@ -13,7 +13,8 @@ var User = function(params) {
   this.email = params.email.toLowerCase();
   this.password = params.password;
   this.friendsPokes = params.friendsPokes ? params.friendsPokes : {};
-  this.bannedUsers = params.bannedUsers ? params.bannedUsers : [];
+  this.invitedUsers = params.invitedUsers ? params.invitedUsers : [];
+  this.ignoredUsers = params.ignoredUsers ? params.ignoredUsers : [];
   this.pendingUsers = params.pendingUsers ? params.pendingUsers : [];
   this.score = params.score || 0;
   this.totalPokes = params.totalPokes || 0;
@@ -22,12 +23,14 @@ var User = function(params) {
 };
 
 User.FRIEND_STATUSES = {
-  BANNED: 'Banned',
+  IGNORED: 'Ignored',
   NOT_FOUND: 'Not found',
   PENDING: 'Pending',
+  INVITED: 'Invited',
   FRIEND: 'Friend',
   NOT_FRIEND: 'Not Friend',
-  SELF: 'Self'
+  SELF: 'Self',
+  UNKNOWN: 'Unknown'
 };
 
 var FriendError = User.FriendError = function(status) {
@@ -70,7 +73,8 @@ User.prototype.toDbJSON = function() {
     name: this.name,
     password: this.password,
     friendsPokes: this.friendsPokes,
-    bannedUsers: this.bannedUsers,
+    invitedUsers: this.invitedUsers,
+    ignoredUsers: this.ignoredUsers,
     pendingUsers: this.pendingUsers,
     score: this.score,
     totalPokes: this.totalPokes,
@@ -85,7 +89,8 @@ User.prototype.toSelfJSON = function() {
     created: this.created,
     score: this.score,
     totalPokes: this.totalPokes,
-    bannedUsers: this.bannedUsers,
+    invitedUsers: this.invitedUsers,
+    ignoredUsers: this.ignoredUsers,
     pendingUsers: this.pendingUsers
   };
 };
@@ -103,28 +108,32 @@ User.prototype.hasFriend = function(email) {
   return this.friendsPokes[email.toLowerCase()] ? true : false;
 };
 
-User.prototype.hasBanned = function(email) {
-  return this.bannedUsers[email.toLowerCase()] ? true : false;
+User.prototype.hasIgnored = function(email) {
+  return this.ignoredUsers.some(function(ignoredUser) {
+    return ignoredUser.email !== -1;
+  });
+};
+
+User.prototype.hasInvited = function(email) {
+  return this.invitedUsers.some(function(invitedUser) {
+    return invitedUser.email !== -1;
+  });
 };
 
 User.prototype.hasPending = function(email) {
-  return this.pendingUsers.indexOf(email) !== -1;
+  return this.pendingUsers.some(function(pendingUser) {
+    return pendingUser.email !== -1;
+  });
 };
 
 /**
  * [setPokingAt description]
- * @param {String|User} userPoked    user poked. can be string for email if user does not exist yet.
+ * @param {User} userPoked    user poked
  * @param {[type]} time              [description]
  * @param {[type]} opponentWonPoints [description]
  */
 User.prototype.setPokingAt = function(userPoked, time, opponentWonPoints) {
-  var email, name;
-  if (userPoked instanceof User) {
-    email = userPoked.email;
-    name = userPoked.name.trim();
-  } else {
-    email = userPoked;
-  }
+  var email = userPoked.email;
   email = email.toLowerCase().trim();
   var oldPoke = this.friendsPokes[email];
   this.friendsPokes[email] = {
@@ -134,25 +143,18 @@ User.prototype.setPokingAt = function(userPoked, time, opponentWonPoints) {
     points: opponentWonPoints || 0,
     pokesCpt: oldPoke ? ++oldPoke.pokesCpt : 0,
     isPokingMe: false,
-    opponentName: name
+    opponentName: userPoked.name.trim()
   };
 };
 
 /**
  * [setPokedBy description]
- * @param {String|User} userPoking    user poking. can be string for email if user does not exist yet.
+ * @param {User} userPoking    user poking
  * @param {[type]} time       [description]
  * @param {[type]} wonPoints  [description]
  */
 User.prototype.setPokedBy = function(userPoking, time, wonPoints) {
-  var email, name;
-  if (userPoking instanceof User) {
-    email = userPoking.email;
-    name = userPoking.name.trim();
-  } else {
-    email = userPoking;
-  }
-  email = email.toLowerCase().trim();
+  var email = userPoking.email;
   var oldPoke = this.friendsPokes[email];
   this.friendsPokes[email] = {
     time: time,
@@ -161,7 +163,7 @@ User.prototype.setPokedBy = function(userPoking, time, wonPoints) {
     points: wonPoints || 0,
     pokesCpt: oldPoke.pokesCpt || 0,
     opponentScore: oldPoke ? oldPoke.opponentScore : 0,
-    opponentName: name
+    opponentName: userPoking.name.trim()
   };
 };
 
@@ -172,8 +174,8 @@ User.prototype.pokeAt = function(opponentEmail, callback) {
     if (!userPoked) return callback(null, User.FRIEND_STATUSES.NOT_FOUND);
 
     if (!userPoked.hasFriend(self.email)) {
-      if (userPoked.hasBanned(self.email)) {
-        return callback(new FriendError(User.FRIEND_STATUSES.BANNED));
+      if (userPoked.hasIgnored(self.email)) {
+        return callback(new FriendError(User.FRIEND_STATUSES.IGNORED));
       }
       if (userPoked.hasPending(self.email)) {
         return callback(new FriendError(User.FRIEND_STATUSES.PENDING));
@@ -194,8 +196,7 @@ User.prototype.pokeAt = function(opponentEmail, callback) {
     var isFirstPoke = self.friendsPokes[opponentEmail] ? false : true; // Very first poke
 
     if (isFirstPoke) {
-      self.removeFromPendingUsers(opponentEmail);
-      wonPoints = 0;
+      wonPoints = 1;
     } else {
       // 1 point per poke + 1 point per hour
       var oneHour = 1000 * 60 * 60;
@@ -264,53 +265,95 @@ User.prototype.sendFriendRequest = function(email, callback) {
   email = email.toLowerCase();
   if (email === this.email) return callback(new FriendError(User.FRIEND_STATUSES.SELF));
 
+  if (this.hasInvited(email)) {
+    // Already invited that user
+    return callback(new FriendError(User.FRIEND_STATUSES.PENDING));
+  }
+
   User.findById(email, function(err, potentialFriend) {
     if (err) return callback(err);
 
     if (!potentialFriend) return callback(new FriendError(User.FRIEND_STATUSES.NOT_FOUND));
-    if (potentialFriend.bannedUsers.indexOf(currentUser.email) !== -1) {
-      return callback(new FriendError(User.FRIEND_STATUSES.BANNED));
-    }
     var friendsEmails = Object.keys(currentUser.friendsPokes);
     if (friendsEmails.indexOf(currentUser.email) !== -1) {
       // Already friends!
-      return callback(new FriendError(User.FRIEND_STATUSES.FRIEND));
-    }
-    if (potentialFriend.hasPending(currentUser.email)) {
-      return callback(new FriendError(User.FRIEND_STATUSES.PENDING));
+      return callback(null, User.FRIEND_STATUSES.FRIEND);
     }
 
-    currentUser.setPokingAt(potentialFriend.email, Date.now(), 0);
-    potentialFriend.pendingUsers.push(currentUser.email);
-    console.log('should emit event to convey that a friend request was sent');
+    // FIXME TODO Thing about separating all that in 2 methods (sendFriendRequest, acceptFriendRequest)
+
+    var callbackStatus;
+
+    if (potentialFriend.hasInvited(currentUser.email)) {
+      // Become friends !
+      potentialFriend.removeFromInvitedUsers(currentUser.email);
+      currentUser.removeFromPendingUsers(potentialFriend.email);
+      potentialFriend.friendsPokes[currentUser.email] = {}; // Sets them as friends
+      currentUser.friendsPokes[potentialFriend.email] = {}; // Sets them as friends
+      var now = Date.now();
+      callbackStatus = User.FRIEND_STATUSES.FRIEND;
+      console.log('should emit event to convey that a friend request was accepted');
+    } else {
+      // Send friend request
+      currentUser.invitedUsers.push({
+        email: potentialFriend.email,
+        name: potentialFriend.name
+      });
+      potentialFriend.pendingUsers.push({
+        email: currentUser.email,
+        name: currentUser.name
+      });
+      callbackStatus = User.FRIEND_STATUSES.PENDING;
+      console.log('should emit event to convey that a friend request was sent');
+    }
 
     async.parallel([
       function(cbParallel) { currentUser.save(cbParallel); },
       function(cbParallel) { potentialFriend.save(cbParallel); }
     ], function(err) {
       if (err) return callback(err);
-      callback(new FriendError(User.FRIEND_STATUSES.PENDING));
+
+      if (callbackStatus === User.FRIEND_STATUSES.PENDING) {
+        return callback(null, callbackStatus);
+      }
+      currentUser.pokeAt(potentialFriend.email, function(err) {
+        return callback(err, callbackStatus);
+      });
     });
   });
 };
 
 User.prototype.removeFromPendingUsers = function(email) {
   email = email.toLowerCase();
-  this.pendingUsers = this.pendingUsers.filter(function(userEmail) {
-    return userEmail !== email;
+  this.pendingUsers = this.pendingUsers.filter(function(pendingUser) {
+    return pendingUser.email !== email;
   });
 };
 
-User.prototype.rejectFriendRequest = function(email) {
+User.prototype.removeFromInvitedUsers = function(email) {
   email = email.toLowerCase();
-  this.removeFromPendingUsers(email);
-  this.bannedUsers.push(email);
+  this.invitedUsers = this.invitedUsers.filter(function(invitedUser) {
+    return invitedUser.email !== email;
+  });
 };
 
-User.prototype.unban = function(email) {
+User.prototype.rejectFriendRequest = function(email, callback) {
   email = email.toLowerCase();
-  this.bannedUsers = this.bannedUsers.filter(function(bannedEmail) {
-    return bannedEmail !== email;
+
+  User.findById(email, function(err, rejectedUser) {
+    if (err) return callback(err);
+    this.removeFromPendingUsers(email);
+    this.ignoredUsers.push({
+      name: rejectedUser.name,
+      email: rejectedUser.email
+    });
+  });
+};
+
+User.prototype.unIgnore = function(email) {
+  email = email.toLowerCase();
+  this.ignoredUsers = this.ignoredUsers.filter(function(ignoredEmail) {
+    return ignoredEmail !== email;
   });
 };
 

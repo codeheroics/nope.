@@ -4,5 +4,6 @@ PokeGame.NewOpponentController = Ember.ObjectController.extend({
     addOpponent: function(email) {
       PokeGame.serverManager.addOpponent(email);
     }
-  }
+  },
+  content: {}
 });

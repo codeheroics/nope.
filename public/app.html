@@ -91,7 +91,7 @@
 						<li><a href="#" class="fa fa-check solo"><span>Poke back</span></a></li>
 					{{/if}}
 				</ul>
-				<header>
+				<div>
 					{{#if opponentPokingMe}}
 						<h2>Nope.</h2>
 					{{else}}
@@ -104,7 +104,15 @@
 							You got the last word. For now.
 						{{/if}}
 					</span>
-				</header>
+				</div>
+				<div>
+					<h3>They want to debate with you!</h3>
+					<ul>
+						{{#each pendingOpponent in pendingOpponents}}
+							<li>{{pendingOpponent.name}} - {{pendingOpponent.email}} - send the first nope / ignore</li>
+						{{/each}}
+					</ul>
+				</div>
 			</section>
 		</script>
 
@@ -120,7 +128,7 @@
 			<form {{action 'authenticate' on='submit'}}>
 				<div class="form-group">
 					<label>Email</label>
-					{{input id='identification' placeholder='Enter E-mail' value=identification}}
+					{{input id='identification' type='email' placeholder='Enter E-mail' value=identification}}
 				</div>
 				<div class="form-group">
 					<label>Password</label>
@@ -193,11 +201,13 @@
 		<script type="text/x-handlebars" data-template-name="newOpponent">
 				<section>
 					<h2 class="major"><span>Add a friend</span></h2>
-					<div class="form-group">
-						<label>Email</label>
-						<input type="email" class="form-control" name="email">
-					</div>
-					<button class="addUser button button-big" {{action 'addOpponent'}}>Add</button>
+					<form {{action 'addOpponent' email on='submit'}}>
+						<div class="form-group">
+							<label>Email</label>
+							{{input type='email' placeholder='Enter E-mail' name="email" class='form-control' value=email}}
+						</div>
+						<button class="addUser button button-big" type="submit">Add</button>
+					</form>
 				</section>
 		</script>
 
