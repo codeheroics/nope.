@@ -143,7 +143,7 @@ PokeGame.PokeServerManager = Ember.Object.extend({
 
             var removeUsers = function(usersData, status) {
               return usersData.map(function(userData) {
-                return PokeGame.Opponent.deleteRecord(userData.id);
+                return PokeGame.Opponent.deleteRecord(userData.email);
               });
             };
 

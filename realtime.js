@@ -54,7 +54,8 @@ primus.on('connection', function connection(spark) {
               spark.write(formatPokeDataForPrimus(pokeData, opponentId));
 
               // Then to the others
-              sparkUser.sparks.forEach(function(sparkId) {
+              var sparkIds = sparkUser.sparks.slice(0);  // Copy for iteration
+              sparkIds.forEach(function(sparkId) {
                 if (sparkId === spark.id) return;
                 var pokingSpark = primus.spark(sparkId);
                 if (pokingSpark) {
@@ -78,10 +79,12 @@ primus.on('connection', function connection(spark) {
                 var opponent = results.opponent;
                 var sparkOpponent = results.sparkOpponent;
                 if (err || !opponent || !sparkOpponent) {
-                  return console.error('Error fetching email ' + email, err, opponent, sparkOpponent);
+                  return console.error('Error fetching email ' + opponentId, err, opponent, sparkOpponent);
                 }
 
-                sparkOpponent.sparks.forEach(function(opponentSparkId) {
+
+                var opponentSparksIds = sparkOpponent.sparks.slice(0); // Copy for iteration
+                opponentSparksIds.forEach(function(opponentSparkId) {
                   var opponentSpark = primus.spark(opponentSparkId);
                   if (opponentSpark) {
                     opponentSpark.write(formatPokeDataForPrimus(opponent.friendsPokes[email], email));
@@ -94,7 +97,7 @@ primus.on('connection', function connection(spark) {
             }]
           }, function(err) {
             if (err) {
-              console.log('Error when ' + email + ' tried to poke ' + opponentId, err);
+              console.error('Error when ' + email + ' tried to poke ' + opponentId, err);
               spark.write('Nope, will not do that');
             }
           });
