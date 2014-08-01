@@ -8,6 +8,7 @@ module.exports = function (app) {
   var isLoggedIn = require('../lib/utils/middlewares')(app).isLoggedIn;
 
   app.get('/pokes', isLoggedIn, function(req, res) {
+    // TODO implement a parameter "since", and only send back friendsPokes from then
     res.jsonp(req.user.friendsPokes);
   });
 

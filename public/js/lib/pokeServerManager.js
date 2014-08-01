@@ -203,23 +203,29 @@ PokeGame.PokeServerManager = Ember.Object.extend({
   },
 
   addOpponent: function(email) {
-    $.ajax(
-      {
-        dataType: 'jsonp',
-        data: { friendEmail: email },
-        jsonp: CALLBACK_NAME,
-        method: 'POST',
-        headers: {
-          'x-access-token': window.localStorage.getItem('token')
-        },
-        url: USERS_ROUTE
-      }
-    )
-      .done(function(object) {
-        alert(object.message);
-      })
-      .fail(function() {
-        alert('Could not reach the server :('); // FIXME FIND ALERT BOX
-      });
+    return new Promise(function(resolve, reject) {
+
+      $.ajax(
+        {
+          dataType: 'jsonp',
+          data: { friendEmail: email },
+          jsonp: CALLBACK_NAME,
+          method: 'POST',
+          headers: {
+            'x-access-token': window.localStorage.getItem('token')
+          },
+          url: USERS_ROUTE
+        }
+      )
+        .done(function(object) {
+          alert(object.message);
+          resolve(object.message);
+        })
+        .fail(function(xhr) {
+          if (!xhr.responseJSON) return alert('Could not reach the Internet :(');
+          alert('Sorry, there was an error: ' + xhr.responseJSON.message); // FIXME FIND ALERT BOX
+          reject();
+        });
+    });
    }
  });

@@ -175,7 +175,7 @@ User.prototype.pokeAt = function(opponentEmail, callback) {
 
     if (!userPoked.hasFriend(self.email)) {
       if (userPoked.hasIgnored(self.email)) {
-        return callback(new FriendError(User.FRIEND_STATUSES.IGNORED));
+        return callback(new FriendError(User.FRIEND_STATUSES.PENDING)); // Do not tell a user he's been ignored
       }
       if (userPoked.hasPending(self.email)) {
         return callback(new FriendError(User.FRIEND_STATUSES.PENDING));
@@ -267,7 +267,7 @@ User.prototype.sendFriendRequest = function(email, callback) {
 
   if (this.hasInvited(email)) {
     // Already invited that user
-    return callback(new FriendError(User.FRIEND_STATUSES.PENDING));
+    return callback(null, User.FRIEND_STATUSES.PENDING);
   }
 
   User.findById(email, function(err, potentialFriend) {

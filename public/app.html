@@ -105,14 +105,16 @@
 						{{/if}}
 					</span>
 				</div>
-				<div>
-					<h3>They want to debate with you!</h3>
-					<ul>
-						{{#each pendingOpponent in pendingOpponents}}
-							<li>{{pendingOpponent.name}} - {{pendingOpponent.email}} - send the first nope / ignore</li>
-						{{/each}}
-					</ul>
-				</div>
+				{{#if pendingOpponents.length}}
+					<div>
+						<h3>They want to send you nopes!</h3>
+						<ul>
+							{{#each pendingOpponent in pendingOpponents}}
+								<li>{{pendingOpponent.name}} - {{pendingOpponent.email}} - send the first nope / ignore</li>
+							{{/each}}
+						</ul>
+					</div>
+				{{/if}}
 			</section>
 		</script>
 
