@@ -42,6 +42,12 @@ PokeGame.AuthenticatedRouteMixin = Ember.Mixin.create(
       this._super(transition, queryParams);
       if (this.get('session').get('isAuthenticated')) {
         createServerManager();
+
+        // Load everything - without this, errors pop, single instances can't be found...
+        PokeGame.User.find();
+        PokeGame.Opponent.find();
+        PokeGame.Poke.find();
+
         PokeGame.serverManager.updateSelfInfos();
       }
     }
