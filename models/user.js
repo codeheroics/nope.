@@ -133,12 +133,15 @@ User.prototype.hasPending = function(email) {
  * @param {[type]} opponentWonPoints [description]
  */
 User.prototype.setPokingAt = function(userPoked, time, opponentWonPoints) {
+  if (isNaN(oldPoke ? oldPoke.opponentScore + opponentWonPoints : 0) || isNaN(oldPoke ? oldPoke.myScore + 1 : 0)) {
+    console.log('setPokingAt NaN!', time, userPoked, opponentWonPoints); // FOR DEBUGGING if problem
+  }
   var email = userPoked.email;
   email = email.toLowerCase().trim();
   var oldPoke = this.friendsPokes[email];
   this.friendsPokes[email] = {
     time: time,
-    myScore: oldPoke ? oldPoke.myScore : 0,
+    myScore: oldPoke ? oldPoke.myScore + 1 : 0, // Increment + 1, I poked
     opponentScore: oldPoke ? oldPoke.opponentScore + opponentWonPoints : 0,
     points: opponentWonPoints || 0,
     pokesCpt: oldPoke ? ++oldPoke.pokesCpt : 0,
@@ -154,6 +157,9 @@ User.prototype.setPokingAt = function(userPoked, time, opponentWonPoints) {
  * @param {[type]} wonPoints  [description]
  */
 User.prototype.setPokedBy = function(userPoking, time, wonPoints) {
+  if (isNaN(oldPoke ? oldPoke.opponentScore + wonPoints : 0) || isNaN(oldPoke ? oldPoke.opponentScore + 1 : 0)) {
+    console.log('setPokedBy NaN!', time, userPoking, wonPoints); // FOR DEBUGGING if problem
+  }
   var email = userPoking.email;
   var oldPoke = this.friendsPokes[email];
   this.friendsPokes[email] = {
@@ -162,7 +168,7 @@ User.prototype.setPokedBy = function(userPoking, time, wonPoints) {
     myScore: oldPoke ? oldPoke.myScore + wonPoints : wonPoints,
     points: wonPoints || 0,
     pokesCpt: oldPoke.pokesCpt || 0,
-    opponentScore: oldPoke ? oldPoke.opponentScore : 0,
+    opponentScore: oldPoke ? oldPoke.opponentScore + 1 : 0, // Increment + 1, he poked
     opponentName: userPoking.name.trim()
   };
 };
@@ -196,11 +202,12 @@ User.prototype.pokeAt = function(opponentEmail, callback) {
     var isFirstPoke = self.friendsPokes[opponentEmail] ? false : true; // Very first poke
 
     if (isFirstPoke) {
-      wonPoints = 1;
+      wonPoints = 0;
     } else {
       // 1 point per poke + 1 point per hour
       var oneHour = 1000 * 60 * 60;
-      wonPoints = Math.floor((time - self.friendsPokes[opponentEmail].time) / oneHour) + 1;
+      wonPoints = Math.floor((time - self.friendsPokes[opponentEmail].time) / oneHour);
+      if (isNaN(wonPoints)) console.log('NaN!', time, self, userPoked); // FOR DEBUGGING if problem
     }
 
     // From here, this can be repeated in case of CAS error

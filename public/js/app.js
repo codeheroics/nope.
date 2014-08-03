@@ -61,8 +61,7 @@ var CustomAuthenticator = Ember.SimpleAuth.Authenticators.Base.extend({
   },
   invalidate: function() {
     return new Ember.RSVP.Promise(function(resolve) {
-      window.localStorage.removeItem('token');
-      window.localStorage.removeItem('email');
+      window.localStorage.clear();
       resolve();
     });
   }

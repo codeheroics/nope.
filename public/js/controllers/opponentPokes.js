@@ -12,11 +12,11 @@ PokeGame.OpponentPokesController = Ember.ObjectController.extend({
     return scoreFor > scoreAgainst;
   }.property('model.scoreFor', 'model.scoreAgainst'), // FIXME
 
-  pokes: function() {
-    var pokes = this.get('model.pokes');
-    if (!pokes) return [];
-    return pokes.toArray().reverse();
-  }.property('model.pokes'),
+  // lastPoke: function() {
+  //   var pokes = this.get('model.pokes');
+  //   if (!pokes) return null;
+  //   return pokes.toArray()[0];
+  // }.property('model.pokes'),
 
   scoreFor: function() {
     var scoreFor = this.get('model.scoreFor');
