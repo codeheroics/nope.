@@ -110,19 +110,19 @@ User.prototype.hasFriend = function(email) {
 
 User.prototype.hasIgnored = function(email) {
   return this.ignoredUsers.some(function(ignoredUser) {
-    return ignoredUser.email !== -1;
+    return ignoredUser.email === email;
   });
 };
 
 User.prototype.hasInvited = function(email) {
   return this.invitedUsers.some(function(invitedUser) {
-    return invitedUser.email !== -1;
+    return invitedUser.email === email;
   });
 };
 
 User.prototype.hasPending = function(email) {
   return this.pendingUsers.some(function(pendingUser) {
-    return pendingUser.email !== -1;
+    return pendingUser.email === email;
   });
 };
 
@@ -138,13 +138,13 @@ User.prototype.setPokingAt = function(userPoked, time, opponentWonPoints) {
   }
   var email = userPoked.email;
   email = email.toLowerCase().trim();
-  var oldPoke = this.friendsPokes[email];
+  var oldPoke = this.friendsPokes[email] || {};
   this.friendsPokes[email] = {
     time: time,
-    myScore: oldPoke ? oldPoke.myScore + 1 : 0, // Increment + 1, I poked
-    opponentScore: oldPoke ? oldPoke.opponentScore + opponentWonPoints : 0,
+    myScore: (oldPoke.myScore || 0) + 1, // Increment + 1, I poked
+    opponentScore: (oldPoke.opponentScore || 0) + (opponentWonPoints || 0),
     points: opponentWonPoints || 0,
-    pokesCpt: oldPoke ? ++oldPoke.pokesCpt : 0,
+    pokesCpt: (oldPoke.pokesCpt || 0) + 1,
     isPokingMe: false,
     opponentName: userPoked.name.trim()
   };
@@ -161,14 +161,14 @@ User.prototype.setPokedBy = function(userPoking, time, wonPoints) {
     console.log('setPokedBy NaN!', time, userPoking, wonPoints); // FOR DEBUGGING if problem
   }
   var email = userPoking.email;
-  var oldPoke = this.friendsPokes[email];
+  var oldPoke = this.friendsPokes[email] || {};
   this.friendsPokes[email] = {
     time: time,
     isPokingMe: true,
-    myScore: oldPoke ? oldPoke.myScore + wonPoints : wonPoints,
+    myScore: (oldPoke.myScore || 0) + (wonPoints || 0),
     points: wonPoints || 0,
     pokesCpt: oldPoke.pokesCpt || 0,
-    opponentScore: oldPoke ? oldPoke.opponentScore + 1 : 0, // Increment + 1, he poked
+    opponentScore: (oldPoke.opponentScore || 0) + 1, // Increment + 1, he poked
     opponentName: userPoking.name.trim()
   };
 };
@@ -197,13 +197,8 @@ User.prototype.pokeAt = function(opponentEmail, callback) {
     // okay, we can poke
 
     var time = Date.now();
-    var wonPoints;
-
-    var isFirstPoke = self.friendsPokes[opponentEmail] ? false : true; // Very first poke
-
-    if (isFirstPoke) {
-      wonPoints = 0;
-    } else {
+    var wonPoints = 0;
+    if (self.friendsPokes[opponentEmail] && self.friendsPokes[opponentEmail].time) {
       // 1 point per poke + 1 point per hour
       var oneHour = 1000 * 60 * 60;
       wonPoints = Math.floor((time - self.friendsPokes[opponentEmail].time) / oneHour);
@@ -277,15 +272,15 @@ User.prototype.sendFriendRequest = function(email, callback) {
     return callback(null, User.FRIEND_STATUSES.PENDING);
   }
 
+  if (this.hasFriend(email)) {
+    // Already friends
+    return callback(null, User.FRIEND_STATUSES.FRIEND);
+  }
+
   User.findById(email, function(err, potentialFriend) {
     if (err) return callback(err);
 
     if (!potentialFriend) return callback(new FriendError(User.FRIEND_STATUSES.NOT_FOUND));
-    var friendsEmails = Object.keys(currentUser.friendsPokes);
-    if (friendsEmails.indexOf(currentUser.email) !== -1) {
-      // Already friends!
-      return callback(null, User.FRIEND_STATUSES.FRIEND);
-    }
 
     // FIXME TODO Thing about separating all that in 2 methods (sendFriendRequest, acceptFriendRequest)
 
@@ -344,21 +339,32 @@ User.prototype.removeFromInvitedUsers = function(email) {
   });
 };
 
-User.prototype.rejectFriendRequest = function(email, callback) {
+User.prototype.rejectUser = function(email, callback) {
+  var self = this;
   email = email.toLowerCase();
 
   User.findById(email, function(err, rejectedUser) {
     if (err) return callback(err);
-    this.removeFromPendingUsers(email);
-    this.ignoredUsers.push({
-      name: rejectedUser.name,
-      email: rejectedUser.email
-    });
+    if (!rejectedUser) return callback(new Error(User.FRIEND_STATUSES.NOT_FOUND));
+
+    var ignoredUserData;
+    if (self.hasFriend(rejectedUser.email)) {
+      ignoredUserData = self.friendsPokes[rejectedUser.email]; // FIXME Need to clone
+      delete self.friendsPokes[rejectedUser.email];
+    } else {
+      ignoredUserData = {
+        email: rejectedUser.email,
+        opponentName: rejectedUser.name
+      };
+    }
+    self.ignoredUsers.push(ignoredUserData);
+    callback();
   });
 };
 
 User.prototype.unIgnore = function(email) {
   email = email.toLowerCase();
+  // FIXME find ignored user and restore him to appropriate spot
   this.ignoredUsers = this.ignoredUsers.filter(function(ignoredEmail) {
     return ignoredEmail !== email;
   });

@@ -1,5 +1,14 @@
 'use strict';
 PokeGame.IndexController = Ember.ArrayController.extend({
+  actions: {
+    addOpponent: function(email) {
+      return PokeGame.serverManager.addOpponent(email);
+    },
+    ignoreOpponent: function(email) {
+      return PokeGame.serverManager.ignoreOpponent(email);
+    }
+  },
+
   opponentPokingMe: function() {
     var opponents = this.get('model');
     var friends = opponents.filterBy('status', 'friend');

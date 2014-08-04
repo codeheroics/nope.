@@ -100,9 +100,7 @@ PokeGame.PokeServerManager = Ember.Object.extend({
         .done(function(data) {
           var user = PokeGame.User.find(1);
 
-          if (user.isLoaded) {
-            return user;
-          } else {
+          if (!user.isLoaded) {
             user = PokeGame.User.create({
               id: 1
             });
@@ -121,6 +119,13 @@ PokeGame.PokeServerManager = Ember.Object.extend({
             var getEmails = function(array) {
               return array.map(function(el) {
                 return el.email;
+              });
+            };
+
+            var getEmailsFromEmberObjects = function(emberObject) {
+              var array = emberObject.toArray();
+              return array.map(function(el) {
+                return el.get('email');
               });
             };
 
@@ -143,12 +148,12 @@ PokeGame.PokeServerManager = Ember.Object.extend({
 
             var removeUsers = function(usersData, status) {
               return usersData.map(function(userData) {
-                return PokeGame.Opponent.deleteRecord(userData.email);
+                return PokeGame.Opponent.removeFromRecordArrays(userData);
               });
             };
 
-            var localPendingUsersMails = getEmails(localPendingUsers);
-            var localIgnoredUsersMails = getEmails(localIgnoredUsers);
+            var localPendingUsersMails = getEmailsFromEmberObjects(localPendingUsers);
+            var localIgnoredUsersMails = getEmailsFromEmberObjects(localIgnoredUsers);
             var serverPendingUsersMails = getEmails(serverPendingUsers);
             var serverIgnoredUsersMails = getEmails(serverIgnoredUsers);
 
@@ -203,6 +208,7 @@ PokeGame.PokeServerManager = Ember.Object.extend({
   },
 
   addOpponent: function(email) {
+    var self = this;
     return new Promise(function(resolve, reject) {
 
       $.ajax(
@@ -218,8 +224,10 @@ PokeGame.PokeServerManager = Ember.Object.extend({
         }
       )
         .done(function(object) {
-          alert(object.message);
-          resolve(object.message);
+          if (object.message !== 'Friend') return alert(object.message);
+          self.updateSelfInfos().then(function() {
+            return self.getAllPokes();
+          }).then(resolve);
         })
         .fail(function(xhr) {
           if (!xhr.responseJSON) return alert('Could not reach the Internet :(');
@@ -227,5 +235,30 @@ PokeGame.PokeServerManager = Ember.Object.extend({
           reject();
         });
     });
-   }
- });
+  },
+
+  ignoreOpponent: function(email) {
+
+    return new Promise(function(resolve, reject) {
+
+      $.ajax(
+        {
+          dataType: 'jsonp',
+          data: { friendEmail: email },
+          jsonp: CALLBACK_NAME,
+          method: 'DELETE',
+          headers: {
+            'x-access-token': window.localStorage.getItem('token')
+          },
+          url: USERS_ROUTE
+        }
+      )
+        .done(resolve)
+        .fail(function(xhr) {
+          if (!xhr.responseJSON) return alert('Could not reach the Internet :(');
+          alert('Sorry, there was an error :('); // FIXME FIND ALERT BOX
+          reject();
+        });
+    });
+  }
+});

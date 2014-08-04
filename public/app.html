@@ -110,7 +110,11 @@
 						<h3>They want to send you nopes!</h3>
 						<ul>
 							{{#each pendingOpponent in pendingOpponents}}
-								<li>{{pendingOpponent.name}} - {{pendingOpponent.email}} - send the first nope / ignore</li>
+								<li>
+									{{pendingOpponent.name}} - {{pendingOpponent.email}} -
+									<a href="#" {{action 'addOpponent' pendingOpponent.email}}>Send the first nope</a> /
+									<a href="#" {{action 'ignoreOpponent' pendingOpponent.email}}>Ignore</a>
+								</li>
 							{{/each}}
 						</ul>
 					</div>

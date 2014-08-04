@@ -30,4 +30,14 @@ module.exports = function(app) {
       return res.jsonp({message: status});
     });
   });
+
+  // TODO never tested
+  app.del('/users', isLoggedIn, function(req, res, next) {
+    if (!validator.isEmail(req.body.friendEmail)) return res.jsonp(400, {message: 'Invalid E-mail'});
+    var friendEmail = req.body.friendEmail.toLowerCase().trim();
+    req.user.rejectUser(friendEmail, function(err) {
+      if (err) return next(err);
+      res.jsonp(200);
+    });
+  });
 };
