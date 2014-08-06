@@ -1,3 +1,4 @@
 {
-  "jwtTokenSecret": "ALL HAIL BRITANNIA!"
+  "jwtTokenSecret": "ALL HAIL BRITANNIA!",
+  "primusChannel": "primus"
 }

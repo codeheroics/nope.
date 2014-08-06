@@ -4,6 +4,7 @@ var couchbase   = require('couchbase');
 var async       = require('async');
 var validator   = require('validator');
 var db          = require('../lib/connection').db;
+var redisClient = require('../lib/redisClient');
 
 var User = function(params) {
   if (!params) throw new Error('Missing properties');
@@ -256,6 +257,28 @@ User.prototype.pokeAt = function(opponentEmail, callback) {
         }
       ],
       function(err) {
+        if (err) return callback(err);
+
+
+        function formatPokeDataForPrimus(pokeData, email) {
+          pokeData.email = email;
+          return pokeData;
+        }
+
+        redisClient.publish(
+          self.email,
+          formatPokeDataForPrimus(
+            self.friendsPokes[opponentEmail],
+            opponentEmail
+          )
+        );
+        redisClient.publish(
+          opponentEmail,
+          formatPokeDataForPrimus(
+            userPoked.friendsPokes[self.email],
+            self.email
+          )
+        );
         callback(err, self.friendsPokes[opponentEmail]);
       }
     );
