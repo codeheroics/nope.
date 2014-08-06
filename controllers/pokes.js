@@ -1,7 +1,6 @@
 'use strict';
 
 var validator = require('validator');
-var Poke      = require('../models/poke');
 var User      = require('../models/user');
 
 module.exports = function (app) {
