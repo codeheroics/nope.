@@ -3,7 +3,7 @@
 var couchbase   = require('couchbase');
 var async       = require('async');
 var validator   = require('validator');
-var db          = require('../lib/connection').db;
+var db          = require('../lib/couchbase');
 var redisClient = require('../lib/redisClient');
 
 var User = function(params) {
