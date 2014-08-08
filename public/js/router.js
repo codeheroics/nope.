@@ -54,6 +54,15 @@ PokeGame.AuthenticatedRouteMixin = Ember.Mixin.create(
   }
 );
 
+PokeGame.LoginRoute = Ember.Route.extend(
+  {
+    beforeModel: function() {
+      if (!this.get('session').get('isAuthenticated')) return;
+      this.transitionTo('index');
+    }
+  }
+);
+
 PokeGame.IndexRoute = Ember.Route.extend(
   PokeGame.AuthenticatedRouteMixin,
   {
