@@ -316,6 +316,14 @@
 	#titleBar
 	{
 		background: rgba(21, 38, 23, 0.8);
+		display: block;
+		border-bottom: 5px solid;
+		height: 60px;
+		position: fixed;
+		width: 100%;
+		top: 0px;
+		left: 0px;
+		z-index: 2999;
 	}
 
 		#titleBar:after
@@ -326,7 +334,7 @@
 			top: 0;
 			width: 100%;
 			height: 100%;
-			background: url('images/overlay.png');
+			background: #000;
 			opacity: 0.15;
 		}
 
@@ -338,28 +346,11 @@
 			font-weight: 700;
 			text-transform: uppercase;
 			font-size: 1.25em;
-			line-height: 44px;
+			line-height: 60px;
 			color: #fff;
 			z-index: 1000;
 			text-align: center;
 		}
-
-		#titleBar .toggle
-		{
-			position: absolute;
-			left: 0;
-			top: 0;
-			text-indent: -9999px;
-			background: #e3daa8 url('images/mobileUI-site-nav-opener-bg.svg') 8px 14px no-repeat;
-			width: 44px;
-			height: 44px;
-			z-index: 1001;
-		}
-
-			#titleBar .toggle:active
-			{
-				background-color: #ebe3b2;
-			}
 
 	#navPanel
 	{
@@ -416,4 +407,8 @@
 /*********************************************************************************/
 	.pokeActions {
 		padding: 1.5em;
+	}
+
+	.bt-menu {
+		display: block
 	}

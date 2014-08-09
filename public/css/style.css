@@ -12,7 +12,9 @@
 /* Basic                                                                         */
 /*********************************************************************************/
 
-	*
+	*,
+	*:after,
+	*::before
 	{
 		-moz-box-sizing: border-box;
 		-webkit-box-sizing: border-box;
@@ -1087,4 +1089,12 @@
 	legend.pokesSent {
 		margin:auto;
 		font-size: 2em;
+	}
+
+	#titleBar {
+		display: none;
+	}
+
+	.bt-menu {
+		display: none;
 	}

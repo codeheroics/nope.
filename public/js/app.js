@@ -100,11 +100,13 @@ Ember.Handlebars.registerBoundHelper('relativeDateFormat', function(date) {
   return moment(date).fromNow();
 });
 
+Ember.View.reopen({
+  didInsertElement : function() {
+    this._super();
+    Ember.run.scheduleOnce('afterRender', this, activateBorderMenus);
+  }
+});
+
 window.PokeGame = Ember.Application.create({
   LOG_TRANSITIONS: true
 });
-
-// PokeGame.ApplicationSerializer = DS.LSSerializer.extend();
-// PokeGame.ApplicationAdapter = DS.LSAdapter.extend({
-//   namespace: 'pokeNS'
-// });

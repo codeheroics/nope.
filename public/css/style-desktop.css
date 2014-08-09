@@ -417,3 +417,7 @@
 	{
 		margin: 4em 0 0 0;
 	}
+
+	#titlebar {
+		display: none;
+	}
