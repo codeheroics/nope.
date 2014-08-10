@@ -42,7 +42,7 @@ PokeGame.PokeServerManager = Ember.Object.extend({
   },
 
   notifyPoked: function(opponentName) {
-    console.log('You were poked by' + opponentName);
+    toastr.warning('"Nope." received from <span style="font-weight:bold;">' + opponentName + '</span>.');
   },
 
   handlePokeResult: function(dataPoke, email) {
@@ -200,11 +200,17 @@ PokeGame.PokeServerManager = Ember.Object.extend({
         return resolve(Promise.all(promises));
       })
       .fail(function(a, b, c) {
-        alert('failed :(');
+        console.error('failed getting pokes')
         reject();
         // :(
       });
     });
+  },
+
+  getPokesFrom: function(email) {
+    // TODO implement me, for now redirecting to getallpokes
+    console.log('Implement me (getPokesFrom)');
+    return this.getAllPokes();
   },
 
   addOpponent: function(email) {
@@ -224,14 +230,23 @@ PokeGame.PokeServerManager = Ember.Object.extend({
         }
       )
         .done(function(object) {
-          if (object.message !== 'Friend') return alert(object.message);
-          self.updateSelfInfos().then(function() {
-            return self.getAllPokes();
-          }).then(resolve);
+          if (object.message !== 'Friend') {
+            toastr.info(object.message);
+            resolve();
+            return;
+          }
+          toastr.success('You just sent your first "nope." to ' + opponentName + '!');
+          return self.getPokesFrom(email).then(function() {
+            var opponentName = PokeGame.Opponent.find(email).get('name');
+            resolve();
+          });
         })
         .fail(function(xhr) {
-          if (!xhr.responseJSON) return alert('Could not reach the Internet :(');
-          alert('Sorry, there was an error: ' + xhr.responseJSON.message); // FIXME FIND ALERT BOX
+          if (!xhr.responseJSON) {
+            toastr.error('Could not reach the Internet :(');
+          } else {
+            toastr.error('Sorry, there was an error: ' + xhr.responseJSON.message);
+          }
           reject();
         });
     });
@@ -255,8 +270,8 @@ PokeGame.PokeServerManager = Ember.Object.extend({
       )
         .done(resolve)
         .fail(function(xhr) {
-          if (!xhr.responseJSON) return alert('Could not reach the Internet :(');
-          alert('Sorry, there was an error :('); // FIXME FIND ALERT BOX
+          if (!xhr.responseJSON) return toastr.error('Could not reach the Internet :(');
+          toastr.error('Sorry, there was an error :('); // FIXME FIND ALERT BOX
           reject();
         });
     });

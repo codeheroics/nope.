@@ -25,7 +25,9 @@
     "handlebars": "~1.3.0",
     "ember-model": "~0.0.11",
     "ember-model-localstorage-adapter": "git://github.com/hugo-agbonon/ember-model-localstorage-adapter.git",
-    "moment": "~2.7.0"
+    "moment": "~2.7.0",
+    "toastr": "~2.0.3",
+    "font-awesome": "~4.1.0"
   },
   "resolutions": {
     "ember": "~1.5.1",

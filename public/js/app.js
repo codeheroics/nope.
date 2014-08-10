@@ -15,6 +15,12 @@ var DEFAULT_AVATAR = 'http://www.gravatar.com/avatar/000000000000000000000000000
 var PENDING_USERS_KEY = 'pendingUsers';
 var IGNORED_USERS_KEY = 'ignoredUsers';
 
+toastr.options = {
+  showDuration: 300,
+  hideDuration: 300,
+  timeOut: 2000,
+};
+
 var CustomAuthenticator = Ember.SimpleAuth.Authenticators.Base.extend({
   restore: function(data) {
     return new Ember.RSVP.Promise(function(resolve, reject) {
@@ -53,7 +59,7 @@ var CustomAuthenticator = Ember.SimpleAuth.Authenticators.Base.extend({
           resolve();
         })
         .fail(function(a, b, c) {
-          alert('failed login :(');
+          toastr.error('Incorrect password. Please try again.');
           console.log(a, b, c);
           reject('failed');
         });
