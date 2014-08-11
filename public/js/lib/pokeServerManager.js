@@ -34,7 +34,10 @@ PokeGame.PokeServerManager = Ember.Object.extend({
             self.notifyPoking(data.opponentName);
           }
         });
+        return;
       }
+
+
     });
 
     this.primus.on('error', function error(err) {
@@ -72,9 +75,7 @@ PokeGame.PokeServerManager = Ember.Object.extend({
     if (!opponent.isLoaded) {
       opponent = PokeGame.Opponent.create({
         id: email,
-        email: email,
-        avatar: DEFAULT_AVATAR,
-        points: dataPoke.points
+        email: email
       });
     }
     opponent.set('name', dataPoke.opponentName);
@@ -82,6 +83,8 @@ PokeGame.PokeServerManager = Ember.Object.extend({
     opponent.set('scoreFor', dataPoke.opponentScore);
     opponent.set('scoreAgainst', dataPoke.myScore);
     opponent.set('pokesCpt', dataPoke.pokesCpt);
+    opponent.set('points', dataPoke.points);
+    opponent.set('avatar', dataPoke.DEFAULT_AVATAR);
     opponent.set('status', 'friend');
     var pokes = opponent.get('pokes').pushObject(pokeRecord);
 
@@ -118,75 +121,93 @@ PokeGame.PokeServerManager = Ember.Object.extend({
           user.set('email', data.email);
           user.set('avatar', data.avatar || DEFAULT_AVATAR);
 
-          user.save().then(function() {
-            var localPendingUsers = PokeGame.Opponent.findQuery({status: 'pending'});
-            var localIgnoredUsers = PokeGame.Opponent.findQuery({status: 'ignored'});
-            var serverPendingUsers = data.pendingUsers;
-            var serverIgnoredUsers = data.ignoredUsers;
-
-            var getEmails = function(array) {
-              return array.map(function(el) {
-                return el.email;
-              });
-            };
-
-            var getEmailsFromEmberObjects = function(emberObject) {
-              var array = emberObject.toArray();
-              return array.map(function(el) {
-                return el.get('email');
-              });
-            };
-
-            var diffByEmail = function(array1, array2) {
-              return array1.filter(function(array1Element) {
-                return array2.indexOf(array1Element.email) === -1;
-              });
-            };
-
-            var diffByEmailFromEmberObjects = function(emberObjects, mailArray) {
-              return emberObjects.filter(function(emberObject) {
-                return mailArray.indexOf(emberObject.get('email')) === -1;
-              });
-            };
-
-            var createUsers = function(usersDatas, status) {
-              return usersDatas.map(function(userData) {
-                return PokeGame.Opponent.create({
-                  id: userData.email,
-                  email: userData.email,
-                  name: userData.name || userData.email,
-                  status: status
-                }).save();
-              });
-            };
-
-            var removeUsers = function(usersData, status) {
-              return usersData.map(function(userData) {
-                return PokeGame.Opponent.removeFromRecordArrays(userData);
-              });
-            };
-
-            var localPendingUsersMails = getEmailsFromEmberObjects(localPendingUsers);
-            var localIgnoredUsersMails = getEmailsFromEmberObjects(localIgnoredUsers);
-            var serverPendingUsersMails = getEmails(serverPendingUsers);
-            var serverIgnoredUsersMails = getEmails(serverIgnoredUsers);
-            var newPendingUsers = diffByEmail(serverPendingUsers, localPendingUsersMails);
-            var newIgnoredUsers = diffByEmail(serverIgnoredUsers, localIgnoredUsersMails);
-            var removedPendingUsers = diffByEmailFromEmberObjects(localPendingUsers, serverPendingUsersMails);
-            var removedIgnoredUsers = diffByEmailFromEmberObjects(localIgnoredUsers, serverIgnoredUsersMails);
-
-            return Promise.all([
-              Promise.all(removeUsers(removedIgnoredUsers, 'ignored')),
-              Promise.all(removeUsers(removedPendingUsers, 'pending')),
-              Promise.all(createUsers(newIgnoredUsers, 'ignored')),
-              Promise.all(createUsers(newPendingUsers, 'pending')),
-            ]).then(resolve, reject);
-          });
+          user.save()
+          .then(self.updateFriendsInfos.bind(self, data))
+          .then(resolve, reject);
         })
         .fail(function() {
           console.log('Failed at getting user self infos :(');
           reject();
         });
+    });
+  },
+
+  // FIXME this doesn't really have anything to do with "server" logic
+  updateFriendsInfos: function(data) {
+    var localPendingUsers = PokeGame.Opponent.findQuery({status: 'pending'});
+    var localIgnoredUsers = PokeGame.Opponent.findQuery({status: 'ignored'});
+    var serverPendingUsers = data.pendingUsers;
+    var serverIgnoredUsers = data.ignoredUsers;
+
+    var getEmails = function(array) {
+      return array.map(function(el) {
+        return el.email;
+      });
+    };
+
+    var getEmailsFromEmberObjects = function(emberObject) {
+      var array = emberObject.toArray();
+      return array.map(function(el) {
+        return el.get('email');
+      });
+    };
+
+    var diffByEmail = function(array1, array2) {
+      return array1.filter(function(array1Element) {
+        return array2.indexOf(array1Element.email) === -1;
+      });
+    };
+
+    var diffByEmailFromEmberObjects = function(emberObjects, mailArray) {
+      return emberObjects.filter(function(emberObject) {
+        return mailArray.indexOf(emberObject.get('email')) === -1;
+      });
+    };
+
+    var localPendingUsersMails = getEmailsFromEmberObjects(localPendingUsers);
+    var localIgnoredUsersMails = getEmailsFromEmberObjects(localIgnoredUsers);
+    var serverPendingUsersMails = getEmails(serverPendingUsers);
+    var serverIgnoredUsersMails = getEmails(serverIgnoredUsers);
+    var newPendingUsers = diffByEmail(serverPendingUsers, localPendingUsersMails);
+    var newIgnoredUsers = diffByEmail(serverIgnoredUsers, localIgnoredUsersMails);
+    var removedPendingUsers = diffByEmailFromEmberObjects(localPendingUsers, serverPendingUsersMails);
+    var removedIgnoredUsers = diffByEmailFromEmberObjects(localIgnoredUsers, serverIgnoredUsersMails);
+
+    return Promise.all([
+      Promise.all(this.removePendingOrIgnoredUsers(removedIgnoredUsers, 'ignored')),
+      Promise.all(this.removePendingOrIgnoredUsers(removedPendingUsers, 'pending')),
+      Promise.all(this.createPendingOrIgnoredUsers(newIgnoredUsers, 'ignored')),
+      Promise.all(this.createPendingOrIgnoredUsers(newPendingUsers, 'pending')),
+    ]);
+  },
+
+  // FIXME this has nothing to do with "server" logic
+  // This function must ONLY be used for pending or ignored opponents
+  // Data is missing to be used for friends.
+  createPendingOrIgnoredUsers: function(usersData, status) {
+    if (usersData instanceof Array === false) usersData = [usersData];
+    return usersData.map(function(userData) {
+
+      var opponent = PokeGame.Opponent.find(userData.email);
+      if (!opponent.isLoaded) {
+        opponent = PokeGame.Opponent.create({
+          id: userData.email,
+          email: userData.email
+        });
+      }
+      opponent.set('name', userData.opponentName);
+      opponent.set('status', status);
+      return opponent.save();
+    });
+  },
+
+  // FIXME this has nothing to do with "server" logic
+  // This function must ONLY be used for pending or ignored opponents
+  // Data is missing to be used for friends.
+  removePendingOrIgnoredUsers: function(usersData) {
+    if (usersData instanceof Array === false) usersData = [usersData];
+    return usersData.map(function(userData) {
+      return PokeGame.Opponent.removeFromRecordArrays(userData);
     });
   },
 
@@ -248,7 +269,6 @@ PokeGame.PokeServerManager = Ember.Object.extend({
             resolve();
             return;
           }
-          toastr.success('You just sent your first "nope." to ' + opponentName + '!');
           return self.getPokesFrom(email).then(function() {
             var opponentName = PokeGame.Opponent.find(email).get('name');
             resolve();
