@@ -135,6 +135,12 @@ PokeGame.PokeServerManager = Ember.Object.extend({
               });
             };
 
+            var diffByEmailFromEmberObjects = function(emberObjects, mailArray) {
+              return emberObjects.filter(function(emberObject) {
+                return mailArray.indexOf(emberObject.get('email')) === -1;
+              });
+            };
+
             var createUsers = function(usersDatas, status) {
               return usersDatas.map(function(userData) {
                 return PokeGame.Opponent.create({
@@ -156,11 +162,10 @@ PokeGame.PokeServerManager = Ember.Object.extend({
             var localIgnoredUsersMails = getEmailsFromEmberObjects(localIgnoredUsers);
             var serverPendingUsersMails = getEmails(serverPendingUsers);
             var serverIgnoredUsersMails = getEmails(serverIgnoredUsers);
-
             var newPendingUsers = diffByEmail(serverPendingUsers, localPendingUsersMails);
             var newIgnoredUsers = diffByEmail(serverIgnoredUsers, localIgnoredUsersMails);
-            var removedPendingUsers = diffByEmail(localPendingUsers, serverPendingUsersMails);
-            var removedIgnoredUsers = diffByEmail(localPendingUsers, serverIgnoredUsersMails);
+            var removedPendingUsers = diffByEmailFromEmberObjects(localPendingUsers, serverPendingUsersMails);
+            var removedIgnoredUsers = diffByEmailFromEmberObjects(localIgnoredUsers, serverIgnoredUsersMails);
 
             return Promise.all([
               Promise.all(removeUsers(removedIgnoredUsers, 'ignored')),
