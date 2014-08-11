@@ -27,7 +27,12 @@ PokeGame.PokeServerManager = Ember.Object.extend({
       if (data.isPokingMe !== undefined) {
         // Data from a poke
         self.handlePokeResult(data).then(function() {
-          if (data.isPokingMe) self.notifyPoked(data.opponentName);
+          if (data.isPokingMe) {
+            self.notifyPoked(data.opponentName);
+          }
+          else {
+            self.notifyPoking(data.opponentName);
+          }
         });
       }
     });
@@ -43,6 +48,9 @@ PokeGame.PokeServerManager = Ember.Object.extend({
 
   notifyPoked: function(opponentName) {
     toastr.warning('"Nope." received from <span style="font-weight:bold;">' + opponentName + '</span>.');
+  },
+  notifyPoking: function(opponentName) {
+    toastr.success('"Nope." sent to <span style="font-weight:bold;">' + opponentName + '</span>.');
   },
 
   handlePokeResult: function(dataPoke, email) {

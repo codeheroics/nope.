@@ -19,6 +19,7 @@ toastr.options = {
   showDuration: 300,
   hideDuration: 300,
   timeOut: 2000,
+  positionClass: 'toast-bottom-right',
 };
 
 var CustomAuthenticator = Ember.SimpleAuth.Authenticators.Base.extend({
