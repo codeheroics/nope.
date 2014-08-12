@@ -37,7 +37,14 @@ PokeGame.PokeServerManager = Ember.Object.extend({
         return;
       }
 
-
+      if (data.pendingUser !== undefined) {
+        // New pending user
+        self.createPendingOrIgnoredUser(data.pendingUser, 'pending')
+        .then(function(pendingOpponent) {
+          toastr.info('A new noper, <span style="font-weight:bold;">' + pendingOpponent.get('name') +
+            '</span>, challenges you!');
+        });
+      }
     });
 
     this.primus.on('error', function error(err) {
@@ -198,6 +205,12 @@ PokeGame.PokeServerManager = Ember.Object.extend({
       opponent.set('name', userData.opponentName);
       opponent.set('status', status);
       return opponent.save();
+    });
+  },
+
+  createPendingOrIgnoredUser: function(userData, status) {
+    return Promise.all(this.createPendingOrIgnoredUsers(userData, status)).then(function(results) {
+      return results[0];
     });
   },
 

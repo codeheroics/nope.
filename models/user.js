@@ -316,8 +316,7 @@ User.prototype.sendFriendRequest = function(email, callback) {
       potentialFriend.friendsPokes[currentUser.email] = {}; // Sets them as friends
       currentUser.friendsPokes[potentialFriend.email] = {}; // Sets them as friends
       var now = Date.now();
-      callbackStatus = User.FRIEND_STATUSES.FRIEND;
-      console.log('should emit event to convey that a friend request was accepted');
+      callbackStatus = User.FRIEND_STATUSES.FRIEND; // Opponent will be poked & notified, OK.
     } else {
       // Send friend request
       currentUser.invitedUsers.push({
@@ -329,7 +328,15 @@ User.prototype.sendFriendRequest = function(email, callback) {
         name: currentUser.name
       });
       callbackStatus = User.FRIEND_STATUSES.PENDING;
-      console.log('should emit event to convey that a friend request was sent');
+      redisClient.publish(
+        potentialFriend.email,
+        {
+          pendingUser: {
+            email: currentUser.email,
+            opponentName: currentUser.name
+          }
+        }
+      );
     }
 
     async.parallel([
