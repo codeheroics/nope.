@@ -1,12 +1,15 @@
 'use strict';
 
 // CONFIG TODO MOVE SOMEWHERE SEPARATE
-var SERVER_URL = 'http://localhost:8000';
-var REALTIME_SERVER_URL = 'http://localhost:8080';
+var protocol = 'http://'; // FIXME
+var hostname = window.location.hostname;
+var SERVER_URL = protocol + hostname + ':8000';
+var REALTIME_SERVER_URL = protocol + hostname + ':8080';
 var USERS_ROUTE = SERVER_URL + '/users';
 var SELF_ROUTE = USERS_ROUTE + '?me';
 var POKES_ROUTE = SERVER_URL + '/pokes';
 var LOGIN_ROUTE = SERVER_URL + '/login';
+var SIGNUP_ROUTE = SERVER_URL + '/signup';
 var PRIMUS_ROUTE = REALTIME_SERVER_URL;
 var CALLBACK_NAME = 'pokecb';
 

@@ -19,6 +19,22 @@ module.exports = function(app) {
     );
    };
 
+   var outputSignupSuccess = function(req, res) {
+    res.jsonp(
+      200,
+      req.user.toSelfJSON()
+    );
+   };
+
+  var outputSignupError = function(err, req, res) {
+    res.jsonp(
+      err ? 500 : 403,
+      {
+        message: err ? 'server error' : 'email already in use'
+      }
+    );
+  };
+
    var createAndOutputToken = function(req, res, next) {
     if (!req.user || !req.user.email) {
       log.error('Tried creating token with no user email', req.user);
@@ -52,17 +68,19 @@ module.exports = function(app) {
   // =====================================
   // show the signup form
   app.get('/signup', function(req, res) {
-
     // render the page and pass in any flash data if it exists
     res.render('signup', { message: req.flash('signupMessage') });
   });
 
   // process the signup form
-  app.post('/signup', passport.authenticate('local-signup', {
-    successRedirect : '/app.html', // redirect to the secure profile section
-    failureRedirect : '/signup', // redirect back to the signup page if there is an error
-    failureFlash : true // allow flash messages
-  }));
+  app.post('/signup', function(req, res, next) {
+    passport.authenticate('local-signup', function(err, user) {
+      if (err) log.error(err.message, err);
+      req.user = user;
+      if (err || !user) return outputSignupError(err, req, res);
+      outputSignupSuccess(req, res);
+    })(req, res);
+  });
 
   // =====================================
   // LOGOUT ==============================
