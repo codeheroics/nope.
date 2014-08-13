@@ -69,6 +69,7 @@
 							<li><a href="#" {{ action 'invalidateSession' }}>Logout</a></li>
 						{{else}}
 							<li>{{#link-to 'login'}}Login{{/link-to}}</li>
+							<li>{{#link-to 'signup'}}Signup{{/link-to}}</li>
 						{{/if}}
 					</ul>
 				</nav>
@@ -87,6 +88,7 @@
 							<li><a href="#" {{ action 'invalidateSession'}} class="fa fa-power-off"><br>Logout</a></li>
 						{{else}}
 							<li>{{#link-to 'login' class="fa fa-arrow-circle-right"}}<br>Login{{/link-to}}</li>
+							<li>{{#link-to 'signup' class="fa fa-arrow-circle-right"}}<br>Signup{{/link-to}}</li>
 						{{/if}}
 					</ul>
 				</nav>

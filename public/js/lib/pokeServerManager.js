@@ -44,6 +44,20 @@ PokeGame.PokeServerManager = Ember.Object.extend({
           toastr.info('A new noper, <span style="font-weight:bold;">' + pendingOpponent.get('name') +
             '</span>, challenges you!');
         });
+        return;
+      }
+
+      if (data.ignoredUser !== undefined) {
+        // New ignored user
+        self.createPendingOrIgnoredUser(data.ignoredUser, 'ignored');
+        return;
+        // No toastr here : user has feedback from HTTP DELETE on device where he ignores,
+        // let's not introduce any race condition wondering if a toastr should be shown or not (HTTP VS Websocket speed
+        // )
+        // .then(function(ignoredOpponent) {
+        //   toastr.info('You are now ignoring <span style="font-weight:bold;">' + ignoredOpponent.get('name') +
+        //     '</span>.');
+        // });
       }
     });
 
@@ -314,10 +328,19 @@ PokeGame.PokeServerManager = Ember.Object.extend({
           url: USERS_ROUTE
         }
       )
-        .done(resolve)
+        .done(function() {
+          var ignoredOpponent = PokeGame.Opponent.find(email);
+          if (!ignoredOpponent.isLoaded) return resolve();
+          ignoredOpponent.set('status', 'ignored');
+          ignoredOpponent.save().then(function() {
+            toastr.info('You are now ignoring <span style="font-weight:bold;">' + ignoredOpponent.get('name') +
+             '</span>.');
+            resolve();
+          });
+        })
         .fail(function(xhr) {
           if (!xhr.responseJSON) return toastr.error('Could not reach the Internet :(');
-          toastr.error('Sorry, there was an error :('); // FIXME FIND ALERT BOX
+          toastr.error('Sorry, there was an error :(');
           reject();
         });
     });

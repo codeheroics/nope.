@@ -5,6 +5,7 @@ var async       = require('async');
 var validator   = require('validator');
 var db          = require('../lib/couchbase');
 var redisClient = require('../lib/redisClient');
+var _           = require('lodash');
 
 var User = function(params) {
   if (!params) throw new Error('Missing properties');
@@ -369,26 +370,40 @@ User.prototype.removeFromInvitedUsers = function(email) {
   });
 };
 
-User.prototype.rejectUser = function(email, callback) {
+User.prototype.ignoreUser = function(email, callback) {
   var self = this;
   email = email.toLowerCase();
 
-  User.findById(email, function(err, rejectedUser) {
+  if (self.hasIgnored(email)) { // already ignored
+    return callback();
+  }
+
+  User.findById(email, function(err, ignoredUser) {
     if (err) return callback(err);
-    if (!rejectedUser) return callback(new Error(User.FRIEND_STATUSES.NOT_FOUND));
+    if (!ignoredUser) return callback(new Error(User.FRIEND_STATUSES.NOT_FOUND));
 
     var ignoredUserData;
-    if (self.hasFriend(rejectedUser.email)) {
-      ignoredUserData = self.friendsPokes[rejectedUser.email]; // FIXME Need to clone
-      delete self.friendsPokes[rejectedUser.email];
+    if (self.hasFriend(ignoredUser.email)) {
+      // Save the most data possible
+      ignoredUserData = _.clone(self.friendsPokes[ignoredUser.email]);
+      delete self.friendsPokes[ignoredUser.email];
     } else {
+      if (self.hasPending(ignoredUser.email)) {
+        self.removeFromPendingUsers(ignoredUser.email);
+      }
       ignoredUserData = {
-        email: rejectedUser.email,
-        opponentName: rejectedUser.name
+        email: ignoredUser.email,
+        opponentName: ignoredUser.name
       };
     }
     self.ignoredUsers.push(ignoredUserData);
-    callback();
+
+    redisClient.publish(
+      self.email,
+      { ignoredUser: _.pick(ignoredUserData, ['email', 'opponentName']) }
+    );
+
+    self.save(callback);
   });
 };
 

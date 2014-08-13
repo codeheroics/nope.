@@ -31,11 +31,11 @@ module.exports = function(app) {
     });
   });
 
-  // TODO never tested
+  // Ignore an user
   app.del('/users', isLoggedIn, function(req, res, next) {
     if (!validator.isEmail(req.body.friendEmail)) return res.jsonp(400, {message: 'Invalid E-mail'});
     var friendEmail = req.body.friendEmail.toLowerCase().trim();
-    req.user.rejectUser(friendEmail, function(err) {
+    req.user.ignoreUser(friendEmail, function(err) {
       if (err) return next(err);
       res.jsonp(200);
     });

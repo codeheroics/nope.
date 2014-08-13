@@ -25,6 +25,7 @@
     "jwt-simple": "^0.2.0",
     "kraken-js": "^0.7.0",
     "less": "^1.7.0",
+    "lodash": "^2.4.1",
     "makara": "^0.3.4",
     "moment": "^2.6.0",
     "nconf": "^0.6.8",
