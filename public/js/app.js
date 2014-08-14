@@ -45,6 +45,7 @@ var CustomAuthenticator = Ember.SimpleAuth.Authenticators.Base.extend({
     });
   },
   authenticate: function(options) {
+    window.localStorage.clear();
     return new Ember.RSVP.Promise(function(resolve, reject) {
       $.ajax(
         {
