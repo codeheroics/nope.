@@ -301,22 +301,37 @@ User.prototype.sendFriendRequest = function(email, callback) {
     return callback(null, User.FRIEND_STATUSES.FRIEND);
   }
 
+  if (this.hasIgnored(email)) {
+    // Restore ignored user // FIXME move in restoreIgnoredUser method
+    var ignoredUserIndex = this.ignoredUsers.indexOf(email);
+    if (ignoredUserIndex !== -1) { // The opposite should not happen
+      var ignoredUserData = this.ignoredUsers[ignoredUserIndex];
+      this.friendsPokes[ignoredUserData.email] = ignoredUserData;
+      delete this.friendsPokes[ignoredUserData.email].email; // Data just added for save in ignored users
+      this.removeFromIgnoredUsers(email);
+    }
+  }
+
   User.findById(email, function(err, potentialFriend) {
     if (err) return callback(err);
 
     if (!potentialFriend) return callback(new FriendError(User.FRIEND_STATUSES.NOT_FOUND));
+     // Do not tell a user he's been ignored
+    if (potentialFriend.hasIgnored(currentUser.email)) return callback(null, User.FRIEND_STATUSES.PENDING);
 
     // FIXME TODO Thing about separating all that in 2 methods (sendFriendRequest, acceptFriendRequest)
 
     var callbackStatus;
 
-    if (potentialFriend.hasInvited(currentUser.email)) {
+    if (potentialFriend.hasFriend(currentUser.email) || potentialFriend.hasIgnored(currentUser.email)) {
+      // The users already knew each other,
+      callbackStatus = User.FRIEND_STATUSES.FRIEND; // Opponent will be poked & notified
+    } else if (potentialFriend.hasInvited(currentUser.email)) {
       // Become friends !
       potentialFriend.removeFromInvitedUsers(currentUser.email);
       currentUser.removeFromPendingUsers(potentialFriend.email);
       potentialFriend.friendsPokes[currentUser.email] = {}; // Sets them as friends
       currentUser.friendsPokes[potentialFriend.email] = {}; // Sets them as friends
-      var now = Date.now();
       callbackStatus = User.FRIEND_STATUSES.FRIEND; // Opponent will be poked & notified, OK.
     } else {
       // Send friend request
@@ -370,6 +385,13 @@ User.prototype.removeFromInvitedUsers = function(email) {
   });
 };
 
+User.prototype.removeFromIgnoredUsers = function(email) {
+  email = email.toLowerCase();
+  this.ignoredUsers = this.ignoredUsers.filter(function(ignoredUser) {
+    return ignoredUser.email !== email;
+  });
+};
+
 User.prototype.ignoreUser = function(email, callback) {
   var self = this;
   email = email.toLowerCase();
@@ -386,6 +408,7 @@ User.prototype.ignoreUser = function(email, callback) {
     if (self.hasFriend(ignoredUser.email)) {
       // Save the most data possible
       ignoredUserData = _.clone(self.friendsPokes[ignoredUser.email]);
+      ignoredUserData.email = ignoredUser.email;
       delete self.friendsPokes[ignoredUser.email];
     } else {
       if (self.hasPending(ignoredUser.email)) {
