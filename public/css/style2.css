@@ -14,9 +14,9 @@
 }
 
 .bt-menu.right {
-	left: initial;
+	left: auto;
 	right: 0;
-	top: -0px;
+	top: 0;
 }
 
 .bt-menu.bt-menu-open {
