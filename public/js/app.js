@@ -14,6 +14,7 @@ var PRIMUS_ROUTE = REALTIME_SERVER_URL;
 var CALLBACK_NAME = 'pokecb';
 
 var DEFAULT_AVATAR = 'http://www.gravatar.com/avatar/00000000000000000000000000000000';
+var GRAVATAR_BASE = 'http://www.gravatar.com/avatar/';
 
 var PENDING_USERS_KEY = 'pendingUsers';
 var IGNORED_USERS_KEY = 'ignoredUsers';

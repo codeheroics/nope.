@@ -27,7 +27,8 @@
     "ember-model-localstorage-adapter": "git://github.com/hugo-agbonon/ember-model-localstorage-adapter.git",
     "moment": "~2.7.0",
     "toastr": "~2.0.3",
-    "font-awesome": "~4.1.0"
+    "font-awesome": "~4.1.0",
+    "js-md5": "~1.1.0"
   },
   "resolutions": {
     "ember": "~1.5.1",

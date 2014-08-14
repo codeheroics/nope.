@@ -6,6 +6,10 @@ PokeGame.OpponentPokesController = Ember.ObjectController.extend({
     }
   },
 
+  myAvatar: function() {
+    return PokeGame.User.find(1).get('avatar');
+  }.property('myAvatar'),
+
   isWinning: function() {
     var scoreFor = this.get('model.scoreFor');
     var scoreAgainst = this.get('model.scoreAgainst');

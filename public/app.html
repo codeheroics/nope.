@@ -19,6 +19,7 @@
 		<script src="components/ember-model/ember-model.js"></script>
 		<script src="components/ember-model-localstorage-adapter/ember-model-localstorage-adapter.js"></script>
 		<script src="components/toastr/toastr.min.js"></script>
+		<script src="components/js-md5/js/md5.min.js"></script>
 
 		<script src="primus/primus.js"></script>
 
@@ -215,7 +216,7 @@
 			<section>
 				<h2 class="major"><span>Friends</span></h2>
 				{{#link-to 'newOpponent' class="addUser button button-big"}}Add a friend{{/link-to}}
-				<ul class="style2">
+				<ul class="columns">
 					{{#each}}
 						<li>
 							<h3>
@@ -225,6 +226,7 @@
 									{{else}}
 										<i class="fa fa-check"></i>
 									{{/if}}
+									<img width="20" height="20" style="border-radius: 10px;" {{bind-attr src="avatar"}} />
 									{{name}}
 								{{/link-to}}
 							</h3>
@@ -254,22 +256,21 @@
 					<div style="display:flex; border-radius: 8px;">
 						{{#if isWinning }}
 							<div class="score score-left winning">
-								<img {{bind-attr src="avatar"}} /><br>
+								<img class="avatar" {{bind-attr src="avatar"}} /><br>
 								{{name}}<br>{{scoreFor}}
 							</div>
 							<div class="score score-right losing">
-								<img {{bind-attr src="avatar"}} /><br>
+								<img class="avatar" {{bind-attr src="myAvatar"}} /><br>
 								You<br>{{scoreAgainst}}
 							</div>
 						{{else}}
 							<div class="score score-left losing">
-								<img {{bind-attr src="avatar"}} /><br>
+								<img class="avatar" {{bind-attr src="avatar"}} /><br>
 								{{name}}<br>{{scoreFor}}
 							</div>
 							<div class="score score-right winning">
-								<img {{bind-attr src="avatar"}} /><br>
+								<img class="avatar" {{bind-attr src="myAvatar"}} /><br>
 								You<br>{{scoreAgainst}}<br>
-								(FIXME avatar of opponent currently used here)
 							</div>
 					{{/if}}
 					</div>

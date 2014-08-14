@@ -232,6 +232,27 @@
 			margin-top: 0;
 		}
 
+
+	ul.columns
+	{
+		columns: 2;
+		-moz-columns: 2;
+	}
+
+		ul.columns > li
+		{
+			border-bottom: solid 2px #e7eae8;
+			padding-top: 2.35em;
+			padding-bottom: 2.35em;
+		}
+
+		ul.columns > li:first-child
+		{
+			border-top: 0;
+			padding-top: 0;
+			margin-top: 0;
+		}
+
 	ul.contact
 	{
 	}
@@ -1097,4 +1118,8 @@
 
 	.bt-menu {
 		display: none;
+	}
+
+	.avatar {
+		border-radius: 50px;
 	}

@@ -105,7 +105,7 @@ PokeGame.PokeServerManager = Ember.Object.extend({
     opponent.set('scoreAgainst', dataPoke.myScore);
     opponent.set('pokesCpt', dataPoke.pokesCpt);
     opponent.set('points', dataPoke.points);
-    opponent.set('avatar', dataPoke.DEFAULT_AVATAR);
+    opponent.set('avatar', /*DEFAULT_AVATAR*/ GRAVATAR_BASE + md5(email) + '?d=retro');
     opponent.set('status', 'friend');
     var pokes = opponent.get('pokes').pushObject(pokeRecord);
 
@@ -140,7 +140,7 @@ PokeGame.PokeServerManager = Ember.Object.extend({
 
           user.set('name', data.name);
           user.set('email', data.email);
-          user.set('avatar', data.avatar || DEFAULT_AVATAR);
+          user.set('avatar',/* data.avatar ||*/ GRAVATAR_BASE + md5(data.email) + '?d=retro');
 
           user.save()
           .then(self.updateFriendsInfos.bind(self, data))

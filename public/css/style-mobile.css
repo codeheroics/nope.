@@ -412,3 +412,8 @@
 	.bt-menu {
 		display: block
 	}
+
+	ul.columns {
+		columns: 1;
+		-moz-columns: 1;
+	}
