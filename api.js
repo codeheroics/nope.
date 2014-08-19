@@ -1,46 +1,26 @@
 'use strict';
+var express = require('express');
+var app = express();
 
-var kraken    = require('kraken-js');
-var app       = {};
+var config = require('config');
+var bodyParser = require('body-parser');
 
-var config    = require('config');
-var flash     = require('connect-flash');
+app.use(bodyParser.urlencoded({ extended: false })); // Forms
+app.use(bodyParser.json());
+// app.use(bodyParser.json({ type: 'application/vnd.api+json' }))
+
+app.use(express.static(__dirname + '/public'));
+
 var passport  = require('passport');
 require('./lib/passport')(passport);
+app.use(passport.initialize());
 
-app.configure = function configure(nconf, next) {
-  // Async method run on startup.
-  next(null);
-};
+app.set('jwtTokenSecret', config.jwtTokenSecret);
+app.set('jsonp callback name', 'nopecb');
 
+// Routes & controller logic
+require('./controllers/auth')(app, passport);
+require('./controllers/pokes')(app);
+require('./controllers/users')(app);
 
-app.requestStart = function requestStart(server) {
-  server.set('jwtTokenSecret', config.jwtTokenSecret);
-  // Run before most express middleware has been registered.
-};
-
-
-app.requestBeforeRoute = function requestBeforeRoute(server) {
-  server.use(passport.initialize());
-  server.use(flash()); // use connect-flash for flash messages stored in session
-
-  // required for passport
-  //server.use(server.session({ secret: 'ilovescotchscotchyscotchscotch' })); // session secret
-};
-
-
-app.requestAfterRoute = function requestAfterRoute(server) {
-  // Run after all routes have been added.
-};
-
-
-if (require.main === module) {
-  kraken.create(app).listen(function (err, server) {
-    if (err) {
-      console.error(err.stack);
-    }
-  });
-}
-
-
-module.exports = app;
+app.listen(8000);

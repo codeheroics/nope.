@@ -1,12 +1,11 @@
 'use strict';
 
-var passport = require('passport');
 var moment = require('moment');
 var jwt = require('jwt-simple');
 var config = require('config');
 var log = require('winston');
 
-module.exports = function(app) {
+module.exports = function(app, passport) {
   var isLoggedIn = require('../lib/utils/middlewares')(app).isLoggedIn;
 
   var outputLoginError = function(req, res) {
@@ -60,7 +59,7 @@ module.exports = function(app) {
 
       req.user = user;
       createAndOutputToken(req, res);
-    })(req, res);
+    })(req, res, next);
   });
 
   // =====================================
@@ -79,7 +78,7 @@ module.exports = function(app) {
       req.user = user;
       if (err || !user) return outputSignupError(err, req, res);
       outputSignupSuccess(req, res);
-    })(req, res);
+    })(req, res, next);
   });
 
   // =====================================

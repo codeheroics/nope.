@@ -11,7 +11,7 @@ var POKES_ROUTE = SERVER_URL + '/pokes';
 var LOGIN_ROUTE = SERVER_URL + '/login';
 var SIGNUP_ROUTE = SERVER_URL + '/signup';
 var PRIMUS_ROUTE = REALTIME_SERVER_URL;
-var CALLBACK_NAME = 'pokecb';
+var CALLBACK_NAME = 'nopecb';
 
 var DEFAULT_AVATAR = 'http://www.gravatar.com/avatar/00000000000000000000000000000000';
 var GRAVATAR_BASE = 'http://www.gravatar.com/avatar/';

@@ -32,7 +32,7 @@ module.exports = function(app) {
   });
 
   // Ignore an user
-  app.del('/users', isLoggedIn, function(req, res, next) {
+  app.delete('/users', isLoggedIn, function(req, res, next) {
     if (!validator.isEmail(req.body.friendEmail)) return res.jsonp(400, {message: 'Invalid E-mail'});
     var friendEmail = req.body.friendEmail.toLowerCase().trim();
     req.user.ignoreUser(friendEmail, function(err) {
