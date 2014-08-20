@@ -4,8 +4,9 @@ var moment = require('moment');
 var jwt = require('jwt-simple');
 var config = require('config');
 var log = require('winston');
+var passport = require('passport');
 
-module.exports = function(app, passport) {
+module.exports = function(app) {
   var isLoggedIn = require('../lib/utils/middlewares')(app).isLoggedIn;
 
   var outputLoginError = function(req, res) {

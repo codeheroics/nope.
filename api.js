@@ -19,7 +19,10 @@ app.set('jwtTokenSecret', config.jwtTokenSecret);
 app.set('jsonp callback name', 'nopecb');
 
 // Routes & controller logic
-require('./controllers/auth')(app, passport);
+app.get('/', function(req, res, next) {
+  res.sendFile(__dirname + '/public/app.html');
+});
+require('./controllers/auth')(app);
 require('./controllers/pokes')(app);
 require('./controllers/users')(app);
 
