@@ -133,10 +133,11 @@
 		<script type="text/x-handlebars" data-template-name="index">
 			<section class="is-highlight">
 				<ul class="special">
-					<li>{{#link-to "opponents" class="fa fa-group solo"}}<span>Poke...</span>{{/link-to}}</li>
+					<li>{{#link-to "opponents" class="fa fa-group solo"}}Opponents{{/link-to}}</li>
 					{{#if opponentPokingMe}}
 						<li>
-							{{#link-to "opponentPokes" opponentPokingMe.id class="fa fa-share solo"}}<span>Poke back</span>{{/link-to}}
+							{{#link-to "opponentPokes" opponentPokingMe.id class="fa fa-share solo"}}
+							Poke back {{opponentPokingMe.name}}{{/link-to}}
 						</li>
 					{{else}}
 						<li><a href="#" class="fa fa-check solo"><span>Poke back</span></a></li>
