@@ -28,7 +28,6 @@
 		<script src="js/animatedBorders/borderMenu.js"></script>
 		<script src="js/animatedBorders/classie.js"></script>
 		<script src="js/animatedBorders/modernizr.custom.js"></script>
-		<script src="js/skel.min.js"></script>
 
 		<script src="js/app.js"></script>
 		<script src="js/router.js"></script>
@@ -48,15 +47,12 @@
 		<link rel="stylesheet" href="components/toastr/toastr.css" />
 		<link rel="stylesheet" href="components/font-awesome/css/font-awesome.min.css" />
 		<link rel="stylesheet" href="css/fonts.css" />
+		<link rel="stylesheet" href="css/style.css" />
+		<link rel="stylesheet" href="css/style-desktop.css" />
+		<link rel="stylesheet" href="css/style-1000px.css" />
+		<link rel="stylesheet" href="css/style-mobile.css" />
 		<link rel="stylesheet" href="css/style2.css" /><!-- Style for animated borders -->
 		<!-- endbuild -->
-		<noscript>
-		<!-- build:css css/build.noscript.css -->
-			<link rel="stylesheet" href="css/skel-noscript.css" />
-			<link rel="stylesheet" href="css/style.css" />
-			<link rel="stylesheet" href="css/style-desktop.css" />
-		<!-- endbuild -->
-		</noscript>
 
 		<!--[if lte IE 9]><link rel="stylesheet" href="css/ie9.css" /><![endif]-->
 		<!--[if lte IE 8]><script src="js/html5shiv.js"></script><link rel="stylesheet" href="css/ie8.css" /><![endif]-->
@@ -133,14 +129,14 @@
 		<script type="text/x-handlebars" data-template-name="index">
 			<section class="is-highlight">
 				<ul class="special">
-					<li>{{#link-to "opponents" class="fa fa-group solo"}}Opponents{{/link-to}}</li>
+					<li>{{#link-to "opponents"}}<i class="fa fa-group solo"></i>Opponents{{/link-to}}</li>
 					{{#if opponentPokingMe}}
 						<li>
-							{{#link-to "opponentPokes" opponentPokingMe.id class="fa fa-share solo"}}
+							{{#link-to "opponentPokes" opponentPokingMe.id}}<i class="fa fa-share solo"></i>
 							Poke back {{opponentPokingMe.name}}{{/link-to}}
 						</li>
 					{{else}}
-						<li><a href="#" class="fa fa-check solo"><span>Poke back</span></a></li>
+						<li><i class="fa fa-check solo"></i>Yep.</li>
 					{{/if}}
 				</ul>
 				<div>

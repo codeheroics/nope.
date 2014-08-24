@@ -127,6 +127,8 @@ gulp.task('buildCSS', function() {
   var fonts = gulp.src(DEV_PUBLIC + '/components/font-awesome/fonts/*')
     .pipe(gulp.dest(DIST_PUBLIC + '/fonts'));
 
+  gutil.log('REMINDER, NEW FONTS WERE ADDED, add them here')
+
   var images = gulp.src(DEV_PUBLIC + '/css/images/*')
     .pipe(gulp.dest(cssDir + '/images'));
 
