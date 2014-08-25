@@ -49,7 +49,7 @@ gulp.task('buildJS', function() {
   ];
 
   var jsDependencies = [
-    'js/config.js',
+    'primus/primus.js',
     'js/animatedBorders/borderMenu.js',
     'js/animatedBorders/classie.js',
     'js/animatedBorders/modernizr.custom.js',
@@ -83,23 +83,21 @@ gulp.task('buildJS', function() {
 gulp.task('buildCSS', function() {
   var cssComponents = [
   'components/toastr/toastr.css',
-  'components/font-awesome/css/font-awesome.min.css'
+  'components/font-awesome/css/font-awesome.css'
   ];
 
   var cssDependencies = [
-    'css/style2.css',
-    'css/fonts.css'
-  ];
-  var cssNoScriptDependencies = [
-    'css/skel-noscript.css',
+    'css/fonts.css',
     'css/style.css',
-    'css/style-desktop.css'
+    'css/style2.css',
+    'css/style-desktop.css',
+    'css/style-mobile.css',
+    'css/style-1000px.css'
   ];
 
   var cssDir = DIST_PUBLIC + '/css';
 
   var sources = cssComponents.concat(cssDependencies).map(appendDevPublic);
-  var noScriptSources = cssNoScriptDependencies.map(appendDevPublic);
 
   var css = gulp.src(sources)
     .pipe(concat('build.css'))
@@ -111,28 +109,21 @@ gulp.task('buildCSS', function() {
     .pipe(gulp.dest(cssDir))
     .on('error', gutil.log);
 
-  var noScriptCss = gulp.src(noScriptSources)
-    .pipe(concat('build.noscript.css'))
-    .pipe(size({showFiles: true}))
-    .pipe(gulp.dest(cssDir))
-    .pipe(minifyCSS())
-    .pipe(rename('build.noscript.min.css'))
-    .pipe(size({showFiles: true}))
-    .pipe(gulp.dest(cssDir))
-    .on('error', gutil.log);
-
   var ieCss = gulp.src(DEV_PUBLIC + '/css/ie*.css')
     .pipe(gulp.dest(cssDir));
 
-  var fonts = gulp.src(DEV_PUBLIC + '/components/font-awesome/fonts/*')
-    .pipe(gulp.dest(DIST_PUBLIC + '/fonts'));
+  var fontSources = [
+    'components/font-awesome/fonts/*',
+    'fonts/*'
+  ].map(appendDevPublic);
 
-  gutil.log('REMINDER, NEW FONTS WERE ADDED, add them here')
+  var fonts = gulp.src(fontSources)
+    .pipe(gulp.dest(DIST_PUBLIC + '/fonts'));
 
   var images = gulp.src(DEV_PUBLIC + '/css/images/*')
     .pipe(gulp.dest(cssDir + '/images'));
 
-  return merge(css, noScriptCss, ieCss, fonts, images);
+  return merge(css, ieCss, fonts, images);
 });
 
 gulp.task('clean', function (cb) {
