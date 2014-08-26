@@ -1,10 +1,11 @@
 'use strict';
 
-// CONFIG TODO MOVE SOMEWHERE SEPARATE
 var protocol = 'http://'; // FIXME
 var hostname = window.location.hostname;
-var SERVER_URL = protocol + hostname + ':8000';
-var REALTIME_SERVER_URL = protocol + hostname + ':8080';
+var isDev = window.location.origin.indexOf('localhost') !== -1;
+var SERVER_URL = window.location.origin;
+var REALTIME_SERVER_URL = isDev ? window.location.protocol + '//' + window.location.hostname + ':8080' : window.location.origin + '/ws';
+
 var USERS_ROUTE = SERVER_URL + '/users';
 var SELF_ROUTE = USERS_ROUTE + '?me';
 var POKES_ROUTE = SERVER_URL + '/pokes';

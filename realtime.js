@@ -6,7 +6,6 @@ var User       = require('./models/user');
 var config     = require('config');
 var app        = express();
 
-app.use(express.static(__dirname + '/public'));
 app.use(bodyParser.json());
 
 var server = require('http').createServer(app);
