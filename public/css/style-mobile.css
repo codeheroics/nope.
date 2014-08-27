@@ -418,5 +418,6 @@
 	ul.columns {
 		columns: 1;
 		-moz-columns: 1;
+		-webkit-columns: 1;
 	}
 }

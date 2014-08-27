@@ -105,7 +105,7 @@ PokeGame.PokeServerManager = Ember.Object.extend({
     opponent.set('scoreAgainst', dataPoke.myScore);
     opponent.set('pokesCpt', dataPoke.pokesCpt);
     opponent.set('points', dataPoke.points);
-    opponent.set('avatar', /*DEFAULT_AVATAR*/ GRAVATAR_BASE + md5(email) + '?d=retro');
+    opponent.set('avatar', generateGravatar(email));
     opponent.set('status', 'friend');
     var pokes = opponent.get('pokes').pushObject(pokeRecord);
 
@@ -140,7 +140,7 @@ PokeGame.PokeServerManager = Ember.Object.extend({
 
           user.set('name', data.name);
           user.set('email', data.email);
-          user.set('avatar',/* data.avatar ||*/ GRAVATAR_BASE + md5(data.email) + '?d=retro');
+          user.set('avatar', generateGravatar(data.email));
 
           user.save()
           .then(self.updateFriendsInfos.bind(self, data))
@@ -217,6 +217,7 @@ PokeGame.PokeServerManager = Ember.Object.extend({
         });
       }
       opponent.set('name', userData.opponentName);
+      opponent.set('avatar', generateGravatar(userData.email));
       opponent.set('status', status);
       return opponent.save();
     });
@@ -291,21 +292,17 @@ PokeGame.PokeServerManager = Ember.Object.extend({
         }
       )
         .done(function(object) {
-          if (object.message !== 'Friend') {
-            toastr.info(object.message);
-            resolve();
-            return;
+          if (object.message === 'Friend') {
+            return self.getPokesFrom(email).then(resolve);
           }
-          return self.getPokesFrom(email).then(function() {
-            var opponentName = PokeGame.Opponent.find(email).get('name');
-            resolve();
-          });
+          toastr.info(object.message);
+          resolve();
         })
         .fail(function(xhr) {
           if (!xhr.responseJSON) {
             toastr.error('Could not reach the Internet :(');
           } else {
-            toastr.error('Sorry, there was an error: ' + xhr.responseJSON.message);
+            toastr.error('Sorry, there was an error with the server when trying to add ' + email);
           }
           reject();
         });
@@ -340,9 +337,21 @@ PokeGame.PokeServerManager = Ember.Object.extend({
         })
         .fail(function(xhr) {
           if (!xhr.responseJSON) return toastr.error('Could not reach the Internet :(');
-          toastr.error('Sorry, there was an error :(');
+          toastr.error('Sorry, there was an error with the server when trying to ignore ' + email);
           reject();
         });
+    });
+  },
+
+  unIgnoreOpponent: function(opponent) {
+    var email = opponent.get('email');
+    return this.addOpponent(email).then(
+      function() {
+        opponent.set('status', 'friend');
+        return opponent.save();
+      }
+    ).then(function() {
+      toastr.info('is no longer ignored', opponent.get('name'));
     });
   }
 });

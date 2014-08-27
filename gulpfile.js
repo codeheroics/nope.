@@ -20,8 +20,12 @@ function appendDevPublic (src) {
   return DEV_PUBLIC + '/' + src;
 }
 
-gulp.task('default', function() {
-  // place code for your default task here
+gulp.task('default', ['watch']);
+
+gulp.task('watch', function() {
+  gulp.watch('public/**/*.css', ['buildCSS']);
+  gulp.watch('public/**/*.js', ['buildJS']);
+  gulp.watch('public/**/*.html', ['buildHTML']);
 });
 
 gulp.task('build', ['buildHTML', 'buildJS', 'buildCSS']);

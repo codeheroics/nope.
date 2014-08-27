@@ -35,6 +35,7 @@
 		<script src="js/models/opponent.js"></script>
 		<script src="js/models/user.js"></script>
 		<script src="js/controllers/index.js"></script>
+		<script src="js/controllers/opponents.js"></script>
 		<script src="js/controllers/opponentPokes.js"></script>
 		<script src="js/controllers/newOpponent.js"></script>
 		<script src="js/controllers/history.js"></script>
@@ -232,9 +233,8 @@
 		<script type="text/x-handlebars" data-template-name="opponents">
 			<section>
 				<h2 class="major"><span>Friends</span></h2>
-				{{#link-to 'newOpponent' class="addUser button button-big"}}Add a friend{{/link-to}}
 				<ul class="columns">
-					{{#each}}
+					{{#each opponents}}
 						<li>
 							<h3>
 								{{#link-to 'opponentPokes' id}}
@@ -251,6 +251,24 @@
 					{{/each}}
 				</ul>
 			</section>
+			<section>{{#link-to 'newOpponent' class="addUser button button-big"}}Add a friend{{/link-to}}</section>
+			{{#if ignoredOpponents}}
+				<section>
+					<h2 class="major"><span>Ignored people</span></h2>
+					<ul class="columns">
+						{{#each ignoredOpponent in ignoredOpponents}}
+							<li>
+								<button style="float:right;" type="button" {{action 'unIgnoreOpponent' ignoredOpponent}}>Unignore</button>
+								<h3>
+									<i class="fa fa-stop"></i>
+									<img width="20" height="20" style="border-radius: 10px;" {{bind-attr src="ignoredOpponent.avatar"}} />
+									{{ignoredOpponent.name}}
+								</h3>
+							</li>
+						{{/each}}
+					</ul>
+				</section>
+			{{/if}}
 		</script>
 
 		<script type="text/x-handlebars" data-template-name="newOpponent">
@@ -301,6 +319,8 @@
 
 					<p class="pokesSent">{{pokesCpt}}</p>
 					<div style="text-align: center;"><legend class="pokesSent">nopes sent</legend></div>
+					<button type="button" style="border:0;">Ignore {{name}} IMPLEMENT ME</button>
+
 				</section>
 			<!-- /Recent Posts -->
 		</script>

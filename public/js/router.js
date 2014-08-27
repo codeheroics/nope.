@@ -106,7 +106,7 @@ PokeGame.OpponentsRoute = Ember.Route.extend(
   PokeGame.AuthenticatedRouteMixin,
   {
     model: function() {
-      return PokeGame.Opponent.findQuery({status: 'friend'});
+      return PokeGame.Opponent.find();
     }
   }
 );

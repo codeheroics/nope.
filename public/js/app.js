@@ -27,6 +27,10 @@ toastr.options = {
   positionClass: 'toast-bottom-right',
 };
 
+function generateGravatar(email) {
+  return GRAVATAR_BASE + md5(email) + '?d=retro';
+}
+
 var CustomAuthenticator = Ember.SimpleAuth.Authenticators.Base.extend({
   restore: function(data) {
     return new Ember.RSVP.Promise(function(resolve, reject) {
