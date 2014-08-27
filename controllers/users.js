@@ -31,6 +31,16 @@ module.exports = function(app) {
     });
   });
 
+  // Patch (my relationship) to an user
+  app.patch('/users', isLoggedIn, function(req, res, next) {
+    if (!validator.isEmail(req.body.friendEmail)) return res.jsonp(400, {message: 'Invalid E-mail'});
+    var friendEmail = req.body.friendEmail.toLowerCase().trim();
+    req.user.unIgnoreUser(friendEmail, function(err) {
+      if (err) return next(err);
+      res.jsonp(200);
+    });
+  });
+
   // Ignore an user
   app.delete('/users', isLoggedIn, function(req, res, next) {
     if (!validator.isEmail(req.body.friendEmail)) return res.jsonp(400, {message: 'Invalid E-mail'});

@@ -12,6 +12,7 @@ PokeGame.Router.map(function() {
   this.resource('signup', { path: '/signup' });
   this.resource('opponentPokes', { path: '/opponents/:opponent_id/pokes' });
   this.resource('opponents', { path: '/opponents' });
+  this.resource('ignoredOpponents', { path: '/opponents?ignored' });
   this.resource('newOpponent', { path: '/opponents/new' });
   this.resource('history', { path: '/history' });
   this.resource('profile', { path: '/profile' });
@@ -106,7 +107,16 @@ PokeGame.OpponentsRoute = Ember.Route.extend(
   PokeGame.AuthenticatedRouteMixin,
   {
     model: function() {
-      return PokeGame.Opponent.find();
+      return PokeGame.Opponent.findQuery({status: 'friend'});
+    }
+  }
+);
+
+PokeGame.IgnoredOpponentsRoute = Ember.Route.extend(
+  PokeGame.AuthenticatedRouteMixin,
+  {
+    model: function() {
+      return PokeGame.Opponent.findQuery({status: 'ignored'});
     }
   }
 );

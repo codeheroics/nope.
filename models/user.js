@@ -182,7 +182,7 @@ User.prototype.pokeAt = function(opponentEmail, callback) {
     if (!userPoked) return callback(null, User.FRIEND_STATUSES.NOT_FOUND);
 
     if (!userPoked.hasFriend(self.email)) {
-      if (userPoked.hasIgnored(self.email)) {
+      if (userPoked.hasIgnored(self.email)) { // FIXME this won't do, if a user had a friend then suddenly he's pending, it's weird
         return callback(new FriendError(User.FRIEND_STATUSES.PENDING)); // Do not tell a user he's been ignored
       }
       if (userPoked.hasPending(self.email)) {
@@ -303,13 +303,7 @@ User.prototype.sendFriendRequest = function(email, callback) {
 
   if (this.hasIgnored(email)) {
     // Restore ignored user // FIXME move in restoreIgnoredUser method
-    var ignoredUserIndex = this.ignoredUsers.indexOf(email);
-    if (ignoredUserIndex !== -1) { // The opposite should not happen
-      var ignoredUserData = this.ignoredUsers[ignoredUserIndex];
-      this.friendsPokes[ignoredUserData.email] = ignoredUserData;
-      delete this.friendsPokes[ignoredUserData.email].email; // Data just added for save in ignored users
-      this.removeFromIgnoredUsers(email);
-    }
+    return callback(null, User.FRIEND_STATUSES.IGNORED);
   }
 
   User.findById(email, function(err, potentialFriend) {
@@ -371,25 +365,22 @@ User.prototype.sendFriendRequest = function(email, callback) {
   });
 };
 
-User.prototype.removeFromPendingUsers = function(email) {
-  email = email.toLowerCase();
-  this.pendingUsers = this.pendingUsers.filter(function(pendingUser) {
-    return pendingUser.email !== email;
+User.prototype._removeFromUsers = function(arrayName, email) {
+  var removedUser = null;
+  this[arrayName] = this[arrayName].filter(function(user) {
+    if (user.email !== email) return true;
+    removedUser = user;
+    return false;
   });
+  return removedUser;
 };
 
-User.prototype.removeFromInvitedUsers = function(email) {
-  email = email.toLowerCase();
-  this.invitedUsers = this.invitedUsers.filter(function(invitedUser) {
-    return invitedUser.email !== email;
-  });
+User.prototype.removeFromPendingUsers = function(email) {
+  return this._removeFromUsers('pendingUsers', email);
 };
 
 User.prototype.removeFromIgnoredUsers = function(email) {
-  email = email.toLowerCase();
-  this.ignoredUsers = this.ignoredUsers.filter(function(ignoredUser) {
-    return ignoredUser.email !== email;
-  });
+  return this._removeFromUsers('ignoredUsers', email);
 };
 
 User.prototype.ignoreUser = function(email, callback) {
@@ -430,12 +421,14 @@ User.prototype.ignoreUser = function(email, callback) {
   });
 };
 
-User.prototype.unIgnore = function(email) {
+User.prototype.unIgnoreUser = function(email, callback) {
   email = email.toLowerCase();
-  // FIXME find ignored user and restore him to appropriate spot
-  this.ignoredUsers = this.ignoredUsers.filter(function(ignoredEmail) {
-    return ignoredEmail !== email;
-  });
+
+  var restoredUser = this.removeFromIgnoredUsers(email);
+  if (!restoredUser) return callback(); // Was not ignored
+  this.friendsPokes[restoredUser.email] = restoredUser;
+  delete this.friendsPokes[restoredUser.email].email; // Data just added for save in ignored users
+  this.save(callback);
 };
 
 module.exports = User;

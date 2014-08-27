@@ -344,14 +344,36 @@ PokeGame.PokeServerManager = Ember.Object.extend({
   },
 
   unIgnoreOpponent: function(opponent) {
+    var self = this;
     var email = opponent.get('email');
-    return this.addOpponent(email).then(
-      function() {
-        opponent.set('status', 'friend');
-        return opponent.save();
-      }
-    ).then(function() {
-      toastr.info('is no longer ignored', opponent.get('name'));
+    return new Promise(function(resolve, reject) {
+
+      $.ajax(
+        {
+          dataType: 'jsonp',
+          data: { friendEmail: email },
+          jsonp: CALLBACK_NAME,
+          method: 'PATCH',
+          headers: {
+            'x-access-token': window.localStorage.getItem('token')
+          },
+          url: USERS_ROUTE
+        }
+      )
+      .done(function() {
+        return self.getPokesFrom(email).then(function() {
+          opponent.set('status', 'friend');
+          return opponent.save();
+        })
+        .then(function() {
+          toastr.info('is no longer ignored', opponent.get('name'));
+          resolve();
+        });
+      })
+      .fail(function(xhr) {
+        toastr.error('Sorry, there was an error with the server when trying to un-ignore ' + opponent.get('name'));
+        reject();
+      });
     });
   }
 });

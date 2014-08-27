@@ -234,7 +234,7 @@
 			<section>
 				<h2 class="major"><span>Friends</span></h2>
 				<ul class="columns">
-					{{#each opponents}}
+					{{#each}}
 						<li>
 							<h3>
 								{{#link-to 'opponentPokes' id}}
@@ -251,24 +251,31 @@
 					{{/each}}
 				</ul>
 			</section>
-			<section>{{#link-to 'newOpponent' class="addUser button button-big"}}Add a friend{{/link-to}}</section>
-			{{#if ignoredOpponents}}
-				<section>
-					<h2 class="major"><span>Ignored people</span></h2>
-					<ul class="columns">
-						{{#each ignoredOpponent in ignoredOpponents}}
-							<li>
-								<button style="float:right;" type="button" {{action 'unIgnoreOpponent' ignoredOpponent}}>Unignore</button>
-								<h3>
-									<i class="fa fa-stop"></i>
-									<img width="20" height="20" style="border-radius: 10px;" {{bind-attr src="ignoredOpponent.avatar"}} />
-									{{ignoredOpponent.name}}
-								</h3>
-							</li>
-						{{/each}}
-					</ul>
-				</section>
-			{{/if}}
+			<section style="text-align:center;">
+				<div>{{#link-to 'newOpponent' class="addUser button button-big"}}Add a friend{{/link-to}}</div>
+				<div>{{#link-to 'ignoredOpponents'}}See ignored opponents{{/link-to}}</div>
+			</section>
+		</script>
+
+		<script type="text/x-handlebars" data-template-name="ignoredOpponents">
+			<section>
+				<h2 class="major"><span>Ignored people</span></h2>
+				{{#if model}}{{else}}
+				  Nope. You are not ignoring anyone.
+				{{/if}}
+				<ul class="columns">
+					{{#each}}
+						<li>
+							<button style="float:right;" type="button" {{action 'unIgnoreOpponent' this}}>Unignore</button>
+							<h3>
+								<i class="fa fa-stop"></i>
+								<img width="20" height="20" style="border-radius: 10px;" {{bind-attr src="avatar"}} />
+								{{name}}
+							</h3>
+						</li>
+					{{/each}}
+				</ul>
+			</section>
 		</script>
 
 		<script type="text/x-handlebars" data-template-name="newOpponent">
@@ -318,8 +325,12 @@
 					{{/if}}
 
 					<p class="pokesSent">{{pokesCpt}}</p>
-					<div style="text-align: center;"><legend class="pokesSent">nopes sent</legend></div>
-					<button type="button" style="border:0;">Ignore {{name}} IMPLEMENT ME</button>
+					<div style="text-align: center;">
+						<legend class="pokesSent">nopes sent</legend>
+					</div>
+					<div style="text-align: center;">
+						<button type="button" {{action 'ignore' model}}>Ignore {{name}}</button>
+					</div>
 
 				</section>
 			<!-- /Recent Posts -->
