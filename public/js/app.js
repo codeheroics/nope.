@@ -113,6 +113,17 @@ Ember.Handlebars.registerBoundHelper('relativeDateFormat', function(date) {
   return moment(date).fromNow();
 });
 
+Ember.Handlebars.registerBoundHelper('duration', function(milliseconds) {
+  var units = ['years', 'days', 'hours', 'minutes', 'seconds'];
+
+  return units.reduce(function(previousValue, unit) {
+    var unitValue = moment.duration(milliseconds)[unit]();
+
+    if (unitValue === 0) return previousValue;
+    return previousValue + ' ' + unitValue + ' ' + unit;
+  }, '');
+});
+
 Ember.View.reopen({
   didInsertElement : function() {
     this._super();

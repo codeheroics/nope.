@@ -3,8 +3,8 @@ PokeGame.Opponent = Ember.Model.extend({
   email:          Ember.attr(), // string
   name:           Ember.attr(), // string
   avatar:         Ember.attr(), // string
-  scoreFor:       Ember.attr(Number), // { defaultValue: 0 }),
-  scoreAgainst:   Ember.attr(Number), // { defaultValue: 0 }),
+  timeFor:        Ember.attr(Number), // { defaultValue: 0 }),
+  timeAgainst:    Ember.attr(Number), // { defaultValue: 0 }),
   pokes:          Ember.hasMany('PokeGame.Poke', { key: 'pokesIds' }),
   pokesCpt:       Ember.attr(Number),
   isScoring:      Ember.attr(), // boolean

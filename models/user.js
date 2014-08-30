@@ -18,7 +18,7 @@ var User = function(params) {
   this.invitedUsers = params.invitedUsers ? params.invitedUsers : [];
   this.ignoredUsers = params.ignoredUsers ? params.ignoredUsers : [];
   this.pendingUsers = params.pendingUsers ? params.pendingUsers : [];
-  this.score = params.score || 0;
+  this.timePoking = params.timePoking || 0;
   this.totalPokes = params.totalPokes || 0;
   this.created = params.created ? params.created : Date.now();
   this.cas = params.cas || null;
@@ -78,7 +78,7 @@ User.prototype.toDbJSON = function() {
     invitedUsers: this.invitedUsers,
     ignoredUsers: this.ignoredUsers,
     pendingUsers: this.pendingUsers,
-    score: this.score,
+    timePoking: this.timePoking,
     totalPokes: this.totalPokes,
     created: this.created
   };
@@ -89,7 +89,7 @@ User.prototype.toSelfJSON = function() {
     name: this.name,
     email: this.email,
     created: this.created,
-    score: this.score,
+    timePoking: this.timePoking,
     totalPokes: this.totalPokes,
     invitedUsers: this.invitedUsers,
     ignoredUsers: this.ignoredUsers,
@@ -100,7 +100,7 @@ User.prototype.toSelfJSON = function() {
 User.prototype.toPublicJSON = function() {
   return {
     name: this.name,
-    score: this.score,
+    timePoking: this.timePoking,
     totalPokes: this.totalPokes,
     created: this.created
   };
@@ -132,20 +132,17 @@ User.prototype.hasPending = function(email) {
  * [setPokingAt description]
  * @param {User} userPoked    user poked
  * @param {[type]} time              [description]
- * @param {[type]} opponentWonPoints [description]
+ * @param {[type]} timeDiff [description]
  */
-User.prototype.setPokingAt = function(userPoked, time, opponentWonPoints) {
-  if (isNaN(oldPoke ? oldPoke.opponentScore + opponentWonPoints : 0) || isNaN(oldPoke ? oldPoke.myScore + 1 : 0)) {
-    console.log('setPokingAt NaN!', time, userPoked, opponentWonPoints); // FOR DEBUGGING if problem
-  }
+User.prototype.setPokingAt = function(userPoked, now, timeDiff) {
   var email = userPoked.email;
   email = email.toLowerCase().trim();
   var oldPoke = this.friendsPokes[email] || {};
   this.friendsPokes[email] = {
-    time: time,
-    myScore: (oldPoke.myScore || 0) + 1, // Increment + 1, I poked
-    opponentScore: (oldPoke.opponentScore || 0) + (opponentWonPoints || 0),
-    points: opponentWonPoints || 0,
+    time: now,
+    myTimePoking: (oldPoke.myTimePoking || 0),
+    opponentTimePoking: (oldPoke.opponentTimePoking || 0) + (timeDiff || 0),
+    timeDiff: timeDiff || 0,
     pokesCpt: (oldPoke.pokesCpt || 0) + 1,
     isPokingMe: false,
     opponentName: userPoked.name.trim()
@@ -155,30 +152,26 @@ User.prototype.setPokingAt = function(userPoked, time, opponentWonPoints) {
 /**
  * [setPokedBy description]
  * @param {User} userPoking    user poking
- * @param {[type]} time       [description]
- * @param {[type]} wonPoints  [description]
+ * @param {[type]} now       [description]
+ * @param {[type]} timeDiff  [description]
  */
-User.prototype.setPokedBy = function(userPoking, time, wonPoints) {
-  if (isNaN(oldPoke ? oldPoke.opponentScore + wonPoints : 0) || isNaN(oldPoke ? oldPoke.opponentScore + 1 : 0)) {
-    console.log('setPokedBy NaN!', time, userPoking, wonPoints); // FOR DEBUGGING if problem
-  }
+User.prototype.setPokedBy = function(userPoking, now, timeDiff) {
   var email = userPoking.email;
   var oldPoke = this.friendsPokes[email] || {};
   this.friendsPokes[email] = {
-    time: time,
+    time: now,
     isPokingMe: true,
-    myScore: (oldPoke.myScore || 0) + (wonPoints || 0),
-    points: wonPoints || 0,
+    myTimePoking: (oldPoke.myTimePoking || 0) + (timeDiff || 0),
+    timeDiff: timeDiff || 0,
     pokesCpt: oldPoke.pokesCpt || 0,
-    opponentScore: (oldPoke.opponentScore || 0) + 1, // Increment + 1, he poked
+    opponentTimePoking: (oldPoke.opponentTimePoking || 0),
     opponentName: userPoking.name.trim()
   };
 };
 
 User.prototype.pokeAt = function(opponentEmail, callback) {
   var self = this;
-  var time = Date.now();
-  var wonPoints = 0;
+  var now = Date.now();
 
   if (!this.hasFriend(opponentEmail)) return callback(new FriendError(User.FRIEND_STATUSES.NOT_FRIEND));
   // === false because undefined would mean it is not defined yet (user just added has friend)
@@ -206,8 +199,8 @@ User.prototype.pokeAt = function(opponentEmail, callback) {
 
     // okay, we can poke
 
-    var wonPoints = calculateWonPoints(time, self.friendsPokes[opponentEmail].time);
-    if (isNaN(wonPoints)) console.error('NaN!', time, self, userPoked); // FOR DEBUGGING if problem
+    var timeDiff = now - self.friendsPokes[opponentEmail].time;
+    if (isNaN(timeDiff)) console.error('NaN!', timeDiff, self, userPoked); // FOR DEBUGGING if problem
 
 
     // From here, this can be repeated in case of CAS error
@@ -223,8 +216,8 @@ User.prototype.pokeAt = function(opponentEmail, callback) {
           async.retry(
             3,
             function updateUserPoked(cbRetry) {
-              userPoked.setPokedBy(self, time, wonPoints);
-              userPoked.score += wonPoints;
+              userPoked.setPokedBy(self, now, timeDiff);
+              userPoked.timePoking += timeDiff;
               userPoked.save(function(errSave, result) {
                 // There was an error saving due to the CAS : We'll update the object and retry saving
                 if (errSave && errSave.code === couchbase.errors.keyAlreadyExists) {
@@ -246,7 +239,7 @@ User.prototype.pokeAt = function(opponentEmail, callback) {
           async.retry(
             3,
             function updateUserPoking(cbRetry) {
-              self.setPokingAt(userPoked, time, wonPoints);
+              self.setPokingAt(userPoked, now, timeDiff);
               self.totalPokes++;
               self.save(function(errSave, result) {
                 // There was an error saving due to the CAS : We'll update the object and retry saving
@@ -288,21 +281,21 @@ User.prototype.pokeAt = function(opponentEmail, callback) {
   });
 };
 
-User.prototype.pokeAtUserIgnoringMe = function(userIgnoring, time, callback) {
-  var wonPoints = calculateWonPoints(time, this.friendsPokes[userIgnoring.email].time);
-  this.setPokingAt(userIgnoring, time, wonPoints);
+User.prototype.pokeAtUserIgnoringMe = function(userIgnoring, now, callback) {
+  var timeDiff = now - this.friendsPokes[userIgnoring.email].time;
+  this.setPokingAt(userIgnoring, now, timeDiff);
   this.totalPokes++;
 
-  if (isNaN(wonPoints)) console.error('NaN!', time, this, userIgnoring); // FOR DEBUGGING if problem
+  if (isNaN(timeDiff)) console.error('NaN!', timeDiff, this, userIgnoring); // FOR DEBUGGING if problem
 
   var ignoringUserFriendsPokeForMe = userIgnoring.removeFromIgnoredUsers(this.email) || {};
   var updatedIgnoringUserFriendsPokeForMe = { // Equivalent of calling setPokedBy for ignored user
-    time: time,
+    time: now,
     isPokingMe: true,
-    myScore: (ignoringUserFriendsPokeForMe.myScore || 0) + (wonPoints || 0),
-    points: wonPoints || 0,
+    myTimePoking: (ignoringUserFriendsPokeForMe.myTimePoking || 0) + (timeDiff || 0),
+    timeDiff: timeDiff || 0,
     pokesCpt: ignoringUserFriendsPokeForMe.pokesCpt || 0,
-    opponentScore: (ignoringUserFriendsPokeForMe.opponentScore || 0) + 1, // Increment + 1, he poked
+    opponentTimePoking: (ignoringUserFriendsPokeForMe.opponentTimePoking || 0) + 1, // Increment + 1, he poked
     opponentName: this.name,
     email: ignoringUserFriendsPokeForMe.email
   };
@@ -470,12 +463,6 @@ User.prototype.unIgnoreUser = function(email, callback) {
   delete this.friendsPokes[restoredUser.email].email; // Data just added for save in ignored users
   this.save(callback);
 };
-
-function calculateWonPoints(now, pokeTime) {
-// 1 point per poke + 1 point per hour
-  var oneHour = 1000 * 60 * 60;
-  return Math.floor((Date.now() - pokeTime) / oneHour);
-}
 
 function formatPokeDataForPrimus(pokeData, email) {
   pokeData.email = email;

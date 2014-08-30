@@ -298,20 +298,20 @@
 						{{#if isWinning }}
 							<div class="score score-left winning">
 								<img class="avatar" {{bind-attr src="avatar"}} /><br>
-								{{name}}<br>{{scoreFor}}
+								{{name}}<br>{{duration timeFor}}
 							</div>
 							<div class="score score-right losing">
 								<img class="avatar" {{bind-attr src="myAvatar"}} /><br>
-								You<br>{{scoreAgainst}}
+								You<br>{{duration timeAgainst}}
 							</div>
 						{{else}}
 							<div class="score score-left losing">
 								<img class="avatar" {{bind-attr src="avatar"}} /><br>
-								{{name}}<br>{{scoreFor}}
+								{{name}}<br>{{duration timeFor}}
 							</div>
 							<div class="score score-right winning">
 								<img class="avatar" {{bind-attr src="myAvatar"}} /><br>
-								You<br>{{scoreAgainst}}<br>
+								You<br>{{duration timeAgainst}}<br>
 							</div>
 					{{/if}}
 					</div>
@@ -372,9 +372,11 @@
 								<!-- Feature -->
 									<section class="is-feature">
 										<a href="#" class="image image-centered image-user"><img {{bind-attr src="avatar"}} /></a>
-										<h3>{{#if name}}{{name}}{{/if}}</h3>
+										<h3>{{name}}</h3>
 										<ul>
 											<li>E-mail: {{email}}</li>
+											<li>Total nopes: {{totalPokes}}</li>
+											<li>Total time noping: {{duration timePoking}}</li>
 										</ul>
 									</section>
 								<!-- /Feature -->
