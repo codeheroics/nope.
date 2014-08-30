@@ -79,7 +79,7 @@ PokeGame.PokeServerManager = Ember.Object.extend({
 
   handlePokeResult: function(dataPoke, email) {
     email = email ? email : dataPoke.email;
-    var pokeId = dataPoke.time.toString() + email;
+    var pokeId = '' + dataPoke.time + email;
 
     var poke = PokeGame.Poke.find(pokeId);
 
@@ -262,7 +262,7 @@ PokeGame.PokeServerManager = Ember.Object.extend({
         return resolve(Promise.all(promises));
       })
       .fail(function(a, b, c) {
-        console.error('failed getting pokes')
+        console.error('failed getting pokes');
         reject();
         // :(
       });

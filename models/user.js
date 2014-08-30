@@ -177,13 +177,20 @@ User.prototype.setPokedBy = function(userPoking, time, wonPoints) {
 
 User.prototype.pokeAt = function(opponentEmail, callback) {
   var self = this;
+  var time = Date.now();
+  var wonPoints = 0;
+
+  if (!this.hasFriend(opponentEmail)) return callback(new FriendError(User.FRIEND_STATUSES.NOT_FRIEND));
+  // === false because undefined would mean it is not defined yet (user just added has friend)
+  if (this.friendsPokes[opponentEmail].isPokingMe === false) return callback(new PokeError('Already poked back'));
+
   User.findById(opponentEmail, function(err, userPoked) {
     if (err) return callback(err);
     if (!userPoked) return callback(null, User.FRIEND_STATUSES.NOT_FOUND);
 
     if (!userPoked.hasFriend(self.email)) {
       if (userPoked.hasIgnored(self.email)) { // FIXME this won't do, if a user had a friend then suddenly he's pending, it's weird
-        return callback(new FriendError(User.FRIEND_STATUSES.PENDING)); // Do not tell a user he's been ignored
+        return self.pokeAtUserIgnoringMe(userPoked, time, callback);
       }
       if (userPoked.hasPending(self.email)) {
         return callback(new FriendError(User.FRIEND_STATUSES.PENDING));
@@ -194,20 +201,21 @@ User.prototype.pokeAt = function(opponentEmail, callback) {
     var opponentUserPoke = userPoked.friendsPokes[self.email];
 
     if (!opponentUserPoke) return callback(new Error('This should not happen'));
-    if (opponentUserPoke.isPokingMe) return callback(new PokeError('Already poked back'));
+    // Next line not useful, check already done ahead, but be careful of locks
+    // if (opponentUserPoke.isPokingMe) return callback(new PokeError('Already poked back'));
 
     // okay, we can poke
 
-    var time = Date.now();
-    var wonPoints = 0;
-    if (self.friendsPokes[opponentEmail] && self.friendsPokes[opponentEmail].time) {
-      // 1 point per poke + 1 point per hour
-      var oneHour = 1000 * 60 * 60;
-      wonPoints = Math.floor((time - self.friendsPokes[opponentEmail].time) / oneHour);
-      if (isNaN(wonPoints)) console.log('NaN!', time, self, userPoked); // FOR DEBUGGING if problem
-    }
+    var wonPoints = calculateWonPoints(time, self.friendsPokes[opponentEmail].time);
+    if (isNaN(wonPoints)) console.error('NaN!', time, self, userPoked); // FOR DEBUGGING if problem
+
 
     // From here, this can be repeated in case of CAS error
+
+    // TODO be careful, even with this, we could be getting cases of locks
+    // (both users with friendsPokes[email].isPokingMe to false)
+
+    // TODO look if couchbase has notions of rollbacks
 
     async.series(
       [
@@ -260,12 +268,6 @@ User.prototype.pokeAt = function(opponentEmail, callback) {
       function(err) {
         if (err) return callback(err);
 
-
-        function formatPokeDataForPrimus(pokeData, email) {
-          pokeData.email = email;
-          return pokeData;
-        }
-
         redisClient.publish(
           self.email,
           formatPokeDataForPrimus(
@@ -284,6 +286,44 @@ User.prototype.pokeAt = function(opponentEmail, callback) {
       }
     );
   });
+};
+
+User.prototype.pokeAtUserIgnoringMe = function(userIgnoring, time, callback) {
+  var wonPoints = calculateWonPoints(time, this.friendsPokes[userIgnoring.email].time);
+  this.setPokingAt(userIgnoring, time, wonPoints);
+  this.totalPokes++;
+
+  if (isNaN(wonPoints)) console.error('NaN!', time, this, userIgnoring); // FOR DEBUGGING if problem
+
+  var ignoringUserFriendsPokeForMe = userIgnoring.removeFromIgnoredUsers(this.email) || {};
+  var updatedIgnoringUserFriendsPokeForMe = { // Equivalent of calling setPokedBy for ignored user
+    time: time,
+    isPokingMe: true,
+    myScore: (ignoringUserFriendsPokeForMe.myScore || 0) + (wonPoints || 0),
+    points: wonPoints || 0,
+    pokesCpt: ignoringUserFriendsPokeForMe.pokesCpt || 0,
+    opponentScore: (ignoringUserFriendsPokeForMe.opponentScore || 0) + 1, // Increment + 1, he poked
+    opponentName: this.name,
+    email: ignoringUserFriendsPokeForMe.email
+  };
+  userIgnoring.ignoredUsers.push(updatedIgnoringUserFriendsPokeForMe);
+
+  this.save(function(err) {
+    if (err) return callback(err);
+    userIgnoring.save(function(err) {
+      if (err) return callback(err);
+
+      redisClient.publish(
+        this.email,
+        formatPokeDataForPrimus(
+          this.friendsPokes[userIgnoring.email],
+          userIgnoring.email
+        )
+      );
+
+      callback(null, this.friendsPokes[userIgnoring.email]);
+    }.bind(this));
+  }.bind(this));
 };
 
 User.prototype.sendFriendRequest = function(email, callback) {
@@ -338,15 +378,6 @@ User.prototype.sendFriendRequest = function(email, callback) {
         name: currentUser.name
       });
       callbackStatus = User.FRIEND_STATUSES.PENDING;
-      redisClient.publish(
-        potentialFriend.email,
-        {
-          pendingUser: {
-            email: currentUser.email,
-            opponentName: currentUser.name
-          }
-        }
-      );
     }
 
     async.parallel([
@@ -356,6 +387,15 @@ User.prototype.sendFriendRequest = function(email, callback) {
       if (err) return callback(err);
 
       if (callbackStatus === User.FRIEND_STATUSES.PENDING) {
+        redisClient.publish(
+          potentialFriend.email,
+          {
+            pendingUser: {
+              email: currentUser.email,
+              opponentName: currentUser.name
+            }
+          }
+        );
         return callback(null, callbackStatus);
       }
       currentUser.pokeAt(potentialFriend.email, function(err) {
@@ -430,5 +470,16 @@ User.prototype.unIgnoreUser = function(email, callback) {
   delete this.friendsPokes[restoredUser.email].email; // Data just added for save in ignored users
   this.save(callback);
 };
+
+function calculateWonPoints(now, pokeTime) {
+// 1 point per poke + 1 point per hour
+  var oneHour = 1000 * 60 * 60;
+  return Math.floor((Date.now() - pokeTime) / oneHour);
+}
+
+function formatPokeDataForPrimus(pokeData, email) {
+  pokeData.email = email;
+  return pokeData;
+}
 
 module.exports = User;

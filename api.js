@@ -27,3 +27,4 @@ require('./controllers/pokes')(app);
 require('./controllers/users')(app);
 
 app.listen(8000);
+console.log(new Date(), 'api.js has started');
