@@ -7,8 +7,26 @@ module.exports = function (app) {
   var isLoggedIn = require('../lib/utils/middlewares')(app).isLoggedIn;
 
   app.get('/pokes', isLoggedIn, function(req, res) {
-    // TODO implement a parameter "since", and only send back friendsPokes from then
-    res.jsonp(req.user.friendsPokes);
+    if (!req.query.since && !req.query.from) return res.jsonp(req.user.friendsPokes);
+
+    var filteredFriendsPokes = {};
+
+    if (req.query.since) {
+      var since = parseInt(req.query.since, 10);
+      if (isNaN(since)) return res.status(400);
+      for (var email in req.user.friendsPokes) {
+        if (!req.user.friendsPokes.hasOwnProperty(email)) continue;
+        if (req.user.friendsPokes[email].time < since) continue;
+          filteredFriendsPokes[email] = req.user.friendsPokes[email];
+      }
+      return res.jsonp(filteredFriendsPokes);
+    }
+
+    if (req.query.from && req.user.friendsPokes[req.query.from]) {
+      return res.jsonp(req.user.friendsPokes[req.query.from]);
+    }
+
+    return res.status(400);
   });
 
   app.post('/pokes', isLoggedIn, function(req, res, next) {
