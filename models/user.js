@@ -189,7 +189,7 @@ User.prototype.pokeAt = function(opponentEmail, callback) {
     if (!userPoked) return callback(null, User.FRIEND_STATUSES.NOT_FOUND);
 
     if (!userPoked.hasFriend(self.email)) {
-      if (userPoked.hasIgnored(self.email)) { // FIXME this won't do, if a user had a friend then suddenly he's pending, it's weird
+      if (userPoked.hasIgnored(self.email)) {
         return self.pokeAtUserIgnoringMe(userPoked, time, callback);
       }
       if (userPoked.hasPending(self.email)) {
@@ -342,7 +342,7 @@ User.prototype.sendFriendRequest = function(email, callback) {
   }
 
   if (this.hasIgnored(email)) {
-    // Restore ignored user // FIXME move in restoreIgnoredUser method
+    // Restore ignored user // TODO move in restoreIgnoredUser method
     return callback(null, User.FRIEND_STATUSES.IGNORED);
   }
 
@@ -353,7 +353,7 @@ User.prototype.sendFriendRequest = function(email, callback) {
      // Do not tell a user he's been ignored
     if (potentialFriend.hasIgnored(currentUser.email)) return callback(null, User.FRIEND_STATUSES.PENDING);
 
-    // FIXME TODO Thing about separating all that in 2 methods (sendFriendRequest, acceptFriendRequest)
+    // TODO Thing about separating all that in 2 methods (sendFriendRequest, acceptFriendRequest)
 
     var callbackStatus;
 

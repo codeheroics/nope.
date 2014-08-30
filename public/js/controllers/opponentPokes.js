@@ -21,7 +21,7 @@ PokeGame.OpponentPokesController = Ember.ObjectController.extend({
     var scoreFor = this.get('model.scoreFor');
     var scoreAgainst = this.get('model.scoreAgainst');
     return scoreFor > scoreAgainst;
-  }.property('model.scoreFor', 'model.scoreAgainst'), // FIXME
+  }.property('model.scoreFor', 'model.scoreAgainst'),
 
   // lastPoke: function() {
   //   var pokes = this.get('model.pokes');

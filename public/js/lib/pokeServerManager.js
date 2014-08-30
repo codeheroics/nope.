@@ -153,7 +153,7 @@ PokeGame.PokeServerManager = Ember.Object.extend({
     });
   },
 
-  // FIXME this doesn't really have anything to do with "server" logic
+  // TODO this doesn't really have anything to do with "server" logic
   updateFriendsInfos: function(data) {
     var localPendingUsers = PokeGame.Opponent.findQuery({status: 'pending'});
     var localIgnoredUsers = PokeGame.Opponent.findQuery({status: 'ignored'});
@@ -202,7 +202,7 @@ PokeGame.PokeServerManager = Ember.Object.extend({
     ]);
   },
 
-  // FIXME this has nothing to do with "server" logic
+  // TODO this has nothing to do with "server" logic
   // This function must ONLY be used for pending or ignored opponents
   // Data is missing to be used for friends.
   createPendingOrIgnoredUsers: function(usersData, status) {
@@ -229,7 +229,7 @@ PokeGame.PokeServerManager = Ember.Object.extend({
     });
   },
 
-  // FIXME this has nothing to do with "server" logic
+  // TODO this has nothing to do with "server" logic
   // This function must ONLY be used for pending or ignored opponents
   // Data is missing to be used for friends.
   removePendingOrIgnoredUsers: function(usersData) {

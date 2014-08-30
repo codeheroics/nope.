@@ -1,10 +1,8 @@
 'use strict';
 
-var protocol = 'http://'; // FIXME
-var hostname = window.location.hostname;
 var isDev = window.location.origin.indexOf('localhost') !== -1;
 var SERVER_URL = window.location.origin;
-var REALTIME_SERVER_URL = isDev ? window.location.protocol + '//' + window.location.hostname + ':8080' : window.location.origin + '/ws';
+var REALTIME_SERVER_URL = isDev ? 'http://localhost:8080' : window.location.origin + '/ws'; //FIXME
 
 var USERS_ROUTE = SERVER_URL + '/users';
 var SELF_ROUTE = USERS_ROUTE + '?me';
@@ -14,7 +12,6 @@ var SIGNUP_ROUTE = SERVER_URL + '/signup';
 var PRIMUS_ROUTE = REALTIME_SERVER_URL;
 var CALLBACK_NAME = 'nopecb';
 
-var DEFAULT_AVATAR = 'http://www.gravatar.com/avatar/00000000000000000000000000000000';
 var GRAVATAR_BASE = 'http://www.gravatar.com/avatar/';
 
 var PENDING_USERS_KEY = 'pendingUsers';
@@ -66,7 +63,6 @@ var CustomAuthenticator = Ember.SimpleAuth.Authenticators.Base.extend({
       )
         .done(function(data) {
           window.localStorage.setItem('token', data);
-          window.localStorage.setItem('email', options.identification); // FIXME
           resolve();
         })
         .fail(function(a, b, c) {
@@ -124,6 +120,4 @@ Ember.View.reopen({
   }
 });
 
-window.PokeGame = Ember.Application.create({
-  LOG_TRANSITIONS: true
-});
+window.PokeGame = Ember.Application.create();
