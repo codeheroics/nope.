@@ -2,11 +2,7 @@
 
 PokeGame.PokeServerManager = Ember.Object.extend({
   init: function() {
-    var self = this;
-    this.getAllPokes().then(function() {
-      self.initPrimus();
-    });
-
+    return this.getAllPokes().then(this.initPrimus.bind(this));
   },
 
   initPrimus: function() {
@@ -28,10 +24,10 @@ PokeGame.PokeServerManager = Ember.Object.extend({
         // Data from a poke
         self.handlePokeResult(data).then(function() {
           if (data.isPokingMe) {
-            self.notifyPoked(data.opponentName);
+            self.notifyPoked(data);
           }
           else {
-            self.notifyPoking(data.opponentName);
+            self.notifyPoking(data);
           }
         });
         return;
@@ -70,11 +66,14 @@ PokeGame.PokeServerManager = Ember.Object.extend({
     this.primus.write(opponentEmail);
   },
 
-  notifyPoked: function(opponentName) {
-    toastr.warning('"Nope." received from <span style="font-weight:bold;">' + opponentName + '</span>.');
+  notifyPoked: function(pokeData) {
+    toastr.warning('received from <span style="font-weight:bold;">' + pokeData.opponentName + '</span>.', 'Nope.')
+    // .click(function() {
+    //   this.transitionTo('/opponents/' + pokeData.opponentEmail);
+    // }.bind(this));
   },
-  notifyPoking: function(opponentName) {
-    toastr.success('"Nope." sent to <span style="font-weight:bold;">' + opponentName + '</span>.');
+  notifyPoking: function(pokeData) {
+    toastr.success('sent to <span style="font-weight:bold;">' + pokeData.opponentName + '</span>.', 'Nope.');
   },
 
   handlePokeResult: function(dataPoke, email) {
@@ -148,10 +147,7 @@ PokeGame.PokeServerManager = Ember.Object.extend({
           .then(self.updateFriendsInfos.bind(self, data))
           .then(resolve, reject);
         })
-        .fail(function() {
-          console.log('Failed at getting user self infos :(');
-          reject();
-        });
+        .fail(reject);
     });
   },
 
@@ -263,11 +259,7 @@ PokeGame.PokeServerManager = Ember.Object.extend({
 
         return resolve(Promise.all(promises));
       })
-      .fail(function(a, b, c) {
-        console.error('failed getting pokes');
-        reject();
-        // :(
-      });
+      .fail(reject);
     });
   },
 
@@ -297,7 +289,11 @@ PokeGame.PokeServerManager = Ember.Object.extend({
           if (object.message === 'Friend') {
             return self.getPokesFrom(email).then(resolve);
           }
-          toastr.info(object.message);
+          toastr.info(
+            'Sent a request to <span style="font-weight:bold;">' + email + '</span>',
+            undefined,
+            { timeOut: 5000 }
+          );
           resolve();
         })
         .fail(function(xhr) {
