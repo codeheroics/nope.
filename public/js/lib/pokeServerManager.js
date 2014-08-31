@@ -1,7 +1,12 @@
 'use strict';
 
+// TODO make of this a general manager, move things in different ones
+// (pokeManager for example)
+
 PokeGame.PokeServerManager = Ember.Object.extend({
   init: function() {
+    this.achievementManager = PokeGame.AchievementsManager.create();
+    this.achievementManager.init();
     return this.getAllPokes().then(this.initPrimus.bind(this));
   },
 
@@ -11,10 +16,8 @@ PokeGame.PokeServerManager = Ember.Object.extend({
       PRIMUS_ROUTE, { strategy : ['online', 'disconnect'] }
     );
 
-    //
     // For convenience we use the private event `outgoing::url` to append the
     // authorization token in the query string of our connection URL.
-    //
     this.primus.on('outgoing::url', function connectionURL(url) {
       url.query = 'access_token=' + (localStorage.getItem('token') || '');
     });
@@ -55,6 +58,11 @@ PokeGame.PokeServerManager = Ember.Object.extend({
         //     '</span>.');
         // });
       }
+
+      if (data.achievement !== undefined) {
+        self.achievementManager.unlock(data.achievement);
+        return;
+      }
     });
 
     this.primus.on('error', function error(err) {
@@ -67,7 +75,7 @@ PokeGame.PokeServerManager = Ember.Object.extend({
   },
 
   notifyPoked: function(pokeData) {
-    toastr.warning('received from <span style="font-weight:bold;">' + pokeData.opponentName + '</span>.', 'Nope.')
+    toastr.warning('received from <span style="font-weight:bold;">' + pokeData.opponentName + '</span>.', 'Nope.');
     // .click(function() {
     //   this.transitionTo('/opponents/' + pokeData.opponentEmail);
     // }.bind(this));

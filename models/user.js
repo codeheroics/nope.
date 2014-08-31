@@ -5,6 +5,7 @@ var async       = require('async');
 var validator   = require('validator');
 var db          = require('../lib/couchbase');
 var redisClient = require('../lib/redisClient');
+var userAchievements = require('./userAchievements');
 var _           = require('lodash');
 
 var User = function(params) {
@@ -18,6 +19,7 @@ var User = function(params) {
   this.invitedUsers = params.invitedUsers ? params.invitedUsers : [];
   this.ignoredUsers = params.ignoredUsers ? params.ignoredUsers : [];
   this.pendingUsers = params.pendingUsers ? params.pendingUsers : [];
+  this.achievements = params.achievements ? params.achievements : {};
   this.timePoking = params.timePoking || 0;
   this.totalPokes = params.totalPokes || 0;
   this.created = params.created ? params.created : Date.now();
@@ -80,7 +82,8 @@ User.prototype.toDbJSON = function() {
     pendingUsers: this.pendingUsers,
     timePoking: this.timePoking,
     totalPokes: this.totalPokes,
-    created: this.created
+    created: this.created,
+    achievements: this.achievements
   };
 };
 
@@ -93,7 +96,8 @@ User.prototype.toSelfJSON = function() {
     totalPokes: this.totalPokes,
     invitedUsers: this.invitedUsers,
     ignoredUsers: this.ignoredUsers,
-    pendingUsers: this.pendingUsers
+    pendingUsers: this.pendingUsers,
+    achievements: this.achievements
   };
 };
 
@@ -102,7 +106,8 @@ User.prototype.toPublicJSON = function() {
     name: this.name,
     timePoking: this.timePoking,
     totalPokes: this.totalPokes,
-    created: this.created
+    created: this.created,
+    achievements: this.achievements
   };
 };
 
@@ -241,6 +246,7 @@ User.prototype.pokeAt = function(opponentEmail, callback) {
             function updateUserPoking(cbRetry) {
               self.setPokingAt(userPoked, now, timeDiff);
               self.totalPokes++;
+              self.earnAchievementsAfterPoking(self.friendsPokes[opponentEmail]);
               self.save(function(errSave, result) {
                 // There was an error saving due to the CAS : We'll update the object and retry saving
                 if (errSave && errSave.code === couchbase.errors.keyAlreadyExists) {
@@ -360,6 +366,8 @@ User.prototype.sendFriendRequest = function(email, callback) {
       potentialFriend.friendsPokes[currentUser.email] = {}; // Sets them as friends
       currentUser.friendsPokes[potentialFriend.email] = {}; // Sets them as friends
       callbackStatus = User.FRIEND_STATUSES.FRIEND; // Opponent will be poked & notified, OK.
+      currentUser.earnAchievementsAfterNewFriends();
+      potentialFriend.earnAchievementsAfterNewFriends();
     } else {
       // Send friend request
       currentUser.invitedUsers.push({
@@ -406,6 +414,10 @@ User.prototype._removeFromUsers = function(arrayName, email) {
     return false;
   });
   return removedUser;
+};
+
+User.prototype.removeFromInvitedUsers = function(email) {
+  return this._removeFromUsers('invitedUsers', email);
 };
 
 User.prototype.removeFromPendingUsers = function(email) {
@@ -462,6 +474,36 @@ User.prototype.unIgnoreUser = function(email, callback) {
   this.friendsPokes[restoredUser.email] = restoredUser;
   delete this.friendsPokes[restoredUser.email].email; // Data just added for save in ignored users
   this.save(callback);
+};
+
+/**
+ * Note : nothing is saved here
+ * @param  {[type]} userAchievementsFunction [description]
+ * @param  {[type]} pokeData                 Optional
+ * @return {[type]}                          [description]
+ */
+User.prototype.earnAchievements = function(userAchievementsFn, pokeData) {
+  var achievedIds = userAchievements[userAchievementsFn](this, pokeData);
+  if (!achievedIds.length) return;
+
+  achievedIds.forEach(function(achievedId) {
+    this.achievements[achievedId] = true;
+
+    redisClient.publish(
+      this.email,
+      {
+        achievement: achievedId
+      }
+    );
+  }, this);
+};
+
+User.prototype.earnAchievementsAfterPoking = function(pokeData) {
+  this.earnAchievements('earnedAfterPoking', pokeData);
+};
+
+User.prototype.earnAchievementsAfterNewFriends = function() {
+  this.earnAchievements('earnedAfterNewFriends');
 };
 
 function formatPokeDataForPrimus(pokeData, email) {
