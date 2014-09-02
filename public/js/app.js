@@ -121,7 +121,7 @@ Ember.Handlebars.registerBoundHelper('duration', function(milliseconds) {
 
     if (unitValue === 0) return previousValue;
     return previousValue + ' ' + unitValue + ' ' + unit;
-  }, '');
+  }, '') || 'Just getting started';
 });
 
 Ember.View.reopen({

@@ -88,6 +88,10 @@ html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockq
 			text-decoration: none;
 		}
 
+	b, strong {
+		font-weight: bold;
+	}
+
 	form
 	{
 	}
@@ -591,6 +595,7 @@ html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockq
 
 	#main
 	{
+		margin: 10px;
 	}
 
 /*********************************************************************************/
@@ -694,4 +699,12 @@ html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockq
 
 	.avatar {
 		border-radius: 50px;
+	}
+
+	.unachieved {
+		color: #c1cac5;
+	}
+
+	.achieved i {
+		color: green;
 	}

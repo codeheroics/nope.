@@ -5,8 +5,7 @@
 
 PokeGame.PokeServerManager = Ember.Object.extend({
   init: function() {
-    this.achievementManager = PokeGame.AchievementsManager.create();
-    this.achievementManager.init();
+    this.achievementsManager = PokeGame.AchievementsManager.create();
     return this.getAllPokes().then(this.initPrimus.bind(this));
   },
 
@@ -60,7 +59,7 @@ PokeGame.PokeServerManager = Ember.Object.extend({
       }
 
       if (data.achievement !== undefined) {
-        self.achievementManager.unlock(data.achievement);
+        self.achievementsManager.unlock(data.achievement);
         return;
       }
     });
@@ -150,6 +149,7 @@ PokeGame.PokeServerManager = Ember.Object.extend({
           user.set('avatar', generateGravatar(data.email));
           user.set('timePoking', data.timePoking);
           user.set('totalPokes', data.totalPokes);
+          self.achievementsManager.update(data.achievements);
 
           user.save()
           .then(self.updateFriendsInfos.bind(self, data))

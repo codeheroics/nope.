@@ -75,20 +75,28 @@ PokeGame.AchievementsManager = Ember.Object.extend({
     }
   },
   init: function() {
+    var user = PokeGame.User.find(1);
+    var userAchievements = user.get('achievements') || [];
+    var newUserAchievements = [];
     for (var id in this.achievements) {
       if (!this.achievements.hasOwnProperty(id)) continue;
-      if (PokeGame.Achievement.find(id).isLoaded) continue;
-      PokeGame.Achievement.create({
+      if (userAchievements && userAchievements[id]) {
+        newUserAchievements[id] = userAchievements[id];
+        continue;
+      }
+      newUserAchievements[id] = {
         id: id,
         title: this.achievements[id].title,
         description: this.achievements[id].description,
         unlocked: false
-      }).save();
+      };
     }
-    return this;
+    user.set('achievements', newUserAchievements);
+    user.save();
   },
 
   unlock: function(achievementId) {
+    var user = PokeGame.User.find(1);
     var achievement = PokeGame.Achievement.find(achievementId);
     if (!achievement.isLoaded) return;
     if (achievement.get('unlocked')) return;
@@ -101,5 +109,27 @@ PokeGame.AchievementsManager = Ember.Object.extend({
         { timeOut: 10000 }
       );
     });
+  },
+
+  /**
+   * Update with data from the server
+   * Note : this is not an unlock, we did not receive a notification to tell us
+   * we just unlocked achievements, we are merely syncing (in case no data
+   * about achievements was stored)
+   * @param  {Object} dataAchievements / key : unlocked achievements as keys
+   */
+  update: function(dataAchievements) {
+    var user = PokeGame.User.find(1);
+    var achievements = user.get('achievements');
+    var newAchievements = achievements.map(function(achievement, id) {
+      return {
+        id: id,
+        title: achievement.title,
+        description: achievement.description,
+        unlocked: !! dataAchievements[id]
+      };
+    });
+    user.set('achievements', newAchievements);
+    user.save();
   }
 });

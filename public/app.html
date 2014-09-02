@@ -33,7 +33,6 @@
 		<script src="js/models/poke.js"></script>
 		<script src="js/models/opponent.js"></script>
 		<script src="js/models/user.js"></script>
-		<script src="js/models/achievement.js"></script>
 		<script src="js/controllers/index.js"></script>
 		<script src="js/controllers/opponents.js"></script>
 		<script src="js/controllers/opponentPokes.js"></script>
@@ -364,30 +363,36 @@
 		</script>
 
 		<script type="text/x-handlebars" data-template-name="profile">
-			<!-- Features -->
-				<section class="is-features">
+				<section>
 					<h2 class="major"><span>My Profile</span></h2>
-					<div>
-						<div class="row">
-							<div style="margin: auto; float:none;">
-
-								<!-- Feature -->
-									<section class="is-feature">
-										<a href="#" class="image image-centered image-user"><img {{bind-attr src="avatar"}} /></a>
-										<h3>{{name}}</h3>
-										<ul>
-											<li>E-mail: {{email}}</li>
-											<li>Total nopes: {{totalPokes}}</li>
-											<li>Total time noping: {{duration timePoking}}</li>
-										</ul>
-									</section>
-								<!-- /Feature -->
-
+						<section style="text-align: center;">
+							<a href="#" class="image image-centered image-user"><img {{bind-attr src="avatar"}} /></a>
+							<h3>{{name}} ({{email}})</h3>
+							<p class="pokesSent">{{totalPokes}}</p>
+							<div>
+								<legend class="pokesSent">nopes sent</legend>
+								<legend class="pokesSent"><small>{{duration timePoking}}</small></li>
 							</div>
-						</div>
-					</div>
+						</section>
+						<section>
+						<h2 class="major"><span>My Achievements</span></h2>
+						<ul>
+						{{#each achievements}}
+							{{#if unlocked}}
+								<li class="achieved">
+									<i class="fa fa-unlock"></i>
+									<strong>{{title}}</strong> - {{description}}
+								</li>
+								{{else}}
+								<li class="unachieved">
+									<i class="fa fa-lock"></i>
+									<strong>{{title}}</strong> - {{description}}
+								</li>
+								{{/if}}
+							</li>
+						{{/each}}
+						</section>
 				</section>
-			<!-- /Features -->
 		</script>
 
 		<script type="text/x-handlebars" data-template-name="help">
