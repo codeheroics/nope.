@@ -79,8 +79,9 @@ html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockq
 
 	a
 	{
-		color: #006376;
-		text-decoration: underline;
+		font-weight: bold;
+		text-decoration: none;
+		color: inherit;
 	}
 
 		a:hover
@@ -332,34 +333,30 @@ html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockq
 				top: 0;
 			}
 
-	ul.special
+	div.special
 	{
 	}
 
-		ul.special li
+		div.special
 		{
 			position: relative;
 			display: inline-block;
-			margin: 0 1.5em 0 1.5em;
 			top: 0;
 		}
 
-		ul.special a {
+		div.special a {
 			text-decoration: none;
 		}
 
-			ul.special i
+			div.special i
 			{
-				display: block;
-				position: relative;
-				background: #c1cac5;
 				width: 12em;
 				height: 12em;
 				border-radius: 6em;
 				outline: 0;
 			}
 
-				ul.special i:before
+				div.special i:before
 				{
 					position: absolute;
 					width: 128px;
@@ -370,7 +367,6 @@ html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockq
 					top: 50%;
 					margin-top: -64px;
 					margin-left: -64px;
-					color: #fff;
 				}
 
 	ul.meta
@@ -705,6 +701,10 @@ html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockq
 		color: #c1cac5;
 	}
 
-	.achieved i {
+	.success {
 		color: green;
+	}
+
+	.alert {
+		color: red;
 	}

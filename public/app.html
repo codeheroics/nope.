@@ -129,30 +129,40 @@
 
 		<script type="text/x-handlebars" data-template-name="index">
 			<section class="is-highlight">
-				<ul class="special">
-					<li>{{#link-to "opponents"}}<i class="fa fa-group solo"></i>Opponents{{/link-to}}</li>
-					{{#if opponentPokingMe}}
-						<li>
-							{{#link-to "opponentPokes" opponentPokingMe.id}}<i class="fa fa-share solo"></i>
-							Poke back {{opponentPokingMe.name}}{{/link-to}}
-						</li>
-					{{else}}
-						<li><i class="fa fa-check solo"></i>Yep.</li>
-					{{/if}}
-				</ul>
 				<div>
 					{{#if opponentPokingMe}}
 						<h2>Nope.</h2>
-					{{else}}
-						<h2>Yep.</h2>
-					{{/if}}
 					<span class="byline">
-						{{#if opponentPokingMe}}
-							{{opponentPokingMe.name}} currently has the last word.
+						{{#if opponentsPokingMe}}
+							You do not have the last word.
 						{{else}}
 							You got the last word. For now.
 						{{/if}}
 					</span>
+						<div class="special">
+							<i class="fa fa-frown-o"></i>
+						</div>
+					{{else}}
+						<h2>Yep.</h2>
+						<div class="special">
+							<i class="fa fa-smile-o"></i>
+						</div>
+					{{/if}}
+				</div>
+				<div>
+					{{#if opponentsPokingMe}}
+						<h4>You have not answered to:</h4>
+						<ul>
+							{{#each opponentsPokingMe}}
+								<li>
+									{{#link-to 'opponentPokes' id}}
+										<img width="20" height="20" style="border-radius: 10px;" {{bind-attr src="avatar"}} />
+										{{name}}
+									{{/link-to}}
+								</li>
+							{{/each}}
+						</ul>
+					{{/if}}
 				</div>
 				{{#if pendingOpponents.length}}
 					<div>
@@ -261,7 +271,7 @@
 			<section>
 				<h2 class="major"><span>Ignored people</span></h2>
 				{{#if model}}{{else}}
-				  Nope. You are not ignoring anyone.
+					Nope. You are not ignoring anyone.
 				{{/if}}
 				<ul class="columns">
 					{{#each}}
@@ -346,8 +356,8 @@
 								<article class="is-post-summary">
 									<h3>
 										{{#link-to 'opponentPokes' opponent}}
-											{{#if isReceived}}{{opponent.name}} told you : "Nope."
-											{{else}} "Nope." did you tell to {{opponent.name}}.{{/if}}
+											{{#if isReceived}}{{opponent.name}} sent you a nope.
+											{{else}} You sentt to {{opponent.name}} a nopes.{{/if}}
 										{{/link-to}}
 									</h3>
 									<ul class="meta">
@@ -379,7 +389,7 @@
 						<ul>
 						{{#each achievements}}
 							{{#if unlocked}}
-								<li class="achieved">
+								<li class="success">
 									<i class="fa fa-unlock"></i>
 									<strong>{{title}}</strong> - {{description}}
 								</li>
@@ -425,7 +435,7 @@
 
 				<!-- Copyright -->
 					<div id="copyright">
-						&copy; A Game of Pokes | Design: <a href="http://html5up.net/">HTML5 UP</a>
+						&copy; Nope. | Design: <a href="http://html5up.net/">HTML5 UP</a>
 					</div>
 				<!-- /Copyright -->
 			</section>

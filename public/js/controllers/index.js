@@ -9,11 +9,11 @@ PokeGame.IndexController = Ember.ArrayController.extend({
     }
   },
 
-  opponentPokingMe: function() {
+  opponentsPokingMe: function() {
     var opponents = this.get('model');
     var friends = opponents.filterBy('status', 'friend');
     var scoringOpponents = friends.filterBy('isScoring', true);
-    return scoringOpponents.length > 0 ? scoringOpponents[0] : null;
+    return scoringOpponents.length > 0 ? scoringOpponents : null;
   }.property('model.@each.isScoring'),
 
   pendingOpponents: function() {
