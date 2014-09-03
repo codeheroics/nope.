@@ -1,10 +1,13 @@
 'use strict';
 
-var moment = require('moment');
-var jwt = require('jwt-simple');
-var config = require('config');
-var log = require('winston');
-var passport = require('passport');
+var moment    = require('moment');
+var jwt       = require('jwt-simple');
+var config    = require('config');
+var log       = require('winston');
+var passport  = require('passport');
+var validator = require('validator');
+var User      = require('../models/user');
+var mail      = require('../lib/mail');
 
 module.exports = function(app) {
   var isLoggedIn = require('../lib/utils/middlewares')(app).isLoggedIn;
@@ -19,13 +22,6 @@ module.exports = function(app) {
     );
    };
 
-   var outputSignupSuccess = function(req, res) {
-    res.jsonp(
-      200,
-      req.user.toSelfJSON()
-    );
-   };
-
   var outputSignupError = function(err, req, res) {
     res.jsonp(
       err ? 500 : 403,
@@ -35,17 +31,23 @@ module.exports = function(app) {
     );
   };
 
-   var createAndOutputToken = function(req, res, next) {
-    if (!req.user || !req.user.email) {
-      log.error('Tried creating token with no user email', req.user);
-      return outputLoginError(req, res);
-    }
-      var token = jwt.encode({
-        email: req.user.email
-      }, config.jwtTokenSecret);
+  var outputConfirmError = function(err, req, res) {
+    res.jsonp(
+      err ? 500 : 403,
+      {
+        message: err ? 'server error, try again later' : 'token error'
+      }
+    );
+  };
 
-      res.jsonp(token);
-   };
+  var createToken = function(tokenSecretLabel, user) {
+    return jwt.encode({
+      email: user.email
+    }, config[tokenSecretLabel]);
+  };
+
+   var createAccessToken = createToken.bind(this, 'jwtTokenSecret');
+   var createConfirmToken = createToken.bind(this, 'jwtTokenSecretForEmail');
 
    // Route to check if logged in
    app.get('/login', isLoggedIn, function(req, res, next) {
@@ -58,8 +60,7 @@ module.exports = function(app) {
       if (err) log.error(err.message, err);
       if (err || !user) return outputLoginError(req, res);
 
-      req.user = user;
-      createAndOutputToken(req, res);
+      res.jsonp(createAccessToken(user));
     })(req, res, next);
   });
 
@@ -76,10 +77,33 @@ module.exports = function(app) {
   app.post('/signup', function(req, res, next) {
     passport.authenticate('local-signup', function(err, user) {
       if (err) log.error(err.message, err);
-      req.user = user;
       if (err || !user) return outputSignupError(err, req, res);
-      outputSignupSuccess(req, res);
+
+      mail.sendConfirmationMail(user, createConfirmToken(user), function(err, json) {
+        console.log('TODO signal to the user if any problems');
+        res.jsonp(null);
+      });
     })(req, res, next);
+  });
+
+  app.get('/confirm', function(req, res, next) {
+    if (!req.query.token) return outputConfirmError(new Error('Invalid token'), req, res);
+
+    var decoded = jwt.decode(req.query.token, config.jwtTokenSecretForEmail);
+      // if user is authenticated in the session, carry on
+      if (!validator.isEmail(decoded.email)) {
+         return outputConfirmError(new Error('Invalid token'), req, res);
+      }
+
+      User.findById(decoded.email, function(err, user) {
+        if (err || !user) return outputConfirmError(err, req, res);
+        user.confirmed = true;
+        user.save(function(err) {
+          if (err) return outputConfirmError(err, req, res);
+          res.jsonp(null);
+        });
+      });
+
   });
 
   // =====================================

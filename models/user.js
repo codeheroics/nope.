@@ -15,6 +15,7 @@ var User = function(params) {
   this.name = params.name;
   this.email = params.email.toLowerCase();
   this.password = params.password;
+  this.confirmed = !! params.confirmed;
   this.friendsNopes = params.friendsNopes ? params.friendsNopes : {};
   this.invitedUsers = params.invitedUsers ? params.invitedUsers : [];
   this.ignoredUsers = params.ignoredUsers ? params.ignoredUsers : [];

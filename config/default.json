@@ -1,4 +1,5 @@
 {
   "jwtTokenSecret": "ALL HAIL BRITANNIA!",
+  "jwtTokenSecretForEmail": "ELEVEN BANZAI!",
   "primusChannel": "primus"
 }
