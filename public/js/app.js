@@ -120,8 +120,8 @@ Ember.Handlebars.registerBoundHelper('duration', function(milliseconds) {
     var unitValue = moment.duration(milliseconds)[unit]();
 
     if (unitValue === 0) return previousValue;
-    return previousValue + ' ' + unitValue + ' ' + unit;
-  }, '') || 'Just getting started';
+    return previousValue + (previousValue === '' ?  '' : ', ') + unitValue + ' ' + unit;
+  }, '').replace(/,([^,]*)$/,' and'+'$1') || '0 second';
 });
 
 Ember.View.reopen({

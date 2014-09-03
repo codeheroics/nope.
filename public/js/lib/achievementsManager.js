@@ -97,14 +97,18 @@ PokeGame.AchievementsManager = Ember.Object.extend({
 
   unlock: function(achievementId) {
     var user = PokeGame.User.find(1);
-    var achievement = PokeGame.Achievement.find(achievementId);
-    if (!achievement.isLoaded) return;
-    if (achievement.get('unlocked')) return;
-    achievement.set('unlocked', true);
-    achievement.save().then(function() {
+    var achievements = user.get('achievements');
+    var achievement = achievements[achievementId];
+    if (achievements[achievementId].unlocked) return;
+    var copiedAchievements = achievements.map(function(achievement) {
+      return achievement;
+    });
+    copiedAchievements[achievementId].unlocked = true;
+    user.set('achievements', achievements);
+    user.save().then(function() {
       toastr.success(
-        '<span style="font-weight:bold;">' + achievement.get('title') + '</span>: '+
-          achievement.get('description'),
+        '<span style="font-weight:bold;">' + achievement.title + '</span>: '+
+          achievement.description,
         'Achievement unlocked!',
         { timeOut: 10000 }
       );

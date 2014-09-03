@@ -130,7 +130,7 @@
 		<script type="text/x-handlebars" data-template-name="index">
 			<section class="is-highlight">
 				<div>
-					{{#if opponentPokingMe}}
+					{{#if opponentsPokingMe}}
 						<h2>Nope.</h2>
 					<span class="byline">
 						{{#if opponentsPokingMe}}
@@ -151,13 +151,13 @@
 				</div>
 				<div>
 					{{#if opponentsPokingMe}}
-						<h4>You have not answered to:</h4>
+						<h4>Last nopes received:</h4>
 						<ul>
 							{{#each opponentsPokingMe}}
 								<li>
 									{{#link-to 'opponentPokes' id}}
 										<img width="20" height="20" style="border-radius: 10px;" {{bind-attr src="avatar"}} />
-										{{name}}
+										{{name}} {{relativeDateFormat lastPokeTime}}
 									{{/link-to}}
 								</li>
 							{{/each}}
@@ -356,13 +356,15 @@
 								<article class="is-post-summary">
 									<h3>
 										{{#link-to 'opponentPokes' opponent}}
-											{{#if isReceived}}{{opponent.name}} sent you a nope.
-											{{else}} You sentt to {{opponent.name}} a nopes.{{/if}}
+											{{#if isReceived}}Nope received from {{opponent.name}}
+											{{else}} Nope sent to {{opponent.name}}.{{/if}}
 										{{/link-to}}
 									</h3>
 									<ul class="meta">
 										<li class="fa fa-clock-o">{{relativeDateFormat date}}</li>
-										<li class="fa fa-comments">{{#if isReceived}}{{opponent.name}}{{else}}You{{/if}} earned {{points}} points</li>
+										<li class="fa fa-comments">
+											{{#if isReceived}}{{opponent.name}}{{else}}You{{/if}} had the advantage for {{duration timeDiff}}
+										</li>
 									</ul>
 								</article>
 							</li>

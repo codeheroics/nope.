@@ -95,7 +95,7 @@ PokeGame.PokeServerManager = Ember.Object.extend({
       id: pokeId,
       isReceived: dataPoke.isPokingMe,
       time: dataPoke.time,
-      points: dataPoke.points
+      timeDiff: dataPoke.timeDiff
     });
 
     var opponent = PokeGame.Opponent.find(email);
@@ -110,9 +110,10 @@ PokeGame.PokeServerManager = Ember.Object.extend({
     opponent.set('timeFor', dataPoke.opponentTimePoking);
     opponent.set('timeAgainst', dataPoke.myTimePoking);
     opponent.set('pokesCpt', dataPoke.pokesCpt);
-    opponent.set('points', dataPoke.points);
+    opponent.set('timeDiff', dataPoke.timeDiff);
     opponent.set('avatar', generateGravatar(email));
     opponent.set('status', 'friend');
+    opponent.set('lastPokeTime', dataPoke.time);
     var pokes = opponent.get('pokes').pushObject(pokeRecord);
 
     pokeRecord.set('opponent', opponent);
