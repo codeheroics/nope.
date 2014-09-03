@@ -46,7 +46,7 @@
 		clear: both;
 		margin: 0 0 2.5em 0 !important;
 	}
-	
+
 	.byline
 	{
 		font-size: 1.5em;
@@ -65,7 +65,7 @@
 	ul.special
 	{
 	}
-	
+
 		ul.special li
 		{
 			margin: 0.1em;
@@ -82,7 +82,7 @@
 				height: 9.5em;
 				border-radius: 4.75em;
 			}
-			
+
 				ul.special a:before
 				{
 					font-size: 64px;
@@ -91,7 +91,7 @@
 	ul.contact
 	{
 	}
-	
+
 		ul.contact li
 		{
 			margin: 0 0.15em 0.35em 0;
@@ -105,7 +105,7 @@
 	.is-highlight
 	{
 	}
-	
+
 		.is-highlight .special
 		{
 		}
@@ -121,7 +121,7 @@
 		{
 			margin: 0 0 0.75em 0;
 		}
-		
+
 		.is-highlight br
 		{
 			display: none;
@@ -131,7 +131,7 @@
 	{
 		margin: 0 !important;
 	}
-	
+
 		.is-post-summary h3
 		{
 			font-size: 1.25em;
@@ -152,7 +152,7 @@
 		{
 			margin: 0 0 0.75em 0;
 		}
-		
+
 		.is-post ul.meta
 		{
 			margin: 0 0 0.5em 0;
@@ -178,7 +178,7 @@
 		{
 			margin: 0 0 0.75em 0;
 		}
-		
+
 		.is-page-content ul.meta
 		{
 			margin: 0 0 0.5em 0;
@@ -202,17 +202,17 @@
 		border-bottom: solid 2px #e7eae8;
 		padding-bottom: 5em;
 	}
-	
+
 		.sidebar > section
 		{
 			margin: 0 0 5em 0 !important;
 		}
-	
+
 		.sidebar > section:last-child
 		{
 			margin: 0 !important;
 		}
-	
+
 	.content
 	{
 		padding-top: 3em;
@@ -231,7 +231,7 @@
 	{
 		padding: 12em 0 8em 0;
 	}
-	
+
 	#main-wrapper
 	{
 		border-top-width: 0px;
@@ -305,7 +305,7 @@
 	{
 		padding: 4em 20px 2em 20px;
 	}
-	
+
 		#footer > .row
 		{
 			padding: 1em 0 1em 0;
@@ -397,7 +397,7 @@
 			color: #fff;
 			border-top: solid 2px rgba(87, 93, 89, 0.15);
 		}
-		
+
 		#navPanel .link:first-child
 		{
 			border-top: 0;
