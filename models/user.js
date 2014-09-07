@@ -15,13 +15,13 @@ var User = function(params) {
   this.name = params.name;
   this.email = params.email.toLowerCase();
   this.password = params.password;
-  this.friendsPokes = params.friendsPokes ? params.friendsPokes : {};
+  this.friendsNopes = params.friendsNopes ? params.friendsNopes : {};
   this.invitedUsers = params.invitedUsers ? params.invitedUsers : [];
   this.ignoredUsers = params.ignoredUsers ? params.ignoredUsers : [];
   this.pendingUsers = params.pendingUsers ? params.pendingUsers : [];
   this.achievements = params.achievements ? params.achievements : {};
-  this.timePoking = params.timePoking || 0;
-  this.totalPokes = params.totalPokes || 0;
+  this.timeNoping = params.timeNoping || 0;
+  this.totalNopes = params.totalNopes || 0;
   this.created = params.created ? params.created : Date.now();
   this.cas = params.cas || null;
 };
@@ -44,11 +44,11 @@ var FriendError = User.FriendError = function(status) {
 };
 User.FriendError.prototype = new Error();
 
-var PokeError = User.PokeError = function(message) {
-  this.name = 'PokeError';
-  this.message = 'There was an error while poking: ' + message;
+var NopeError = User.NopeError = function(message) {
+  this.name = 'NopeError';
+  this.message = 'There was an error while noping: ' + message;
 };
-User.PokeError.prototype = new Error();
+User.NopeError.prototype = new Error();
 
 User.findById = function(email, callback) {
   email = email.toLowerCase();
@@ -76,12 +76,12 @@ User.prototype.toDbJSON = function() {
   return {
     name: this.name,
     password: this.password,
-    friendsPokes: this.friendsPokes,
+    friendsNopes: this.friendsNopes,
     invitedUsers: this.invitedUsers,
     ignoredUsers: this.ignoredUsers,
     pendingUsers: this.pendingUsers,
-    timePoking: this.timePoking,
-    totalPokes: this.totalPokes,
+    timeNoping: this.timeNoping,
+    totalNopes: this.totalNopes,
     created: this.created,
     achievements: this.achievements
   };
@@ -92,8 +92,8 @@ User.prototype.toSelfJSON = function() {
     name: this.name,
     email: this.email,
     created: this.created,
-    timePoking: this.timePoking,
-    totalPokes: this.totalPokes,
+    timeNoping: this.timeNoping,
+    totalNopes: this.totalNopes,
     invitedUsers: this.invitedUsers,
     ignoredUsers: this.ignoredUsers,
     pendingUsers: this.pendingUsers,
@@ -104,15 +104,15 @@ User.prototype.toSelfJSON = function() {
 User.prototype.toPublicJSON = function() {
   return {
     name: this.name,
-    timePoking: this.timePoking,
-    totalPokes: this.totalPokes,
+    timeNoping: this.timeNoping,
+    totalNopes: this.totalNopes,
     created: this.created,
     achievements: this.achievements
   };
 };
 
 User.prototype.hasFriend = function(email) {
-  return this.friendsPokes[email.toLowerCase()] ? true : false;
+  return this.friendsNopes[email.toLowerCase()] ? true : false;
 };
 
 User.prototype.hasIgnored = function(email) {
@@ -134,101 +134,101 @@ User.prototype.hasPending = function(email) {
 };
 
 /**
- * [setPokingAt description]
- * @param {User} userPoked    user poked
+ * [setNopingAt description]
+ * @param {User} userNoped    user noped
  * @param {[type]} time              [description]
  * @param {[type]} timeDiff [description]
  */
-User.prototype.setPokingAt = function(userPoked, now, timeDiff) {
-  var email = userPoked.email;
+User.prototype.setNopingAt = function(userNoped, now, timeDiff) {
+  var email = userNoped.email;
   email = email.toLowerCase().trim();
-  var oldPoke = this.friendsPokes[email] || {};
-  this.friendsPokes[email] = {
+  var oldNope = this.friendsNopes[email] || {};
+  this.friendsNopes[email] = {
     time: now,
-    myTimePoking: (oldPoke.myTimePoking || 0),
-    opponentTimePoking: (oldPoke.opponentTimePoking || 0) + (timeDiff || 0),
+    myTimeNoping: (oldNope.myTimeNoping || 0),
+    opponentTimeNoping: (oldNope.opponentTimeNoping || 0) + (timeDiff || 0),
     timeDiff: timeDiff || 0,
-    pokesCpt: (oldPoke.pokesCpt || 0) + 1,
-    isPokingMe: false,
-    opponentName: userPoked.name.trim()
+    nopesCpt: (oldNope.nopesCpt || 0) + 1,
+    isNopingMe: false,
+    opponentName: userNoped.name.trim()
   };
 };
 
 /**
- * [setPokedBy description]
- * @param {User} userPoking    user poking
+ * [setNopedBy description]
+ * @param {User} userNoping    user noping
  * @param {[type]} now       [description]
  * @param {[type]} timeDiff  [description]
  */
-User.prototype.setPokedBy = function(userPoking, now, timeDiff) {
-  var email = userPoking.email;
-  var oldPoke = this.friendsPokes[email] || {};
-  this.friendsPokes[email] = {
+User.prototype.setNopedBy = function(userNoping, now, timeDiff) {
+  var email = userNoping.email;
+  var oldNope = this.friendsNopes[email] || {};
+  this.friendsNopes[email] = {
     time: now,
-    isPokingMe: true,
-    myTimePoking: (oldPoke.myTimePoking || 0) + (timeDiff || 0),
+    isNopingMe: true,
+    myTimeNoping: (oldNope.myTimeNoping || 0) + (timeDiff || 0),
     timeDiff: timeDiff || 0,
-    pokesCpt: oldPoke.pokesCpt || 0,
-    opponentTimePoking: (oldPoke.opponentTimePoking || 0),
-    opponentName: userPoking.name.trim()
+    nopesCpt: oldNope.nopesCpt || 0,
+    opponentTimeNoping: (oldNope.opponentTimeNoping || 0),
+    opponentName: userNoping.name.trim()
   };
 };
 
-User.prototype.pokeAt = function(opponentEmail, callback) {
+User.prototype.nopeAt = function(opponentEmail, callback) {
   var self = this;
   var now = Date.now();
 
   if (!this.hasFriend(opponentEmail)) return callback(new FriendError(User.FRIEND_STATUSES.NOT_FRIEND));
   // === false because undefined would mean it is not defined yet (user just added has friend)
-  if (this.friendsPokes[opponentEmail].isPokingMe === false) return callback(new PokeError('Already poked back'));
+  if (this.friendsNopes[opponentEmail].isNopingMe === false) return callback(new NopeError('Already noped back'));
 
-  User.findById(opponentEmail, function(err, userPoked) {
+  User.findById(opponentEmail, function(err, userNoped) {
     if (err) return callback(err);
-    if (!userPoked) return callback(new FriendError(User.FRIEND_STATUSES.NOT_FOUND));
+    if (!userNoped) return callback(new FriendError(User.FRIEND_STATUSES.NOT_FOUND));
 
-    if (!userPoked.hasFriend(self.email)) {
-      if (userPoked.hasIgnored(self.email)) {
-        return self.pokeAtUserIgnoringMe(userPoked, time, callback);
+    if (!userNoped.hasFriend(self.email)) {
+      if (userNoped.hasIgnored(self.email)) {
+        return self.nopeAtUserIgnoringMe(userNoped, time, callback);
       }
-      if (userPoked.hasPending(self.email)) {
+      if (userNoped.hasPending(self.email)) {
         return callback(new FriendError(User.FRIEND_STATUSES.PENDING));
       }
       return callback(new FriendError(User.FRIEND_STATUSES.NOT_FRIEND));
     }
 
-    var opponentUserPoke = userPoked.friendsPokes[self.email];
+    var opponentUserNope = userNoped.friendsNopes[self.email];
 
-    if (!opponentUserPoke) return callback(new Error('This should not happen'));
+    if (!opponentUserNope) return callback(new Error('This should not happen'));
     // Next line not useful, check already done ahead, but be careful of locks
-    // if (opponentUserPoke.isPokingMe) return callback(new PokeError('Already poked back'));
+    // if (opponentUserNope.isNopingMe) return callback(new NopeError('Already noped back'));
 
-    // okay, we can poke
+    // okay, we can nope
 
-    var timeDiff = now - self.friendsPokes[opponentEmail].time;
-    if (isNaN(timeDiff)) console.error('NaN!', timeDiff, self, userPoked); // FOR DEBUGGING if problem
+    var timeDiff = now - self.friendsNopes[opponentEmail].time;
+    if (isNaN(timeDiff)) console.error('NaN!', timeDiff, self, userNoped); // FOR DEBUGGING if problem
 
 
     // From here, this can be repeated in case of CAS error
 
     // TODO be careful, even with this, we could be getting cases of locks
-    // (both users with friendsPokes[email].isPokingMe to false)
+    // (both users with friendsNopes[email].isNopingMe to false)
 
     // TODO look if couchbase has notions of rollbacks
 
     async.series(
       [
-        function manageUserPoked(cbSeries) {
+        function manageUserNoped(cbSeries) {
           async.retry(
             3,
-            function updateUserPoked(cbRetry) {
-              userPoked.setPokedBy(self, now, timeDiff);
-              userPoked.timePoking += timeDiff;
-              userPoked.save(function(errSave, result) {
+            function updateUserNoped(cbRetry) {
+              userNoped.setNopedBy(self, now, timeDiff);
+              userNoped.timeNoping += timeDiff;
+              userNoped.save(function(errSave, result) {
                 // There was an error saving due to the CAS : We'll update the object and retry saving
                 if (errSave && errSave.code === couchbase.errors.keyAlreadyExists) {
-                  User.findById(userPoked.email, function(errGet, updateUserPoked) {
+                  User.findById(userNoped.email, function(errGet, updateUserNoped) {
                     if (errGet) return cbRetry(errGet);
-                    userPoked = updateUserPoked;
+                    userNoped = updateUserNoped;
                     return cbRetry(errSave);
                   });
                 }
@@ -240,19 +240,19 @@ User.prototype.pokeAt = function(opponentEmail, callback) {
           );
         },
 
-        function manageUserPoking(cbSeries) {
+        function manageUserNoping(cbSeries) {
           async.retry(
             3,
-            function updateUserPoking(cbRetry) {
-              self.setPokingAt(userPoked, now, timeDiff);
-              self.totalPokes++;
-              self.earnAchievementsAfterPoking(self.friendsPokes[opponentEmail]);
+            function updateUserNoping(cbRetry) {
+              self.setNopingAt(userNoped, now, timeDiff);
+              self.totalNopes++;
+              self.earnAchievementsAfterNoping(self.friendsNopes[opponentEmail]);
               self.save(function(errSave, result) {
                 // There was an error saving due to the CAS : We'll update the object and retry saving
                 if (errSave && errSave.code === couchbase.errors.keyAlreadyExists) {
-                  User.findById(self.email, function(errGet, pokingUser) {
+                  User.findById(self.email, function(errGet, nopingUser) {
                     if (errGet) return cbRetry(errGet);
-                    self = pokingUser;
+                    self = nopingUser;
                     return cbRetry(errSave);
                   });
                 }
@@ -269,43 +269,43 @@ User.prototype.pokeAt = function(opponentEmail, callback) {
 
         redisClient.publish(
           self.email,
-          formatPokeDataForPrimus(
-            self.friendsPokes[opponentEmail],
+          formatNopeDataForPrimus(
+            self.friendsNopes[opponentEmail],
             opponentEmail
           )
         );
         redisClient.publish(
           opponentEmail,
-          formatPokeDataForPrimus(
-            userPoked.friendsPokes[self.email],
+          formatNopeDataForPrimus(
+            userNoped.friendsNopes[self.email],
             self.email
           )
         );
-        callback(err, self.friendsPokes[opponentEmail]);
+        callback(err, self.friendsNopes[opponentEmail]);
       }
     );
   });
 };
 
-User.prototype.pokeAtUserIgnoringMe = function(userIgnoring, now, callback) {
-  var timeDiff = now - this.friendsPokes[userIgnoring.email].time;
-  this.setPokingAt(userIgnoring, now, timeDiff);
-  this.totalPokes++;
+User.prototype.nopeAtUserIgnoringMe = function(userIgnoring, now, callback) {
+  var timeDiff = now - this.friendsNopes[userIgnoring.email].time;
+  this.setNopingAt(userIgnoring, now, timeDiff);
+  this.totalNopes++;
 
   if (isNaN(timeDiff)) console.error('NaN!', timeDiff, this, userIgnoring); // FOR DEBUGGING if problem
 
-  var ignoringUserFriendsPokeForMe = userIgnoring.removeFromIgnoredUsers(this.email) || {};
-  var updatedIgnoringUserFriendsPokeForMe = { // Equivalent of calling setPokedBy for ignored user
+  var ignoringUserFriendsNopeForMe = userIgnoring.removeFromIgnoredUsers(this.email) || {};
+  var updatedIgnoringUserFriendsNopeForMe = { // Equivalent of calling setNopedBy for ignored user
     time: now,
-    isPokingMe: true,
-    myTimePoking: (ignoringUserFriendsPokeForMe.myTimePoking || 0) + (timeDiff || 0),
+    isNopingMe: true,
+    myTimeNoping: (ignoringUserFriendsNopeForMe.myTimeNoping || 0) + (timeDiff || 0),
     timeDiff: timeDiff || 0,
-    pokesCpt: ignoringUserFriendsPokeForMe.pokesCpt || 0,
-    opponentTimePoking: (ignoringUserFriendsPokeForMe.opponentTimePoking || 0) + 1, // Increment + 1, he poked
+    nopesCpt: ignoringUserFriendsNopeForMe.nopesCpt || 0,
+    opponentTimeNoping: (ignoringUserFriendsNopeForMe.opponentTimeNoping || 0) + 1, // Increment + 1, he noped
     opponentName: this.name,
-    email: ignoringUserFriendsPokeForMe.email
+    email: ignoringUserFriendsNopeForMe.email
   };
-  userIgnoring.ignoredUsers.push(updatedIgnoringUserFriendsPokeForMe);
+  userIgnoring.ignoredUsers.push(updatedIgnoringUserFriendsNopeForMe);
 
   this.save(function(err) {
     if (err) return callback(err);
@@ -314,13 +314,13 @@ User.prototype.pokeAtUserIgnoringMe = function(userIgnoring, now, callback) {
 
       redisClient.publish(
         this.email,
-        formatPokeDataForPrimus(
-          this.friendsPokes[userIgnoring.email],
+        formatNopeDataForPrimus(
+          this.friendsNopes[userIgnoring.email],
           userIgnoring.email
         )
       );
 
-      callback(null, this.friendsPokes[userIgnoring.email]);
+      callback(null, this.friendsNopes[userIgnoring.email]);
     }.bind(this));
   }.bind(this));
 };
@@ -358,14 +358,14 @@ User.prototype.sendFriendRequest = function(email, callback) {
 
     if (potentialFriend.hasFriend(currentUser.email) || potentialFriend.hasIgnored(currentUser.email)) {
       // The users already knew each other,
-      callbackStatus = User.FRIEND_STATUSES.FRIEND; // Opponent will be poked & notified
+      callbackStatus = User.FRIEND_STATUSES.FRIEND; // Opponent will be noped & notified
     } else if (potentialFriend.hasInvited(currentUser.email)) {
       // Become friends !
       potentialFriend.removeFromInvitedUsers(currentUser.email);
       currentUser.removeFromPendingUsers(potentialFriend.email);
-      potentialFriend.friendsPokes[currentUser.email] = {}; // Sets them as friends
-      currentUser.friendsPokes[potentialFriend.email] = {}; // Sets them as friends
-      callbackStatus = User.FRIEND_STATUSES.FRIEND; // Opponent will be poked & notified, OK.
+      potentialFriend.friendsNopes[currentUser.email] = {}; // Sets them as friends
+      currentUser.friendsNopes[potentialFriend.email] = {}; // Sets them as friends
+      callbackStatus = User.FRIEND_STATUSES.FRIEND; // Opponent will be noped & notified, OK.
       currentUser.earnAchievementsAfterNewFriends();
       potentialFriend.earnAchievementsAfterNewFriends();
     } else {
@@ -399,7 +399,7 @@ User.prototype.sendFriendRequest = function(email, callback) {
         );
         return callback(null, callbackStatus);
       }
-      currentUser.pokeAt(potentialFriend.email, function(err) {
+      currentUser.nopeAt(potentialFriend.email, function(err) {
         return callback(err, callbackStatus);
       });
     });
@@ -443,9 +443,9 @@ User.prototype.ignoreUser = function(email, callback) {
     var ignoredUserData;
     if (self.hasFriend(ignoredUser.email)) {
       // Save the most data possible
-      ignoredUserData = _.clone(self.friendsPokes[ignoredUser.email]);
+      ignoredUserData = _.clone(self.friendsNopes[ignoredUser.email]);
       ignoredUserData.email = ignoredUser.email;
-      delete self.friendsPokes[ignoredUser.email];
+      delete self.friendsNopes[ignoredUser.email];
     } else {
       if (self.hasPending(ignoredUser.email)) {
         self.removeFromPendingUsers(ignoredUser.email);
@@ -471,19 +471,19 @@ User.prototype.unIgnoreUser = function(email, callback) {
 
   var restoredUser = this.removeFromIgnoredUsers(email);
   if (!restoredUser) return callback(); // Was not ignored
-  this.friendsPokes[restoredUser.email] = restoredUser;
-  delete this.friendsPokes[restoredUser.email].email; // Data just added for save in ignored users
+  this.friendsNopes[restoredUser.email] = restoredUser;
+  delete this.friendsNopes[restoredUser.email].email; // Data just added for save in ignored users
   this.save(callback);
 };
 
 /**
  * Note : nothing is saved here
  * @param  {[type]} userAchievementsFunction [description]
- * @param  {[type]} pokeData                 Optional
+ * @param  {[type]} nopeData                 Optional
  * @return {[type]}                          [description]
  */
-User.prototype.earnAchievements = function(userAchievementsFn, pokeData) {
-  var achievedIds = userAchievements[userAchievementsFn](this, pokeData);
+User.prototype.earnAchievements = function(userAchievementsFn, nopeData) {
+  var achievedIds = userAchievements[userAchievementsFn](this, nopeData);
   if (!achievedIds.length) return;
 
   achievedIds.forEach(function(achievedId) {
@@ -498,17 +498,17 @@ User.prototype.earnAchievements = function(userAchievementsFn, pokeData) {
   }, this);
 };
 
-User.prototype.earnAchievementsAfterPoking = function(pokeData) {
-  this.earnAchievements('earnedAfterPoking', pokeData);
+User.prototype.earnAchievementsAfterNoping = function(nopeData) {
+  this.earnAchievements('earnedAfterNoping', nopeData);
 };
 
 User.prototype.earnAchievementsAfterNewFriends = function() {
   this.earnAchievements('earnedAfterNewFriends');
 };
 
-function formatPokeDataForPrimus(pokeData, email) {
-  pokeData.email = email;
-  return pokeData;
+function formatNopeDataForPrimus(nopeData, email) {
+  nopeData.email = email;
+  return nopeData;
 }
 
 module.exports = User;

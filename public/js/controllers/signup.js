@@ -1,5 +1,5 @@
 'use strict';
-PokeGame.SignupController = Ember.ObjectController.extend({
+NopeGame.SignupController = Ember.ObjectController.extend({
   message: function() {
     return 'bouh';
   }.property('message'),

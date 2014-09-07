@@ -1,15 +1,15 @@
 'use strict';
-PokeGame.IndexController = Ember.ArrayController.extend({
+NopeGame.IndexController = Ember.ArrayController.extend({
   actions: {
     addOpponent: function(email) {
-      return PokeGame.serverManager.addOpponent(email);
+      return NopeGame.serverManager.addOpponent(email);
     },
     ignoreOpponent: function(email) {
-      return PokeGame.serverManager.ignoreOpponent(email);
+      return NopeGame.serverManager.ignoreOpponent(email);
     }
   },
 
-  opponentsPokingMe: function() {
+  opponentsNopingMe: function() {
     var opponents = this.get('model');
     var friends = opponents.filterBy('status', 'friend');
     var scoringOpponents = friends.filterBy('isScoring', true);

@@ -1,3 +1,3 @@
-# Poke Server
+# Nope Server
 
-Server for a game of pokes
+Server for a game of nopes

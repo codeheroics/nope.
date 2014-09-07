@@ -19,7 +19,7 @@ describe('User', function() {
     ], done);
   });
 
-  describe('#pokeAt', function() {
+  describe('#nopeAt', function() {
     it('should retry saving if the save produces a CAS error', function(done) {
       async.parallel({
         a: function(cbParallel) { User.findById('a@a.a', cbParallel); },
@@ -33,12 +33,12 @@ describe('User', function() {
         expect(userA).to.exist;
         expect(userB).to.exist;
 
-        userA.pokeAt(userB.email, function(err, status) {
+        userA.nopeAt(userB.email, function(err, status) {
           expect(err).to.not.exist;
           expect(status).to.not.exist;
 
           // The userB that we have in memory is not up to date anymore
-          // Saving should send back an error, but poking should
+          // Saving should send back an error, but noping should
           // do the necessary to circuvent that
           async.series([
             function(cbSeries) {
@@ -48,7 +48,7 @@ describe('User', function() {
               });
             },
             function(cbSeries) {
-              userB.pokeAt(userA.email, function(err) {
+              userB.nopeAt(userA.email, function(err) {
                 expect(err).to.not.exist;
                 cbSeries();
               });

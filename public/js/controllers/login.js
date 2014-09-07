@@ -1,6 +1,6 @@
 'use strict';
 
-PokeGame.LoginController = Ember.Controller.extend(
+NopeGame.LoginController = Ember.Controller.extend(
   Ember.SimpleAuth.LoginControllerMixin,
   {
     authenticatorFactory: 'authenticator:custom',

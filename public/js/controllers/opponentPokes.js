@@ -1,12 +1,12 @@
 'use strict';
-PokeGame.OpponentPokesController = Ember.ObjectController.extend({
+NopeGame.OpponentNopesController = Ember.ObjectController.extend({
   actions: {
-    poke: function(opponent) {
-      PokeGame.serverManager.pokeAt(opponent.get('email'));
+    nope: function(opponent) {
+      NopeGame.serverManager.nopeAt(opponent.get('email'));
     },
 
     ignore: function(opponent) {
-      PokeGame.serverManager.ignoreOpponent(opponent.get('email'))
+      NopeGame.serverManager.ignoreOpponent(opponent.get('email'))
       .then(function() {
         this.transitionToRoute('opponents');
       }.bind(this));
@@ -14,7 +14,7 @@ PokeGame.OpponentPokesController = Ember.ObjectController.extend({
   },
 
   myAvatar: function() {
-    return PokeGame.User.find(1).get('avatar');
+    return NopeGame.User.find(1).get('avatar');
   }.property('myAvatar'),
 
   isWinning: function() {

@@ -67,53 +67,53 @@ var achievements = {
   10: {
     title: 'Pi noper.',
     description: 'Answer nope. in 3.14 seconds',
-    hasEarned: function(user, pokeData) {
-      return pokeData.timeDiff >= PI_SECONDS_LOW && pokeData.timeDiff < PI_SECONDS_HIGH;
+    hasEarned: function(user, nopeData) {
+      return nopeData.timeDiff >= PI_SECONDS_LOW && nopeData.timeDiff < PI_SECONDS_HIGH;
     }
   },
   11: {
     title: 'Pi noper 2',
     description: 'Answer nope. in 3 minutes and 14 seconds',
-    hasEarned: function(user, pokeData) {
-      return pokeData.timeDiff >= PI_MINUTES_LOW && pokeData.timeDiff < PI_MINUTES_HIGH;
+    hasEarned: function(user, nopeData) {
+      return nopeData.timeDiff >= PI_MINUTES_LOW && nopeData.timeDiff < PI_MINUTES_HIGH;
     }
   },
   12: {
     title: 'Pi noper 3',
     description: 'Answer nope. in 3 hours and 14 minutes',
-    hasEarned: function(user, pokeData) {
-      return pokeData.timeDiff >= PI_HOURS_LOW && pokeData.timeDiff < PI_HOURS_HIGH;
+    hasEarned: function(user, nopeData) {
+      return nopeData.timeDiff >= PI_HOURS_LOW && nopeData.timeDiff < PI_HOURS_HIGH;
     }
   },
   13: {
     title: 'The answer to life, the universe, and everything',
     description: 'Answer nope. in 42 seconds',
-    hasEarned: function(user, pokeData) {
-      return pokeData.timeDiff >= FOURTY_TWO_SECONDS_LOW
-        && pokeData.timeDiff < FOURTY_TWO_SECONDS_HIGH;
+    hasEarned: function(user, nopeData) {
+      return nopeData.timeDiff >= FOURTY_TWO_SECONDS_LOW
+        && nopeData.timeDiff < FOURTY_TWO_SECONDS_HIGH;
     }
   },
   14: {
     title: 'The answer to life, the universe, and everything 2',
     description: 'Answer nope. in 42 minutes',
-    hasEarned: function(user, pokeData) {
-      return pokeData.timeDiff >= FOURTY_TWO_MINUTES_LOW
-        && pokeData.timeDiff < FOURTY_TWO_MINUTES_HIGH;
+    hasEarned: function(user, nopeData) {
+      return nopeData.timeDiff >= FOURTY_TWO_MINUTES_LOW
+        && nopeData.timeDiff < FOURTY_TWO_MINUTES_HIGH;
     }
   },
   15: {
     title: 'The answer to life, the universe, and everything 3',
     description: 'Answer nope. in 42 hours',
-    hasEarned: function(user, pokeData) {
-      return pokeData.timeDiff >= FOURTY_TWO_HOURS_LOW
-        && pokeData.timeDiff < FOURTY_TWO_HOURS_HIGH;
+    hasEarned: function(user, nopeData) {
+      return nopeData.timeDiff >= FOURTY_TWO_HOURS_LOW
+        && nopeData.timeDiff < FOURTY_TWO_HOURS_HIGH;
     }
   },
   16: {
     title: 'Social noper',
     description: 'Have at least 5 friends',
-    hasEarned: function(user, pokeData) {
-      return Object.keys(user.friendsPokes).length > 5;
+    hasEarned: function(user, nopeData) {
+      return Object.keys(user.friendsNopes).length > 5;
     }
   },
   17: {
@@ -123,23 +123,23 @@ var achievements = {
   }
 };
 
-var achievableByPokingIds = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+var achievableByNopingIds = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
 var achievableByNewFriendsIds = [16];
 var achievableByInviteIds = [17];
 
 function hasEarnedTotalNopes(nopesToObtain, user) {
-  return user.totalPokes >= nopesToObtain;
+  return user.totalNopes >= nopesToObtain;
 }
 
-function hasEarnedOpponentNopes(nopesToObtain, user, pokeData) {
-  return pokeData.pokesCpt >= nopesToObtain;
+function hasEarnedOpponentNopes(nopesToObtain, user, nopeData) {
+  return nopeData.nopesCpt >= nopesToObtain;
 }
 
 module.exports = {
-  earnedAfterPoking: function(user, pokeData) {
-    return achievableByPokingIds.filter(function(achievementId) {
+  earnedAfterNoping: function(user, nopeData) {
+    return achievableByNopingIds.filter(function(achievementId) {
       if (user.achievements[achievementId]) return false; // Already earned
-      return achievements[achievementId].hasEarned(user, pokeData);
+      return achievements[achievementId].hasEarned(user, nopeData);
     });
   },
 

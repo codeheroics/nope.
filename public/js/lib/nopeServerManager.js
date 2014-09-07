@@ -1,12 +1,12 @@
 'use strict';
 
 // TODO make of this a general manager, move things in different ones
-// (pokeManager for example)
+// (nopeManager for example)
 
-PokeGame.PokeServerManager = Ember.Object.extend({
+NopeGame.NopeServerManager = Ember.Object.extend({
   init: function() {
-    this.achievementsManager = PokeGame.AchievementsManager.create();
-    return this.getAllPokes().then(this.initPrimus.bind(this));
+    this.achievementsManager = NopeGame.AchievementsManager.create();
+    return this.getAllNopes().then(this.initPrimus.bind(this));
   },
 
   initPrimus: function() {
@@ -22,14 +22,14 @@ PokeGame.PokeServerManager = Ember.Object.extend({
     });
 
     this.primus.on('data', function(data) {
-      if (data.isPokingMe !== undefined) {
-        // Data from a poke
-        self.handlePokeResult(data).then(function() {
-          if (data.isPokingMe) {
-            self.notifyPoked(data);
+      if (data.isNopingMe !== undefined) {
+        // Data from a nope
+        self.handleNopeResult(data).then(function() {
+          if (data.isNopingMe) {
+            self.notifyNoped(data);
           }
           else {
-            self.notifyPoking(data);
+            self.notifyNoping(data);
           }
         });
         return;
@@ -69,57 +69,57 @@ PokeGame.PokeServerManager = Ember.Object.extend({
     });
   },
 
-  pokeAt: function(opponentEmail) {
+  nopeAt: function(opponentEmail) {
     this.primus.write(opponentEmail);
   },
 
-  notifyPoked: function(pokeData) {
-    toastr.warning('received from <span style="font-weight:bold;">' + pokeData.opponentName + '</span>.', 'Nope.');
+  notifyNoped: function(nopeData) {
+    toastr.warning('received from <span style="font-weight:bold;">' + nopeData.opponentName + '</span>.', 'Nope.');
     // .click(function() {
-    //   this.transitionTo('/opponents/' + pokeData.opponentEmail);
+    //   this.transitionTo('/opponents/' + nopeData.opponentEmail);
     // }.bind(this));
   },
-  notifyPoking: function(pokeData) {
-    toastr.success('sent to <span style="font-weight:bold;">' + pokeData.opponentName + '</span>.', 'Nope.');
+  notifyNoping: function(nopeData) {
+    toastr.success('sent to <span style="font-weight:bold;">' + nopeData.opponentName + '</span>.', 'Nope.');
   },
 
-  handlePokeResult: function(dataPoke, email) {
-    email = email ? email : dataPoke.email;
-    var pokeId = '' + dataPoke.time + email;
+  handleNopeResult: function(dataNope, email) {
+    email = email ? email : dataNope.email;
+    var nopeId = '' + dataNope.time + email;
 
-    var poke = PokeGame.Poke.find(pokeId);
+    var nope = NopeGame.Nope.find(nopeId);
 
-    if (poke.isLoaded) return Promise.resolve(poke); // exit
+    if (nope.isLoaded) return Promise.resolve(nope); // exit
 
-    var pokeRecord = PokeGame.Poke.create({
-      id: pokeId,
-      isReceived: dataPoke.isPokingMe,
-      time: dataPoke.time,
-      timeDiff: dataPoke.timeDiff
+    var nopeRecord = NopeGame.Nope.create({
+      id: nopeId,
+      isReceived: dataNope.isNopingMe,
+      time: dataNope.time,
+      timeDiff: dataNope.timeDiff
     });
 
-    var opponent = PokeGame.Opponent.find(email);
+    var opponent = NopeGame.Opponent.find(email);
     if (!opponent.isLoaded) {
-      opponent = PokeGame.Opponent.create({
+      opponent = NopeGame.Opponent.create({
         id: email,
         email: email
       });
     }
-    opponent.set('name', dataPoke.opponentName);
-    opponent.set('isScoring', dataPoke.isPokingMe);
-    opponent.set('timeFor', dataPoke.opponentTimePoking);
-    opponent.set('timeAgainst', dataPoke.myTimePoking);
-    opponent.set('pokesCpt', dataPoke.pokesCpt);
-    opponent.set('timeDiff', dataPoke.timeDiff);
+    opponent.set('name', dataNope.opponentName);
+    opponent.set('isScoring', dataNope.isNopingMe);
+    opponent.set('timeFor', dataNope.opponentTimeNoping);
+    opponent.set('timeAgainst', dataNope.myTimeNoping);
+    opponent.set('nopesCpt', dataNope.nopesCpt);
+    opponent.set('timeDiff', dataNope.timeDiff);
     opponent.set('avatar', generateGravatar(email));
     opponent.set('status', 'friend');
-    opponent.set('lastPokeTime', dataPoke.time);
-    var pokes = opponent.get('pokes').pushObject(pokeRecord);
+    opponent.set('lastNopeTime', dataNope.time);
+    var nopes = opponent.get('nopes').pushObject(nopeRecord);
 
-    pokeRecord.set('opponent', opponent);
+    nopeRecord.set('opponent', opponent);
 
     return opponent.save().then(function() {
-      return pokeRecord.save();
+      return nopeRecord.save();
     });
   },
 
@@ -137,10 +137,10 @@ PokeGame.PokeServerManager = Ember.Object.extend({
         }
       )
         .done(function(data) {
-          var user = PokeGame.User.find(1);
+          var user = NopeGame.User.find(1);
 
           if (!user.isLoaded) {
-            user = PokeGame.User.create({
+            user = NopeGame.User.create({
               id: 1
             });
           }
@@ -148,8 +148,8 @@ PokeGame.PokeServerManager = Ember.Object.extend({
           user.set('name', data.name);
           user.set('email', data.email);
           user.set('avatar', generateGravatar(data.email));
-          user.set('timePoking', data.timePoking);
-          user.set('totalPokes', data.totalPokes);
+          user.set('timeNoping', data.timeNoping);
+          user.set('totalNopes', data.totalNopes);
           self.achievementsManager.update(data.achievements);
 
           user.save()
@@ -162,8 +162,8 @@ PokeGame.PokeServerManager = Ember.Object.extend({
 
   // TODO this doesn't really have anything to do with "server" logic
   updateFriendsInfos: function(data) {
-    var localPendingUsers = PokeGame.Opponent.findQuery({status: 'pending'});
-    var localIgnoredUsers = PokeGame.Opponent.findQuery({status: 'ignored'});
+    var localPendingUsers = NopeGame.Opponent.findQuery({status: 'pending'});
+    var localIgnoredUsers = NopeGame.Opponent.findQuery({status: 'ignored'});
     var serverPendingUsers = data.pendingUsers;
     var serverIgnoredUsers = data.ignoredUsers;
 
@@ -216,9 +216,9 @@ PokeGame.PokeServerManager = Ember.Object.extend({
     if (usersData instanceof Array === false) usersData = [usersData];
     return usersData.map(function(userData) {
 
-      var opponent = PokeGame.Opponent.find(userData.email);
+      var opponent = NopeGame.Opponent.find(userData.email);
       if (!opponent.isLoaded) {
-        opponent = PokeGame.Opponent.create({
+        opponent = NopeGame.Opponent.create({
           id: userData.email,
           email: userData.email
         });
@@ -242,11 +242,11 @@ PokeGame.PokeServerManager = Ember.Object.extend({
   removePendingOrIgnoredUsers: function(usersData) {
     if (usersData instanceof Array === false) usersData = [usersData];
     return usersData.map(function(userData) {
-      return PokeGame.Opponent.removeFromRecordArrays(userData);
+      return NopeGame.Opponent.removeFromRecordArrays(userData);
     });
   },
 
-  getAllPokes: function() {
+  getAllNopes: function() {
     var self = this;
     return new Promise(function(resolve, reject) {
       $.ajax(
@@ -256,14 +256,14 @@ PokeGame.PokeServerManager = Ember.Object.extend({
           headers: {
             'x-access-token': window.localStorage.getItem('token')
           },
-          url: POKES_ROUTE
+          url: NOPES_ROUTE
         }
       )
-      .done(function(dataPokes) {
-        var email = Object.keys(dataPokes);
+      .done(function(dataNopes) {
+        var email = Object.keys(dataNopes);
         var promises = email.map(function(email) {
-          var dataPoke = dataPokes[email];
-          return self.handlePokeResult(dataPoke, email);
+          var dataNope = dataNopes[email];
+          return self.handleNopeResult(dataNope, email);
         });
 
         return resolve(Promise.all(promises));
@@ -272,10 +272,10 @@ PokeGame.PokeServerManager = Ember.Object.extend({
     });
   },
 
-  getPokesFrom: function(email) {
-    // TODO implement me, for now redirecting to getallpokes
-    console.log('Implement me (getPokesFrom)');
-    return this.getAllPokes();
+  getNopesFrom: function(email) {
+    // TODO implement me, for now redirecting to getallnopes
+    console.log('Implement me (getNopesFrom)');
+    return this.getAllNopes();
   },
 
   addOpponent: function(email) {
@@ -296,7 +296,7 @@ PokeGame.PokeServerManager = Ember.Object.extend({
       )
         .done(function(object) {
           if (object.message === 'Friend') {
-            return self.getPokesFrom(email).then(resolve);
+            return self.getNopesFrom(email).then(resolve);
           }
           toastr.info(
             'Sent a request to <span style="font-weight:bold;">' + email + '</span>',
@@ -333,7 +333,7 @@ PokeGame.PokeServerManager = Ember.Object.extend({
         }
       )
         .done(function() {
-          var ignoredOpponent = PokeGame.Opponent.find(email);
+          var ignoredOpponent = NopeGame.Opponent.find(email);
           if (!ignoredOpponent.isLoaded) return resolve();
           ignoredOpponent.set('status', 'ignored');
           ignoredOpponent.save().then(function() {
@@ -368,7 +368,7 @@ PokeGame.PokeServerManager = Ember.Object.extend({
         }
       )
       .done(function() {
-        return self.getPokesFrom(email).then(function() {
+        return self.getNopesFrom(email).then(function() {
           opponent.set('status', 'friend');
           return opponent.save();
         })
