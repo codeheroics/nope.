@@ -132,18 +132,17 @@
 				<div>
 					{{#if opponentsNopingMe}}
 						<h2>Nope.</h2>
-					<span class="byline">
-						{{#if opponentsNopingMe}}
+						<span class="byline">
 							You do not have the last word.
-						{{else}}
-							You got the last word. For now.
-						{{/if}}
-					</span>
+						</span>
 						<div class="special">
 							<i class="fa fa-frown-o"></i>
 						</div>
 					{{else}}
 						<h2>Yep.</h2>
+						<span class="byline">
+								You got the last word. For now.
+						</span>
 						<div class="special">
 							<i class="fa fa-smile-o"></i>
 						</div>
@@ -243,6 +242,11 @@
 		<script type="text/x-handlebars" data-template-name="opponents">
 			<section>
 				<h2 class="major"><span>Friends</span></h2>
+				{{#if model.length}}{{else}}
+					<div style="text-align:center;">
+						No friends yet, add some!
+						</div>
+				{{/if}}
 				<ul class="columns">
 					{{#each}}
 						<li>
