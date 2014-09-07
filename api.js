@@ -23,7 +23,7 @@ app.get('/', function(req, res, next) {
   res.sendFile(__dirname + '/public_dist/app.html');
 });
 require('./controllers/auth')(app);
-require('./controllers/pokes')(app);
+require('./controllers/nopes')(app);
 require('./controllers/users')(app);
 
 app.listen(8000);

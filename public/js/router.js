@@ -1,16 +1,16 @@
-/* global PokeGame */
+/* global NopeGame */
 /* global Ember */
 'use strict';
 
-PokeGame.Router.reopen({
+NopeGame.Router.reopen({
   rootURL: '/app.html'
 });
 
-PokeGame.Router.map(function() {
+NopeGame.Router.map(function() {
   this.resource('index', { path: '/'  });
   this.resource('login', { path: '/login' });
   this.resource('signup', { path: '/signup' });
-  this.resource('opponentPokes', { path: '/opponents/:opponent_id/pokes' });
+  this.resource('opponentNopes', { path: '/opponents/:opponent_id/nopes' });
   this.resource('opponents', { path: '/opponents' });
   this.resource('ignoredOpponents', { path: '/opponents?ignored' });
   this.resource('newOpponent', { path: '/opponents/new' });
@@ -21,12 +21,12 @@ PokeGame.Router.map(function() {
 });
 
 function createServerManager() {
-  if (PokeGame.serverManager) return;
-  PokeGame.serverManager = PokeGame.PokeServerManager.create();
+  if (NopeGame.serverManager) return;
+  NopeGame.serverManager = NopeGame.NopeServerManager.create();
 }
 
 
-PokeGame.ApplicationRoute = Ember.Route.extend(
+NopeGame.ApplicationRoute = Ember.Route.extend(
   Ember.SimpleAuth.ApplicationRouteMixin, {
     actions: {
       sessionAuthenticationSucceeded: function(transition, queryParams) {
@@ -37,7 +37,7 @@ PokeGame.ApplicationRoute = Ember.Route.extend(
   }
 );
 
-PokeGame.AuthenticatedRouteMixin = Ember.Mixin.create(
+NopeGame.AuthenticatedRouteMixin = Ember.Mixin.create(
   Ember.SimpleAuth.AuthenticatedRouteMixin, {
     beforeModel: function(transition, queryParams) {
       this._super(transition, queryParams);
@@ -45,17 +45,17 @@ PokeGame.AuthenticatedRouteMixin = Ember.Mixin.create(
         createServerManager();
 
         // Load everything - without this, errors pop, single instances can't be found...
-        PokeGame.User.find();
-        PokeGame.Opponent.find();
-        PokeGame.Poke.find();
+        NopeGame.User.find();
+        NopeGame.Opponent.find();
+        NopeGame.Nope.find();
 
-        PokeGame.serverManager.updateSelfInfos();
+        NopeGame.serverManager.updateSelfInfos();
       }
     }
   }
 );
 
-PokeGame.LoginRoute = Ember.Route.extend(
+NopeGame.LoginRoute = Ember.Route.extend(
   {
     beforeModel: function() {
       if (!this.get('session').get('isAuthenticated')) return;
@@ -64,63 +64,63 @@ PokeGame.LoginRoute = Ember.Route.extend(
   }
 );
 
-PokeGame.IndexRoute = Ember.Route.extend(
-  PokeGame.AuthenticatedRouteMixin,
+NopeGame.IndexRoute = Ember.Route.extend(
+  NopeGame.AuthenticatedRouteMixin,
   {
     model: function() {
-      return PokeGame.Opponent.find();
+      return NopeGame.Opponent.find();
     },
   }
 );
 
-PokeGame.HistoryRoute = Ember.Route.extend(
-  PokeGame.AuthenticatedRouteMixin,
+NopeGame.HistoryRoute = Ember.Route.extend(
+  NopeGame.AuthenticatedRouteMixin,
   {
     model: function() {
-      return PokeGame.Poke.find();
+      return NopeGame.Nope.find();
     }
   }
 );
 
-PokeGame.ProfileRoute = Ember.Route.extend(
-  PokeGame.AuthenticatedRouteMixin,
+NopeGame.ProfileRoute = Ember.Route.extend(
+  NopeGame.AuthenticatedRouteMixin,
   {
     model: function() {
-      var user = PokeGame.User.find(1);
+      var user = NopeGame.User.find(1);
       if (user.isLoaded) return user;
 
-      PokeGame.serverManager.updateSelfInfos();
+      NopeGame.serverManager.updateSelfInfos();
     }
   }
 );
 
-PokeGame.OpponentPokesRoute = Ember.Route.extend(
-  PokeGame.AuthenticatedRouteMixin,
+NopeGame.OpponentNopesRoute = Ember.Route.extend(
+  NopeGame.AuthenticatedRouteMixin,
   {
     model: function(params) {
-      return PokeGame.Opponent.find(params.opponent_id);
+      return NopeGame.Opponent.find(params.opponent_id);
     }
   }
 );
 
-PokeGame.OpponentsRoute = Ember.Route.extend(
-  PokeGame.AuthenticatedRouteMixin,
+NopeGame.OpponentsRoute = Ember.Route.extend(
+  NopeGame.AuthenticatedRouteMixin,
   {
     model: function() {
-      return PokeGame.Opponent.findQuery({status: 'friend'});
+      return NopeGame.Opponent.findQuery({status: 'friend'});
     }
   }
 );
 
-PokeGame.IgnoredOpponentsRoute = Ember.Route.extend(
-  PokeGame.AuthenticatedRouteMixin,
+NopeGame.IgnoredOpponentsRoute = Ember.Route.extend(
+  NopeGame.AuthenticatedRouteMixin,
   {
     model: function() {
-      return PokeGame.Opponent.findQuery({status: 'ignored'});
+      return NopeGame.Opponent.findQuery({status: 'ignored'});
     }
   }
 );
 
-PokeGame.NewOpponentRoute = Ember.Route.extend(
-  PokeGame.AuthenticatedRouteMixin
+NopeGame.NewOpponentRoute = Ember.Route.extend(
+  NopeGame.AuthenticatedRouteMixin
 );

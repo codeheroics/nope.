@@ -659,28 +659,28 @@ html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockq
 		text-align: center;
 	}
 
-	.pokeActions {
+	.nopeActions {
 		margin-top: 0.5em;
 		padding: 1.5em;
 		text-align: center;
 		width: 100%;
 	}
 
-	.hasPokedBack, .hasPokedBack:hover {
+	.hasNopedBack, .hasNopedBack:hover {
 		background-color: #ccd5d0;
 	}
 
-	.needsPokeBack, .needsPokeBack:hover {
+	.needsNopeBack, .needsNopeBack:hover {
 		background-color: #a0a3d8;
 	}
 
-	p.pokesSent {
+	p.nopesSent {
 		font-size: 7em;
 		text-align: center;
 		margin: 0.5em 0 0.35em 0;
 	}
 
-	legend.pokesSent {
+	legend.nopesSent {
 		margin:auto;
 		font-size: 2em;
 	}

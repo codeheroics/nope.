@@ -6,7 +6,7 @@ var REALTIME_SERVER_URL = isDev ? 'http://localhost:8080' : window.location.orig
 
 var USERS_ROUTE = SERVER_URL + '/users';
 var SELF_ROUTE = USERS_ROUTE + '?me';
-var POKES_ROUTE = SERVER_URL + '/pokes';
+var NOPES_ROUTE = SERVER_URL + '/nopes';
 var LOGIN_ROUTE = SERVER_URL + '/login';
 var SIGNUP_ROUTE = SERVER_URL + '/signup';
 var PRIMUS_ROUTE = REALTIME_SERVER_URL;
@@ -131,4 +131,4 @@ Ember.View.reopen({
   }
 });
 
-window.PokeGame = Ember.Application.create();
+window.NopeGame = Ember.Application.create();

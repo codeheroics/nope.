@@ -1,5 +1,5 @@
 'use strict';
-PokeGame.OpponentsController = Ember.ArrayController.extend({
+NopeGame.OpponentsController = Ember.ArrayController.extend({
   sortProperties: ['name'],
   sortAscending: true
 });

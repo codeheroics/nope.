@@ -1,5 +1,5 @@
 'use strict';
-PokeGame.AchievementsManager = Ember.Object.extend({
+NopeGame.AchievementsManager = Ember.Object.extend({
   achievements: {
     0: {
       title: 'Hundred nopes.',
@@ -75,7 +75,7 @@ PokeGame.AchievementsManager = Ember.Object.extend({
     }
   },
   init: function() {
-    var user = PokeGame.User.find(1);
+    var user = NopeGame.User.find(1);
     var userAchievements = user.get('achievements') || [];
     var newUserAchievements = [];
     for (var id in this.achievements) {
@@ -96,7 +96,7 @@ PokeGame.AchievementsManager = Ember.Object.extend({
   },
 
   unlock: function(achievementId) {
-    var user = PokeGame.User.find(1);
+    var user = NopeGame.User.find(1);
     var achievements = user.get('achievements');
     var achievement = achievements[achievementId];
     if (achievements[achievementId].unlocked) return;
@@ -123,7 +123,7 @@ PokeGame.AchievementsManager = Ember.Object.extend({
    * @param  {Object} dataAchievements / key : unlocked achievements as keys
    */
   update: function(dataAchievements) {
-    var user = PokeGame.User.find(1);
+    var user = NopeGame.User.find(1);
     var achievements = user.get('achievements');
     var newAchievements = achievements.map(function(achievement, id) {
       return {

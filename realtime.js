@@ -47,9 +47,9 @@ primus.on('connection', function connection(spark) {
   spark.on('data', function received(opponentId) {
     User.findById(email, function(err, user) {
       if (err || !user) return console.error('Error fetching email ' + email, err);
-      user.pokeAt(opponentId, function(err) {
+      user.nopeAt(opponentId, function(err) {
         if (!err) return;
-        console.error('Error when ' + email + ' tried to poke ' + opponentId, err);
+        console.error('Error when ' + email + ' tried to nope ' + opponentId, err);
         spark.write('Nope, will not do that');
       });
     });

@@ -1,12 +1,12 @@
-PokeGame.Poke = Ember.Model.extend({
+NopeGame.Nope = Ember.Model.extend({
   id:               Ember.attr(), // string
-  opponent:         Ember.belongsTo('PokeGame.Opponent', { key: 'opponentId' }),
+  opponent:         Ember.belongsTo('NopeGame.Opponent', { key: 'opponentId' }),
   isReceived:       Ember.attr(), // boolean
   time:             Ember.attr(Number),
   date:             function() {return new Date(this.get('time')); }.property('date'),
   timeDiff:         Ember.attr(Number)
 });
 
-PokeGame.Poke.reopenClass({
+NopeGame.Nope.reopenClass({
   adapter: Ember.LocalStorageAdapter.create()
 });
