@@ -71,7 +71,11 @@ NopeGame.AchievementsManager = Ember.Object.extend({
     },
     17: {
       title: 'Party noper',
-      description: 'Invite at least 5 friends',
+      description: 'Have at least 10 friends',
+    },
+    18: {
+      title: 'Charisma noper',
+      description: 'Have at least 15 friends',
     }
   },
   init: function() {

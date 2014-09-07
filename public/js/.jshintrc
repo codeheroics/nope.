@@ -28,7 +28,7 @@
     "dojo": false,
 
     // Custom predefined globals.
-    "predef": ["PokeGame", "Ember", "console", "Promise", "alert", "moment", "toastr"],
+    "predef": ["NopeGame", "Ember", "console", "Promise", "alert", "moment", "toastr"],
 
     // Development
 

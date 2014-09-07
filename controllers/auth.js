@@ -48,7 +48,6 @@ module.exports = function(app) {
 
    var createAccessToken = createToken.bind(this, 'jwtTokenSecret'); // FIXME add salt to these
    var createConfirmToken = createToken.bind(this, 'jwtTokenSecretForConfirm'); // FIXME add salt to these
-   var createConfirmForInvitation = createToken.bind(this, 'jwtTokenSecretForInvitation'); // FIXME add salt to these
 
    // Route to check if logged in
    app.get('/login', isLoggedIn, function(req, res, next) {

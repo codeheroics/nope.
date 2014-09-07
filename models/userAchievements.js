@@ -118,14 +118,22 @@ var achievements = {
   },
   17: {
     title: 'Party noper',
-    description: 'Invite at least 5 friends',
-    hasEarned: function() {}
-  }
+    description: 'Have at least 10 friends',
+    hasEarned: function(user, nopeData) {
+      return Object.keys(user.friendsNopes).length > 10;
+    }
+  },
+  18: {
+    title: 'Charisma noper',
+    description: 'Have at least 15 friends',
+    hasEarned: function(user, nopeData) {
+      return Object.keys(user.friendsNopes).length > 15;
+    }
+  },
 };
 
 var achievableByNopingIds = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
-var achievableByNewFriendsIds = [16];
-var achievableByInviteIds = [17];
+var achievableByNewFriendsIds = [16, 17, 18];
 
 function hasEarnedTotalNopes(nopesToObtain, user) {
   return user.totalNopes >= nopesToObtain;
