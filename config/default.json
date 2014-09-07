@@ -1,5 +1,6 @@
 {
   "jwtTokenSecret": "ALL HAIL BRITANNIA!",
-  "jwtTokenSecretForEmail": "ELEVEN BANZAI!",
+  "jwtTokenSecretForConfirm": "ELEVEN BANZAI!",
+  "jwtTokenSecretForInvitation": "WAGA NA WA ZERO!",
   "primusChannel": "primus"
 }
