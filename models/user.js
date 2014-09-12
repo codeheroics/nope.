@@ -349,7 +349,7 @@ User.prototype.sendFriendRequest = function(email, callback) {
   User.findById(email, function(err, potentialFriend) {
     if (err) return callback(err);
 
-    if (!potentialFriend) return callback(null, User.FRIEND_STATUSES.NOT_FOUND); // No user // FIXME probably send mail here
+    if (!potentialFriend) return callback(new FriendError(User.FRIEND_STATUSES.NOT_FOUND)); // No user // FIXME probably send mail here
      // Do not tell a user he's been ignored
     if (potentialFriend.hasIgnored(currentUser.email)) return callback(null, User.FRIEND_STATUSES.PENDING);
 

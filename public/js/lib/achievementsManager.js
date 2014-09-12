@@ -112,7 +112,10 @@ NopeGame.AchievementsManager = Ember.Object.extend({
     user.save().then(function() {
       toastr.success(
         '<span style="font-weight:bold;">' + achievement.title + '</span>: '+
-          achievement.description,
+          achievement.description + '<br>' +
+          '<a target="_blank" href="https://twitter.com/share?url=https%3A%2F%2Fwww.nope.wtf&text=' +
+          encodeURIComponent('I just unlocked the achievement ' + achievement.title + ' in Nope!') +
+          '"><i class="fa fa-twitter solo"></i> Tweet it!</a>',
         'Achievement unlocked!',
         { timeOut: 10000 }
       );
