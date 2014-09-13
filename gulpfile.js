@@ -95,8 +95,7 @@ gulp.task('buildCSS', function() {
     'css/style.css',
     'css/style2.css',
     'css/style-desktop.css',
-    'css/style-mobile.css',
-    'css/style-1000px.css'
+    'css/style-mobile.css'
   ];
 
   var cssDir = DIST_PUBLIC + '/css';
