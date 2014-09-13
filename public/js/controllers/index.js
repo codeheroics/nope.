@@ -9,6 +9,11 @@ NopeGame.IndexController = Ember.ArrayController.extend({
     }
   },
 
+  hasOpponents: function() {
+    var friends = this.get('model').filterBy('status', 'friend');
+    return friends.length > 0;
+  }.property('model.@each.status'),
+
   opponentsNopingMe: function() {
     var opponents = this.get('model');
     var friends = opponents.filterBy('status', 'friend');

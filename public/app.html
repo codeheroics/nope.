@@ -139,13 +139,23 @@
 							<i class="fa fa-frown-o"></i>
 						</div>
 					{{else}}
-						<h2>Yep.</h2>
-						<span class="byline">
-								You got the last word. For now.
-						</span>
-						<div class="special">
-							<i class="fa fa-smile-o"></i>
-						</div>
+						{{#if hasOpponents}}
+							<h2>Yep.</h2>
+							<span class="byline">
+									You got the last word. For now.
+							</span>
+							<div class="special">
+								<i class="fa fa-smile-o"></i>
+							</div>
+						{{else}}
+							<h2>Nope.</h2>
+							<span class="byline">
+								{{#link-to 'opponents'}}You need to invite friends to be your opponents{{/link-to}}!
+							</span>
+							<div class="special">
+								<i class="fa fa-frown-o"></i>
+							</div>
+						{{/if}}
 					{{/if}}
 				</div>
 				<div>
