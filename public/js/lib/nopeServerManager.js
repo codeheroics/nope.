@@ -28,9 +28,11 @@ NopeGame.NopeServerManager = Ember.Object.extend({
           if (data.isNopingMe) {
             self.notifyNoped(data);
           }
-          else {
-            self.notifyNoping(data);
-          }
+          // else {
+            // We are notify that we are noping because we made the HTTP call there
+            // in the nopeAt method
+            // self.notifyNoping(data);
+          // }
         });
         return;
       }
@@ -70,7 +72,28 @@ NopeGame.NopeServerManager = Ember.Object.extend({
   },
 
   nopeAt: function(opponentEmail) {
-    this.primus.write(opponentEmail);
+    $.ajax(
+      {
+        dataType: 'jsonp',
+        data: { friendEmail: opponentEmail },
+        jsonp: CALLBACK_NAME,
+        headers: {
+          'x-access-token': window.localStorage.getItem('token')
+        },
+        method: 'POST',
+        url: NOPES_ROUTE
+      }
+    )
+    .done(function(data) {
+      this.handleNopeResult(data).then(this.notifyNoping.bind(this, data));
+    }.bind(this))
+    .fail(function(xhr) {
+      if (!xhr.responseJSON) {
+        toastr.error('Could not reach the Internet :(');
+      } else {
+        toastr.error('Sorry, there was an error with the server when trying to send a nope to ' + opponentEmail);
+      }
+    });
   },
 
   notifyNoped: function(nopeData) {

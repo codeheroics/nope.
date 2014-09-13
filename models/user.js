@@ -180,8 +180,10 @@ User.prototype.nopeAt = function(opponentEmail, callback) {
   var now = Date.now();
 
   if (!this.hasFriend(opponentEmail)) return callback(new FriendError(User.FRIEND_STATUSES.NOT_FRIEND));
+
   // === false because undefined would mean it is not defined yet (user just added has friend)
-  if (this.friendsNopes[opponentEmail].isNopingMe === false) return callback(new NopeError('Already noped back'));
+  // we send back the data, maybe the user did not get it before
+  if (this.friendsNopes[opponentEmail].isNopingMe === false) return callback(null, this.friendsNopes[opponentEmail]);
 
   User.findById(opponentEmail, function(err, userNoped) {
     if (err) return callback(err);
@@ -189,7 +191,7 @@ User.prototype.nopeAt = function(opponentEmail, callback) {
 
     if (!userNoped.hasFriend(self.email)) {
       if (userNoped.hasIgnored(self.email)) {
-        return self.nopeAtUserIgnoringMe(userNoped, time, callback);
+        return self.nopeAtUserIgnoringMe(userNoped, now, callback);
       }
       if (userNoped.hasPending(self.email)) {
         return callback(new FriendError(User.FRIEND_STATUSES.PENDING));
