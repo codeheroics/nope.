@@ -57,9 +57,17 @@ NopeGame.AuthenticatedRouteMixin = Ember.Mixin.create(
 
 NopeGame.LoginRoute = Ember.Route.extend(
   {
-    beforeModel: function() {
-      if (!this.get('session').get('isAuthenticated')) return;
-      this.transitionTo('index');
+    beforeModel: function(params) {
+      if (this.get('session').get('isAuthenticated')) return this.transitionTo('index');
+
+
+      if (params.queryParams.confirmed) {
+        toastr.success(
+          'You have successfully completed your registration! You can now login!',
+          'Welcome!',
+          {timeOut: 30000}
+        );
+      }
     }
   }
 );

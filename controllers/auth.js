@@ -100,7 +100,8 @@ module.exports = function(app) {
         user.confirmed = true;
         user.save(function(err) {
           if (err) return outputConfirmError(err, req, res);
-          res.jsonp(null);
+          if (req.xhr) return res.jsonp(null);
+          res.redirect('/app.html#/login?confirmed');
         });
       });
 
