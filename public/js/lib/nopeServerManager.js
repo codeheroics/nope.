@@ -12,7 +12,15 @@ NopeGame.NopeServerManager = Ember.Object.extend({
   initPrimus: function() {
     var self = this;
     this.primus = Primus.connect(
-      PRIMUS_ROUTE, { strategy : ['online', 'disconnect'] }
+      PRIMUS_ROUTE,
+      {
+        strategy : ['online', 'disconnect'],
+        reconnect: {
+          maxDelay: 600000, // Number: The max delay for a reconnect retry.
+          minDelay: 500, // Number: The minimum delay before we reconnect.
+          retries: 10 // Number: How many times should we attempt to reconnect.
+        }
+      }
     );
 
     // For convenience we use the private event `outgoing::url` to append the

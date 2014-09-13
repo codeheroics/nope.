@@ -1,5 +1,19 @@
-(function (name, context, definition) {  context[name] = definition.call(context);  if (typeof module !== "undefined" && module.exports) {    module.exports = context[name];  } else if (typeof define == "function" && define.amd) {    define(function reference() { return context[name]; });  }})("Primus", this, function PRIMUS() {/*globals require, define */
+(function UMDish(name, context, definition) {  context[name] = definition.call(context);  if (typeof module !== "undefined" && module.exports) {    module.exports = context[name];  } else if (typeof define == "function" && define.amd) {    define(function reference() { return context[name]; });  }})("Primus", this, function Primus() {/*globals require, define */
 'use strict';
+
+/**
+ * Representation of a single EventEmitter function.
+ *
+ * @param {Function} fn Event handler to be called.
+ * @param {Mixed} context Context for function execution.
+ * @param {Boolean} once Only emit once
+ * @api private
+ */
+function EE(fn, context, once) {
+  this.fn = fn;
+  this.context = context;
+  this.once = once || false;
+}
 
 /**
  * Minimal EventEmitter interface that is molded against the Node.js
@@ -8,9 +22,15 @@
  * @constructor
  * @api public
  */
-function EventEmitter() {
-  this._events = {};
-}
+function EventEmitter() { /* Nothing to set */ }
+
+/**
+ * Holds the assigned EventEmitters by name.
+ *
+ * @type {Object}
+ * @private
+ */
+EventEmitter.prototype._events = undefined;
 
 /**
  * Return a list of assigned event listeners.
@@ -20,7 +40,13 @@ function EventEmitter() {
  * @api public
  */
 EventEmitter.prototype.listeners = function listeners(event) {
-  return Array.apply(this, this._events[event] || []);
+  if (!this._events || !this._events[event]) return [];
+
+  for (var i = 0, l = this._events[event].length, ee = []; i < l; i++) {
+    ee.push(this._events[event][i].fn);
+  }
+
+  return ee;
 };
 
 /**
@@ -36,48 +62,42 @@ EventEmitter.prototype.emit = function emit(event, a1, a2, a3, a4, a5) {
   var listeners = this._events[event]
     , length = listeners.length
     , len = arguments.length
-    , fn = listeners[0]
+    , ee = listeners[0]
     , args
-    , i;
+    , i, j;
 
   if (1 === length) {
-    if (fn.__EE3_once) this.removeListener(event, fn);
+    if (ee.once) this.removeListener(event, ee.fn, true);
 
     switch (len) {
-      case 1:
-        fn.call(fn.__EE3_context || this);
-      break;
-      case 2:
-        fn.call(fn.__EE3_context || this, a1);
-      break;
-      case 3:
-        fn.call(fn.__EE3_context || this, a1, a2);
-      break;
-      case 4:
-        fn.call(fn.__EE3_context || this, a1, a2, a3);
-      break;
-      case 5:
-        fn.call(fn.__EE3_context || this, a1, a2, a3, a4);
-      break;
-      case 6:
-        fn.call(fn.__EE3_context || this, a1, a2, a3, a4, a5);
-      break;
-
-      default:
-        for (i = 1, args = new Array(len -1); i < len; i++) {
-          args[i - 1] = arguments[i];
-        }
-
-        fn.apply(fn.__EE3_context || this, args);
+      case 1: return ee.fn.call(ee.context), true;
+      case 2: return ee.fn.call(ee.context, a1), true;
+      case 3: return ee.fn.call(ee.context, a1, a2), true;
+      case 4: return ee.fn.call(ee.context, a1, a2, a3), true;
+      case 5: return ee.fn.call(ee.context, a1, a2, a3, a4), true;
+      case 6: return ee.fn.call(ee.context, a1, a2, a3, a4, a5), true;
     }
-  } else {
+
     for (i = 1, args = new Array(len -1); i < len; i++) {
       args[i - 1] = arguments[i];
     }
 
-    for (i = 0; i < length; fn = listeners[++i]) {
-      if (fn.__EE3_once) this.removeListener(event, fn);
-      fn.apply(fn.__EE3_context || this, args);
+    ee.fn.apply(ee.context, args);
+  } else {
+    for (i = 0; i < length; i++) {
+      if (listeners[i].once) this.removeListener(event, listeners[i].fn, true);
+
+      switch (len) {
+        case 1: listeners[i].fn.call(listeners[i].context); break;
+        case 2: listeners[i].fn.call(listeners[i].context, a1); break;
+        case 3: listeners[i].fn.call(listeners[i].context, a1, a2); break;
+        default:
+          if (!args) for (j = 1, args = new Array(len -1); j < len; j++) {
+            args[j - 1] = arguments[j];
+          }
+
+          listeners[i].fn.apply(listeners[i].context, args);
+      }
     }
   }
 
@@ -95,9 +115,7 @@ EventEmitter.prototype.emit = function emit(event, a1, a2, a3, a4, a5) {
 EventEmitter.prototype.on = function on(event, fn, context) {
   if (!this._events) this._events = {};
   if (!this._events[event]) this._events[event] = [];
-
-  fn.__EE3_context = context;
-  this._events[event].push(fn);
+  this._events[event].push(new EE( fn, context || this ));
 
   return this;
 };
@@ -111,8 +129,11 @@ EventEmitter.prototype.on = function on(event, fn, context) {
  * @api public
  */
 EventEmitter.prototype.once = function once(event, fn, context) {
-  fn.__EE3_once = true;
-  return this.on(event, fn, context);
+  if (!this._events) this._events = {};
+  if (!this._events[event]) this._events[event] = [];
+  this._events[event].push(new EE(fn, context || this, true ));
+
+  return this;
 };
 
 /**
@@ -120,16 +141,17 @@ EventEmitter.prototype.once = function once(event, fn, context) {
  *
  * @param {String} event The event we want to remove.
  * @param {Function} fn The listener that we need to find.
+ * @param {Boolean} once Only remove once listeners.
  * @api public
  */
-EventEmitter.prototype.removeListener = function removeListener(event, fn) {
+EventEmitter.prototype.removeListener = function removeListener(event, fn, once) {
   if (!this._events || !this._events[event]) return this;
 
   var listeners = this._events[event]
     , events = [];
 
-  for (var i = 0, length = listeners.length; i < length; i++) {
-    if (fn && listeners[i] !== fn) {
+  if (fn) for (var i = 0, length = listeners.length; i < length; i++) {
+    if (listeners[i].fn !== fn && listeners[i].once !== once) {
       events.push(listeners[i]);
     }
   }
@@ -353,6 +375,7 @@ function Primus(url, options) {
  * Simple require wrapper to make browserify, node and require.js play nice.
  *
  * @param {String} name The module to require.
+ * @returns {Object|Undefined} The module that we required.
  * @api private
  */
 Primus.require = function requires(name) {
@@ -471,7 +494,7 @@ Primus.OPEN    = 3;   // The connection is open.
  * supported transports.
  *
  * @type {Boolean}
- * @api private
+ * @private
  */
 Primus.prototype.AVOID_WEBSOCKETS = false;
 
@@ -482,7 +505,7 @@ Primus.prototype.AVOID_WEBSOCKETS = false;
  * feature detection.
  *
  * @type {Boolean}
- * @api private
+ * @private
  */
 Primus.prototype.NETWORK_EVENTS = false;
 Primus.prototype.online = true;
@@ -511,7 +534,7 @@ Primus.prototype.ark = {};
  * Return the given plugin.
  *
  * @param {String} name The name of the plugin.
- * @returns {Mixed}
+ * @returns {Object|undefined} The plugin or undefined.
  * @api public
  */
 Primus.prototype.plugin = function plugin(name) {
@@ -532,7 +555,7 @@ Primus.prototype.plugin = function plugin(name) {
  * Checks if the given event is an emitted event by Primus.
  *
  * @param {String} evt The event name.
- * @returns {Boolean}
+ * @returns {Boolean} Indication of the event is reserved for internal use.
  * @api public
  */
 Primus.prototype.reserved = function reserved(evt) {
@@ -544,11 +567,12 @@ Primus.prototype.reserved = function reserved(evt) {
  * The actual events that are used by the client.
  *
  * @type {Object}
- * @api public
+ * @public
  */
 Primus.prototype.reserved.events = {
   readyStateChange: 1,
   reconnecting: 1,
+  reconnected: 1,
   reconnect: 1,
   offline: 1,
   timeout: 1,
@@ -564,6 +588,7 @@ Primus.prototype.reserved.events = {
  * Initialise the Primus and setup all parsers and internal listeners.
  *
  * @param {Object} options The original options object.
+ * @returns {Primus}
  * @api private
  */
 Primus.prototype.initialise = function initialise(options) {
@@ -582,6 +607,9 @@ Primus.prototype.initialise = function initialise(options) {
   });
 
   primus.on('incoming::open', function opened() {
+    var readyState = primus.readyState
+      , reconnect = primus.attempt;
+
     if (primus.attempt) primus.attempt = null;
 
     //
@@ -591,7 +619,14 @@ Primus.prototype.initialise = function initialise(options) {
     primus.writable = true;
     primus.readable = true;
 
-    var readyState = primus.readyState;
+    //
+    // Make sure we are flagged as `online` as we've successfully opened the
+    // connection.
+    //
+    if (!primus.online) {
+      primus.online = true;
+      primus.emit('online');
+    }
 
     primus.readyState = Primus.OPEN;
     if (readyState !== primus.readyState) {
@@ -601,14 +636,20 @@ Primus.prototype.initialise = function initialise(options) {
     primus.latency = +new Date() - start;
 
     primus.emit('open');
+    if (reconnect) primus.emit('reconnected');
+
     primus.clearTimeout('ping', 'pong').heartbeat();
 
     if (primus.buffer.length) {
-      for (var i = 0, length = primus.buffer.length; i < length; i++) {
-        primus._write(primus.buffer[i]);
-      }
+      var data = primus.buffer.slice()
+        , length = data.length
+        , i = 0;
 
-      primus.buffer = [];
+      primus.buffer.length = 0;
+
+      for (; i < length; i++) {
+        primus._write(data[i]);
+      }
     }
   });
 
@@ -620,7 +661,8 @@ Primus.prototype.initialise = function initialise(options) {
   });
 
   primus.on('incoming::error', function error(e) {
-    var connect = primus.timers.connect;
+    var connect = primus.timers.connect
+      , err = e;
 
     //
     // We're still doing a reconnect attempt, it could be that we failed to
@@ -628,7 +670,24 @@ Primus.prototype.initialise = function initialise(options) {
     // always emit an `error` event instead of a `open` event.
     //
     if (primus.attempt) return primus.reconnect();
-    if (primus.listeners('error').length) primus.emit('error', e);
+
+    //
+    // When the error is not an Error instance we try to normalize it.
+    //
+    if ('string' === typeof e) {
+      err = new Error(e);
+    } else if (!(e instanceof Error) && 'object' === typeof e) {
+      //
+      // BrowserChannel and SockJS returns an object which contains some
+      // details of the error. In order to have a proper error we "copy" the
+      // details in an Error instance.
+      //
+      err = new Error(e.message || e.reason);
+      for (var key in e) {
+        if (e.hasOwnProperty(key)) err[key] = e[key];
+      }
+    }
+    if (primus.listeners('error').length) primus.emit('error', err);
 
     //
     // We received an error while connecting, this most likely the result of an
@@ -868,7 +927,7 @@ Primus.prototype.transforms = function transforms(primus, connection, type, data
     //
     // We always emit 2 arguments for the data event, the first argument is the
     // parsed data and the second argument is the raw string that we received.
-    // This allows you, for exampele, to do some validation on the parsed data
+    // This allows you, for example, to do some validation on the parsed data
     // and then save the raw string in your database without the stringify
     // overhead.
     //
@@ -884,6 +943,7 @@ Primus.prototype.transforms = function transforms(primus, connection, type, data
  * Retrieve the current id from the server.
  *
  * @param {Function} fn Callback function.
+ * @returns {Primus}
  * @api public
  */
 Primus.prototype.id = function id(fn) {
@@ -898,6 +958,7 @@ Primus.prototype.id = function id(fn) {
  * assume that we don't have any open connections. If you do call it when you
  * have a connection open, it could cause duplicate connections.
  *
+ * @returns {Primus}
  * @api public
  */
 Primus.prototype.open = function open() {
@@ -911,14 +972,15 @@ Primus.prototype.open = function open() {
   //
   if (!this.attempt && this.options.timeout) this.timeout();
 
-  return this.emit('outgoing::open');
+  this.emit('outgoing::open');
+  return this;
 };
 
 /**
  * Send a new message.
  *
  * @param {Mixed} data The data that needs to be written.
- * @returns {Boolean} Always returns true.
+ * @returns {Boolean} Always returns true as we don't support back pressure.
  * @api public
  */
 Primus.prototype.write = function write(data) {
@@ -932,7 +994,7 @@ Primus.prototype.write = function write(data) {
  * The actual message writer.
  *
  * @param {Mixed} data The message that needs to be written.
- * @returns {Boolean}
+ * @returns {Boolean} Successful write to the underlaying transport.
  * @api private
  */
 Primus.prototype._write = function write(data) {
@@ -973,6 +1035,7 @@ Primus.prototype._write = function write(data) {
  * connected and our internet connection didn't drop. We cannot use server side
  * heartbeats for this unfortunately.
  *
+ * @returns {Primus}
  * @api private
  */
 Primus.prototype.heartbeat = function heartbeat() {
@@ -1004,17 +1067,21 @@ Primus.prototype.heartbeat = function heartbeat() {
    * @api private
    */
   function ping() {
-    primus.clearTimeout('ping').write('primus::ping::'+ (+new Date));
-    primus.emit('outgoing::ping');
+    var value = +new Date();
+
+    primus.clearTimeout('ping').write('primus::ping::'+ value);
+    primus.emit('outgoing::ping', value);
     primus.timers.pong = setTimeout(pong, primus.options.pong);
   }
 
   primus.timers.ping = setTimeout(ping, primus.options.ping);
+  return this;
 };
 
 /**
  * Start a connection timeout.
  *
+ * @returns {Primus}
  * @api private
  */
 Primus.prototype.timeout = function timeout() {
@@ -1056,6 +1123,7 @@ Primus.prototype.timeout = function timeout() {
  * Properly clean up all `setTimeout` references.
  *
  * @param {String} ..args.. The names of the timeout's we need clear.
+ * @returns {Primus}
  * @api private
  */
 Primus.prototype.clearTimeout = function clear() {
@@ -1073,6 +1141,7 @@ Primus.prototype.clearTimeout = function clear() {
  *
  * @param {Function} callback Callback to be called after the timeout.
  * @param {Object} opts Options for configuring the timeout.
+ * @returns {Primus}
  * @api private
  */
 Primus.prototype.backoff = function backoff(callback, opts) {
@@ -1139,6 +1208,7 @@ Primus.prototype.backoff = function backoff(callback, opts) {
 /**
  * Start a new reconnect procedure.
  *
+ * @returns {Primus}
  * @api private
  */
 Primus.prototype.reconnect = function reconnect() {
@@ -1166,7 +1236,7 @@ Primus.prototype.reconnect = function reconnect() {
 };
 
 /**
- * Close the connection.
+ * Close the connection completely.
  *
  * @param {Mixed} data last packet of data.
  * @returns {Primus}
@@ -1188,7 +1258,7 @@ Primus.prototype.end = function end(data) {
     return this;
   }
 
-  if (data) this.write(data);
+  if (data !== undefined) this.write(data);
 
   this.writable = false;
   this.readable = false;
@@ -1246,6 +1316,7 @@ Primus.prototype.merge = function merge(target) {
 /**
  * Parse the connection string.
  *
+ * @type {Function}
  * @param {String} url Connection URL.
  * @returns {Object} Parsed connection.
  * @api private
@@ -1377,6 +1448,7 @@ Primus.prototype.uri = function uri(options) {
  *
  * @param {String} event Name of the event that we should emit.
  * @param {Function} parser Argument parser.
+ * @returns {Function} The wrapped function that will emit events when called.
  * @api public
  */
 Primus.prototype.emits = function emits(event, parser) {
@@ -1403,6 +1475,7 @@ Primus.prototype.emits = function emits(event, parser) {
  *
  * @param {String} type Incoming or outgoing
  * @param {Function} fn A new message transformer.
+ * @returns {Primus}
  * @api public
  */
 Primus.prototype.transform = function transform(type, fn) {
@@ -1421,6 +1494,7 @@ Primus.prototype.transform = function transform(type, fn) {
  * If not, throw it, so we get a stack trace + proper error message.
  *
  * @param {Error} err The critical error.
+ * @returns {Primus}
  * @api private
  */
 Primus.prototype.critical = function critical(err) {
@@ -1493,6 +1567,15 @@ Primus.prototype.client = function client() {
       // Binary support in Engine.IO breaks a shit things. Turn it off for now.
       //
       forceBase64: true,
+
+      //
+      // XDR has been the source of pain for most real-time users. It doesn't
+      // support the full CORS spec and is infested with bugs. It cannot connect
+      // cross-scheme, does not send ANY authorization information like Cookies,
+      // Basic Authorization headers etc. Force this off by default to ensure a
+      // stable connection.
+      //
+      enablesXDR: false,
 
       //
       // Force timestamps on every single connection. Engine.IO only does this
@@ -1574,7 +1657,7 @@ Primus.prototype.decoder = function decoder(data, fn) {
 
   fn(err, data);
 };
-Primus.prototype.version = "2.3.0";
+Primus.prototype.version = "2.4.6";
 
 //
 // Hack 1: \u2028 and \u2029 are allowed inside string in JSON. But JavaScript
@@ -1653,7 +1736,7 @@ if (
     Primus.prototype.AVOID_WEBSOCKETS = true;
   }
 }
- return Primus; });(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
+ return Primus; });(function PrimusLibraryWrap(Primus) {(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 self["eio"] = _dereq_("./index.js");
 
 },{"./index.js":2}],2:[function(_dereq_,module,exports){
@@ -1672,14 +1755,14 @@ module.exports = _dereq_('./socket');
  */
 module.exports.parser = _dereq_('engine.io-parser');
 
-},{"./socket":4,"engine.io-parser":14}],4:[function(_dereq_,module,exports){
+},{"./socket":4,"engine.io-parser":15}],4:[function(_dereq_,module,exports){
 (function (global){
 /**
  * Module dependencies.
  */
 
 var transports = _dereq_('./transports');
-var Emitter = _dereq_('emitter');
+var Emitter = _dereq_('component-emitter');
 var debug = _dereq_('debug')('engine.io-client:socket');
 var index = _dereq_('indexof');
 var parser = _dereq_('engine.io-parser');
@@ -1747,7 +1830,9 @@ function Socket(uri, opts){
   this.upgrade = false !== opts.upgrade;
   this.path = (opts.path || '/engine.io').replace(/\/$/, '') + '/';
   this.forceJSONP = !!opts.forceJSONP;
+  this.jsonp = false !== opts.jsonp;
   this.forceBase64 = !!opts.forceBase64;
+  this.enablesXDR = !!opts.enablesXDR;
   this.timestampParam = opts.timestampParam || 't';
   this.timestampRequests = opts.timestampRequests;
   this.transports = opts.transports || ['polling', 'websocket'];
@@ -1816,7 +1901,9 @@ Socket.prototype.createTransport = function (name) {
     path: this.path,
     query: query,
     forceJSONP: this.forceJSONP,
+    jsonp: this.jsonp,
     forceBase64: this.forceBase64,
+    enablesXDR: this.enablesXDR,
     timestampRequests: this.timestampRequests,
     timestampParam: this.timestampParam,
     policyPort: this.policyPort,
@@ -1845,11 +1932,28 @@ Socket.prototype.open = function () {
   var transport;
   if (this.rememberUpgrade && Socket.priorWebsocketSuccess && this.transports.indexOf('websocket') != -1) {
     transport = 'websocket';
+  } else if (0 == this.transports.length) {
+    // Emit error on next tick so it can be listened to
+    var self = this;
+    setTimeout(function() {
+      self.emit('error', 'No transports available');
+    }, 0);
+    return;
   } else {
     transport = this.transports[0];
   }
   this.readyState = 'opening';
-  var transport = this.createTransport(transport);
+
+  // Retry with the next transport if the transport is disabled (jsonp: false)
+  var transport;
+  try {
+    transport = this.createTransport(transport);
+  } catch (e) {
+    this.transports.shift();
+    this.open();
+    return;
+  }
+
   transport.open();
   this.setTransport(transport);
 };
@@ -2303,13 +2407,13 @@ Socket.prototype.filterUpgrades = function (upgrades) {
 };
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./transport":5,"./transports":6,"debug":12,"emitter":13,"engine.io-parser":14,"indexof":23,"parsejson":25,"parseqs":26,"parseuri":27}],5:[function(_dereq_,module,exports){
+},{"./transport":5,"./transports":6,"component-emitter":12,"debug":14,"engine.io-parser":15,"indexof":24,"parsejson":25,"parseqs":26,"parseuri":27}],5:[function(_dereq_,module,exports){
 /**
  * Module dependencies.
  */
 
 var parser = _dereq_('engine.io-parser');
-var Emitter = _dereq_('emitter');
+var Emitter = _dereq_('component-emitter');
 
 /**
  * Module exports.
@@ -2335,6 +2439,7 @@ function Transport (opts) {
   this.readyState = '';
   this.agent = opts.agent || false;
   this.socket = opts.socket;
+  this.enablesXDR = opts.enablesXDR;
 }
 
 /**
@@ -2430,8 +2535,9 @@ Transport.prototype.onOpen = function () {
  * @api private
  */
 
-Transport.prototype.onData = function (data) {
-  this.onPacket(parser.decodePacket(data, this.socket.binaryType));
+Transport.prototype.onData = function(data){
+  var packet = parser.decodePacket(data, this.socket.binaryType);
+  this.onPacket(packet);
 };
 
 /**
@@ -2453,7 +2559,7 @@ Transport.prototype.onClose = function () {
   this.emit('close');
 };
 
-},{"emitter":13,"engine.io-parser":14}],6:[function(_dereq_,module,exports){
+},{"component-emitter":12,"engine.io-parser":15}],6:[function(_dereq_,module,exports){
 (function (global){
 /**
  * Module dependencies
@@ -2481,6 +2587,8 @@ exports.websocket = websocket;
 function polling(opts){
   var xhr;
   var xd = false;
+  var xs = false;
+  var jsonp = false !== opts.jsonp;
 
   if (global.location) {
     var isSSL = 'https:' == location.protocol;
@@ -2492,14 +2600,17 @@ function polling(opts){
     }
 
     xd = opts.hostname != location.hostname || port != opts.port;
+    xs = opts.secure != isSSL;
   }
 
   opts.xdomain = xd;
+  opts.xscheme = xs;
   xhr = new XMLHttpRequest(opts);
 
   if ('open' in xhr && !opts.forceJSONP) {
     return new XHR(opts);
   } else {
+    if (!jsonp) throw new Error('JSONP disabled');
     return new JSONP(opts);
   }
 }
@@ -2513,7 +2624,7 @@ function polling(opts){
  */
 
 var Polling = _dereq_('./polling');
-var inherit = _dereq_('inherits');
+var inherit = _dereq_('component-inherit');
 
 /**
  * Module exports.
@@ -2741,7 +2852,7 @@ JSONPPolling.prototype.doWrite = function (data, fn) {
 };
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./polling":9,"inherits":24}],8:[function(_dereq_,module,exports){
+},{"./polling":9,"component-inherit":13}],8:[function(_dereq_,module,exports){
 (function (global){
 /**
  * Module requirements.
@@ -2749,9 +2860,9 @@ JSONPPolling.prototype.doWrite = function (data, fn) {
 
 var XMLHttpRequest = _dereq_('xmlhttprequest');
 var Polling = _dereq_('./polling');
-var Emitter = _dereq_('emitter');
+var Emitter = _dereq_('component-emitter');
+var inherit = _dereq_('component-inherit');
 var debug = _dereq_('debug')('engine.io-client:polling-xhr');
-var inherit = _dereq_('inherits');
 
 /**
  * Module exports.
@@ -2787,6 +2898,7 @@ function XHR(opts){
 
     this.xd = opts.hostname != global.location.hostname ||
       port != opts.port;
+    this.xs = opts.secure != isSSL;
   }
 }
 
@@ -2813,8 +2925,10 @@ XHR.prototype.request = function(opts){
   opts = opts || {};
   opts.uri = this.uri();
   opts.xd = this.xd;
+  opts.xs = this.xs;
   opts.agent = this.agent || false;
   opts.supportsBinary = this.supportsBinary;
+  opts.enablesXDR = this.enablesXDR;
   return new Request(opts);
 };
 
@@ -2867,10 +2981,14 @@ function Request(opts){
   this.method = opts.method || 'GET';
   this.uri = opts.uri;
   this.xd = !!opts.xd;
+  this.xs = !!opts.xs;
   this.async = false !== opts.async;
   this.data = undefined != opts.data ? opts.data : null;
   this.agent = opts.agent;
-  this.create(opts.isBinary, opts.supportsBinary);
+  this.isBinary = opts.isBinary;
+  this.supportsBinary = opts.supportsBinary;
+  this.enablesXDR = opts.enablesXDR;
+  this.create();
 }
 
 /**
@@ -2885,14 +3003,14 @@ Emitter(Request.prototype);
  * @api private
  */
 
-Request.prototype.create = function(isBinary, supportsBinary){
-  var xhr = this.xhr = new XMLHttpRequest({ agent: this.agent, xdomain: this.xd });
+Request.prototype.create = function(){
+  var xhr = this.xhr = new XMLHttpRequest({ agent: this.agent, xdomain: this.xd, xscheme: this.xs, enablesXDR: this.enablesXDR });
   var self = this;
 
   try {
     debug('xhr open %s: %s', this.method, this.uri);
     xhr.open(this.method, this.uri, this.async);
-    if (supportsBinary) {
+    if (this.supportsBinary) {
       // This has to be done after open because Firefox is stupid
       // http://stackoverflow.com/questions/13216903/get-binary-data-with-xmlhttprequest-in-a-firefox-extension
       xhr.responseType = 'arraybuffer';
@@ -2900,7 +3018,7 @@ Request.prototype.create = function(isBinary, supportsBinary){
 
     if ('POST' == this.method) {
       try {
-        if (isBinary) {
+        if (this.isBinary) {
           xhr.setRequestHeader('Content-type', 'application/octet-stream');
         } else {
           xhr.setRequestHeader('Content-type', 'text/plain;charset=UTF-8');
@@ -2913,22 +3031,18 @@ Request.prototype.create = function(isBinary, supportsBinary){
       xhr.withCredentials = true;
     }
 
-    xhr.onreadystatechange = function(){
-      var data;
-
-      try {
+    if (this.hasXDR()) {
+      xhr.onload = function(){
+        self.onLoad();
+      };
+      xhr.onerror = function(){
+        self.onError(xhr.responseText);
+      };
+    } else {
+      xhr.onreadystatechange = function(){
         if (4 != xhr.readyState) return;
         if (200 == xhr.status || 1223 == xhr.status) {
-          var contentType = xhr.getResponseHeader('Content-Type');
-          if (contentType === 'application/octet-stream') {
-            data = xhr.response;
-          } else {
-            if (!supportsBinary) {
-              data = xhr.responseText;
-            } else {
-              data = 'ok';
-            }
-          }
+          self.onLoad();
         } else {
           // make sure the `error` event handler that's user-set
           // does not throw in the same tick and gets caught here
@@ -2936,14 +3050,8 @@ Request.prototype.create = function(isBinary, supportsBinary){
             self.onError(xhr.status);
           }, 0);
         }
-      } catch (e) {
-        self.onError(e);
-      }
-
-      if (null != data) {
-        self.onData(data);
-      }
-    };
+      };
+    }
 
     debug('xhr data %s', this.data);
     xhr.send(this.data);
@@ -3007,7 +3115,11 @@ Request.prototype.cleanup = function(){
     return;
   }
   // xmlhttprequest
-  this.xhr.onreadystatechange = empty;
+  if (this.hasXDR()) {
+    this.xhr.onload = this.xhr.onerror = empty;
+  } else {
+    this.xhr.onreadystatechange = empty;
+  }
 
   try {
     this.xhr.abort();
@@ -3018,6 +3130,46 @@ Request.prototype.cleanup = function(){
   }
 
   this.xhr = null;
+};
+
+/**
+ * Called upon load.
+ *
+ * @api private
+ */
+
+Request.prototype.onLoad = function(){
+  var data;
+  try {
+    var contentType;
+    try {
+      contentType = this.xhr.getResponseHeader('Content-Type');
+    } catch (e) {}
+    if (contentType === 'application/octet-stream') {
+      data = this.xhr.response;
+    } else {
+      if (!this.supportsBinary) {
+        data = this.xhr.responseText;
+      } else {
+        data = 'ok';
+      }
+    }
+  } catch (e) {
+    this.onError(e);
+  }
+  if (null != data) {
+    this.onData(data);
+  }
+};
+
+/**
+ * Check if it has XDomainRequest.
+ *
+ * @api private
+ */
+
+Request.prototype.hasXDR = function(){
+  return 'undefined' !== typeof global.XDomainRequest && !this.xs && this.enablesXDR;
 };
 
 /**
@@ -3055,7 +3207,7 @@ function unloadHandler() {
 }
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./polling":9,"debug":12,"emitter":13,"inherits":24,"xmlhttprequest":11}],9:[function(_dereq_,module,exports){
+},{"./polling":9,"component-emitter":12,"component-inherit":13,"debug":14,"xmlhttprequest":11}],9:[function(_dereq_,module,exports){
 /**
  * Module dependencies.
  */
@@ -3063,8 +3215,8 @@ function unloadHandler() {
 var Transport = _dereq_('../transport');
 var parseqs = _dereq_('parseqs');
 var parser = _dereq_('engine.io-parser');
+var inherit = _dereq_('component-inherit');
 var debug = _dereq_('debug')('engine.io-client:polling');
-var inherit = _dereq_('inherits');
 
 /**
  * Module exports.
@@ -3302,7 +3454,7 @@ Polling.prototype.uri = function(){
   return schema + '://' + this.hostname + port + this.path + query;
 };
 
-},{"../transport":5,"debug":12,"engine.io-parser":14,"inherits":24,"parseqs":26,"xmlhttprequest":11}],10:[function(_dereq_,module,exports){
+},{"../transport":5,"component-inherit":13,"debug":14,"engine.io-parser":15,"parseqs":26,"xmlhttprequest":11}],10:[function(_dereq_,module,exports){
 /**
  * Module dependencies.
  */
@@ -3310,8 +3462,8 @@ Polling.prototype.uri = function(){
 var Transport = _dereq_('../transport');
 var parser = _dereq_('engine.io-parser');
 var parseqs = _dereq_('parseqs');
+var inherit = _dereq_('component-inherit');
 var debug = _dereq_('debug')('engine.io-client:websocket');
-var inherit = _dereq_('inherits');
 
 /**
  * `ws` exposes a WebSocket-compatible interface in
@@ -3533,12 +3685,29 @@ WS.prototype.check = function(){
   return !!WebSocket && !('__initialize' in WebSocket && this.name === WS.prototype.name);
 };
 
-},{"../transport":5,"debug":12,"engine.io-parser":14,"inherits":24,"parseqs":26,"ws":28}],11:[function(_dereq_,module,exports){
+},{"../transport":5,"component-inherit":13,"debug":14,"engine.io-parser":15,"parseqs":26,"ws":28}],11:[function(_dereq_,module,exports){
 // browser shim for xmlhttprequest module
 var hasCORS = _dereq_('has-cors');
 
 module.exports = function(opts) {
   var xdomain = opts.xdomain;
+
+  // scheme must be same when usign XDomainRequest
+  // http://blogs.msdn.com/b/ieinternals/archive/2010/05/13/xdomainrequest-restrictions-limitations-and-workarounds.aspx
+  var xscheme = opts.xscheme;
+
+  // XDomainRequest has a flow of not sending cookie, therefore it should be disabled as a default.
+  // https://github.com/Automattic/engine.io-client/pull/217
+  var enablesXDR = opts.enablesXDR;
+
+  // Use XDomainRequest for IE8 if enablesXDR is true
+  // because loading bar keeps flashing when using jsonp-polling
+  // https://github.com/yujiosaka/socke.io-ie8-loading-example
+  try {
+    if ('undefined' != typeof XDomainRequest && !xscheme && enablesXDR) {
+      return new XDomainRequest();
+    }
+  } catch (e) { }
 
   // XMLHttpRequest can be disabled on IE
   try {
@@ -3554,7 +3723,181 @@ module.exports = function(opts) {
   }
 }
 
-},{"has-cors":21}],12:[function(_dereq_,module,exports){
+},{"has-cors":22}],12:[function(_dereq_,module,exports){
+
+/**
+ * Expose `Emitter`.
+ */
+
+module.exports = Emitter;
+
+/**
+ * Initialize a new `Emitter`.
+ *
+ * @api public
+ */
+
+function Emitter(obj) {
+  if (obj) return mixin(obj);
+};
+
+/**
+ * Mixin the emitter properties.
+ *
+ * @param {Object} obj
+ * @return {Object}
+ * @api private
+ */
+
+function mixin(obj) {
+  for (var key in Emitter.prototype) {
+    obj[key] = Emitter.prototype[key];
+  }
+  return obj;
+}
+
+/**
+ * Listen on the given `event` with `fn`.
+ *
+ * @param {String} event
+ * @param {Function} fn
+ * @return {Emitter}
+ * @api public
+ */
+
+Emitter.prototype.on =
+Emitter.prototype.addEventListener = function(event, fn){
+  this._callbacks = this._callbacks || {};
+  (this._callbacks[event] = this._callbacks[event] || [])
+    .push(fn);
+  return this;
+};
+
+/**
+ * Adds an `event` listener that will be invoked a single
+ * time then automatically removed.
+ *
+ * @param {String} event
+ * @param {Function} fn
+ * @return {Emitter}
+ * @api public
+ */
+
+Emitter.prototype.once = function(event, fn){
+  var self = this;
+  this._callbacks = this._callbacks || {};
+
+  function on() {
+    self.off(event, on);
+    fn.apply(this, arguments);
+  }
+
+  on.fn = fn;
+  this.on(event, on);
+  return this;
+};
+
+/**
+ * Remove the given callback for `event` or all
+ * registered callbacks.
+ *
+ * @param {String} event
+ * @param {Function} fn
+ * @return {Emitter}
+ * @api public
+ */
+
+Emitter.prototype.off =
+Emitter.prototype.removeListener =
+Emitter.prototype.removeAllListeners =
+Emitter.prototype.removeEventListener = function(event, fn){
+  this._callbacks = this._callbacks || {};
+
+  // all
+  if (0 == arguments.length) {
+    this._callbacks = {};
+    return this;
+  }
+
+  // specific event
+  var callbacks = this._callbacks[event];
+  if (!callbacks) return this;
+
+  // remove all handlers
+  if (1 == arguments.length) {
+    delete this._callbacks[event];
+    return this;
+  }
+
+  // remove specific handler
+  var cb;
+  for (var i = 0; i < callbacks.length; i++) {
+    cb = callbacks[i];
+    if (cb === fn || cb.fn === fn) {
+      callbacks.splice(i, 1);
+      break;
+    }
+  }
+  return this;
+};
+
+/**
+ * Emit `event` with the given args.
+ *
+ * @param {String} event
+ * @param {Mixed} ...
+ * @return {Emitter}
+ */
+
+Emitter.prototype.emit = function(event){
+  this._callbacks = this._callbacks || {};
+  var args = [].slice.call(arguments, 1)
+    , callbacks = this._callbacks[event];
+
+  if (callbacks) {
+    callbacks = callbacks.slice(0);
+    for (var i = 0, len = callbacks.length; i < len; ++i) {
+      callbacks[i].apply(this, args);
+    }
+  }
+
+  return this;
+};
+
+/**
+ * Return array of callbacks for `event`.
+ *
+ * @param {String} event
+ * @return {Array}
+ * @api public
+ */
+
+Emitter.prototype.listeners = function(event){
+  this._callbacks = this._callbacks || {};
+  return this._callbacks[event] || [];
+};
+
+/**
+ * Check if this emitter has `event` handlers.
+ *
+ * @param {String} event
+ * @return {Boolean}
+ * @api public
+ */
+
+Emitter.prototype.hasListeners = function(event){
+  return !! this.listeners(event).length;
+};
+
+},{}],13:[function(_dereq_,module,exports){
+
+module.exports = function(a, b){
+  var fn = function(){};
+  fn.prototype = b.prototype;
+  a.prototype = new fn;
+  a.prototype.constructor = a;
+};
+},{}],14:[function(_dereq_,module,exports){
 
 /**
  * Expose `debug()` as the module.
@@ -3693,171 +4036,7 @@ try {
   if (window.localStorage) debug.enable(localStorage.debug);
 } catch(e){}
 
-},{}],13:[function(_dereq_,module,exports){
-
-/**
- * Module dependencies.
- */
-
-var index = _dereq_('indexof');
-
-/**
- * Expose `Emitter`.
- */
-
-module.exports = Emitter;
-
-/**
- * Initialize a new `Emitter`.
- *
- * @api public
- */
-
-function Emitter(obj) {
-  if (obj) return mixin(obj);
-};
-
-/**
- * Mixin the emitter properties.
- *
- * @param {Object} obj
- * @return {Object}
- * @api private
- */
-
-function mixin(obj) {
-  for (var key in Emitter.prototype) {
-    obj[key] = Emitter.prototype[key];
-  }
-  return obj;
-}
-
-/**
- * Listen on the given `event` with `fn`.
- *
- * @param {String} event
- * @param {Function} fn
- * @return {Emitter}
- * @api public
- */
-
-Emitter.prototype.on = function(event, fn){
-  this._callbacks = this._callbacks || {};
-  (this._callbacks[event] = this._callbacks[event] || [])
-    .push(fn);
-  return this;
-};
-
-/**
- * Adds an `event` listener that will be invoked a single
- * time then automatically removed.
- *
- * @param {String} event
- * @param {Function} fn
- * @return {Emitter}
- * @api public
- */
-
-Emitter.prototype.once = function(event, fn){
-  var self = this;
-  this._callbacks = this._callbacks || {};
-
-  function on() {
-    self.off(event, on);
-    fn.apply(this, arguments);
-  }
-
-  fn._off = on;
-  this.on(event, on);
-  return this;
-};
-
-/**
- * Remove the given callback for `event` or all
- * registered callbacks.
- *
- * @param {String} event
- * @param {Function} fn
- * @return {Emitter}
- * @api public
- */
-
-Emitter.prototype.off =
-Emitter.prototype.removeListener =
-Emitter.prototype.removeAllListeners = function(event, fn){
-  this._callbacks = this._callbacks || {};
-
-  // all
-  if (0 == arguments.length) {
-    this._callbacks = {};
-    return this;
-  }
-
-  // specific event
-  var callbacks = this._callbacks[event];
-  if (!callbacks) return this;
-
-  // remove all handlers
-  if (1 == arguments.length) {
-    delete this._callbacks[event];
-    return this;
-  }
-
-  // remove specific handler
-  var i = index(callbacks, fn._off || fn);
-  if (~i) callbacks.splice(i, 1);
-  return this;
-};
-
-/**
- * Emit `event` with the given args.
- *
- * @param {String} event
- * @param {Mixed} ...
- * @return {Emitter}
- */
-
-Emitter.prototype.emit = function(event){
-  this._callbacks = this._callbacks || {};
-  var args = [].slice.call(arguments, 1)
-    , callbacks = this._callbacks[event];
-
-  if (callbacks) {
-    callbacks = callbacks.slice(0);
-    for (var i = 0, len = callbacks.length; i < len; ++i) {
-      callbacks[i].apply(this, args);
-    }
-  }
-
-  return this;
-};
-
-/**
- * Return array of callbacks for `event`.
- *
- * @param {String} event
- * @return {Array}
- * @api public
- */
-
-Emitter.prototype.listeners = function(event){
-  this._callbacks = this._callbacks || {};
-  return this._callbacks[event] || [];
-};
-
-/**
- * Check if this emitter has `event` handlers.
- *
- * @param {String} event
- * @return {Boolean}
- * @api public
- */
-
-Emitter.prototype.hasListeners = function(event){
-  return !! this.listeners(event).length;
-};
-
-},{"indexof":23}],14:[function(_dereq_,module,exports){
+},{}],15:[function(_dereq_,module,exports){
 (function (global){
 /**
  * Module dependencies.
@@ -3882,7 +4061,7 @@ var isAndroid = navigator.userAgent.match(/Android/i);
  * Current protocol version.
  */
 
-exports.protocol = 2;
+exports.protocol = 3;
 
 /**
  * Packet types.
@@ -3928,10 +4107,15 @@ var Blob = _dereq_('blob');
  * @api private
  */
 
-exports.encodePacket = function (packet, supportsBinary, callback) {
-  if (typeof supportsBinary == 'function') {
+exports.encodePacket = function (packet, supportsBinary, utf8encode, callback) {
+  if ('function' == typeof supportsBinary) {
     callback = supportsBinary;
     supportsBinary = false;
+  }
+
+  if ('function' == typeof utf8encode) {
+    callback = utf8encode;
+    utf8encode = null;
   }
 
   var data = (packet.data === undefined)
@@ -3949,7 +4133,7 @@ exports.encodePacket = function (packet, supportsBinary, callback) {
 
   // data fragment is optional
   if (undefined !== packet.data) {
-    encoded += utf8.encode(String(packet.data));
+    encoded += utf8encode ? utf8.encode(String(packet.data)) : String(packet.data);
   }
 
   return callback('' + encoded);
@@ -3985,7 +4169,7 @@ function encodeBlobAsArrayBuffer(packet, supportsBinary, callback) {
   var fr = new FileReader();
   fr.onload = function() {
     packet.data = fr.result;
-    exports.encodePacket(packet, supportsBinary, callback);
+    exports.encodePacket(packet, supportsBinary, true, callback);
   };
   return fr.readAsArrayBuffer(packet.data);
 }
@@ -4047,14 +4231,20 @@ exports.encodeBase64Packet = function(packet, callback) {
  * @api private
  */
 
-exports.decodePacket = function (data, binaryType) {
+exports.decodePacket = function (data, binaryType, utf8decode) {
   // String data
   if (typeof data == 'string' || data === undefined) {
     if (data.charAt(0) == 'b') {
       return exports.decodeBase64Packet(data.substr(1), binaryType);
     }
 
-    data = utf8.decode(data);
+    if (utf8decode) {
+      try {
+        data = utf8.decode(data);
+      } catch (e) {
+        return err;
+      }
+    }
     var type = data.charAt(0);
 
     if (Number(type) != type || !packetslist[type]) {
@@ -4138,7 +4328,7 @@ exports.encodePayload = function (packets, supportsBinary, callback) {
   }
 
   function encodeOne(packet, doneCallback) {
-    exports.encodePacket(packet, supportsBinary, function(message) {
+    exports.encodePacket(packet, supportsBinary, true, function(message) {
       doneCallback(null, setLengthHeader(message));
     });
   }
@@ -4214,7 +4404,7 @@ exports.decodePayload = function (data, binaryType, callback) {
       }
 
       if (msg.length) {
-        packet = exports.decodePacket(msg, binaryType);
+        packet = exports.decodePacket(msg, binaryType, true);
 
         if (err.type == packet.type && err.data == packet.data) {
           // parser error in individual packet - ignoring payload
@@ -4258,7 +4448,7 @@ exports.encodePayloadAsArrayBuffer = function(packets, callback) {
   }
 
   function encodeOne(packet, doneCallback) {
-    exports.encodePacket(packet, true, function(data) {
+    exports.encodePacket(packet, true, true, function(data) {
       return doneCallback(null, data);
     });
   }
@@ -4316,7 +4506,7 @@ exports.encodePayloadAsArrayBuffer = function(packets, callback) {
 
 exports.encodePayloadAsBlob = function(packets, callback) {
   function encodeOne(packet, doneCallback) {
-    exports.encodePacket(packet, true, function(encoded) {
+    exports.encodePacket(packet, true, true, function(encoded) {
       var binaryIdentifier = new Uint8Array(1);
       binaryIdentifier[0] = 1;
       if (typeof encoded === 'string') {
@@ -4369,14 +4559,25 @@ exports.decodePayloadAsBinary = function (data, binaryType, callback) {
   var bufferTail = data;
   var buffers = [];
 
+  var numberTooLong = false;
   while (bufferTail.byteLength > 0) {
     var tailArray = new Uint8Array(bufferTail);
     var isString = tailArray[0] === 0;
     var msgLength = '';
+
     for (var i = 1; ; i++) {
       if (tailArray[i] == 255) break;
+
+      if (msgLength.length > 310) {
+        numberTooLong = true;
+        break;
+      }
+
       msgLength += tailArray[i];
     }
+
+    if(numberTooLong) return callback(err, 0, 1);
+
     bufferTail = sliceBuffer(bufferTail, 2 + msgLength.length);
     msgLength = parseInt(msgLength);
 
@@ -4393,18 +4594,19 @@ exports.decodePayloadAsBinary = function (data, binaryType, callback) {
         }
       }
     }
+
     buffers.push(msg);
     bufferTail = sliceBuffer(bufferTail, msgLength);
   }
 
   var total = buffers.length;
   buffers.forEach(function(buffer, i) {
-    callback(exports.decodePacket(buffer, binaryType), i, total);
+    callback(exports.decodePacket(buffer, binaryType, true), i, total);
   });
 };
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./keys":15,"after":16,"arraybuffer.slice":17,"base64-arraybuffer":18,"blob":19,"utf8":20}],15:[function(_dereq_,module,exports){
+},{"./keys":16,"after":17,"arraybuffer.slice":18,"base64-arraybuffer":19,"blob":20,"utf8":21}],16:[function(_dereq_,module,exports){
 
 /**
  * Gets the keys for an object.
@@ -4425,7 +4627,7 @@ module.exports = Object.keys || function keys (obj){
   return arr;
 };
 
-},{}],16:[function(_dereq_,module,exports){
+},{}],17:[function(_dereq_,module,exports){
 module.exports = after
 
 function after(count, callback, err_cb) {
@@ -4455,7 +4657,7 @@ function after(count, callback, err_cb) {
 
 function noop() {}
 
-},{}],17:[function(_dereq_,module,exports){
+},{}],18:[function(_dereq_,module,exports){
 /**
  * An abstraction for slicing an arraybuffer even when
  * ArrayBuffer.prototype.slice is not supported
@@ -4486,7 +4688,7 @@ module.exports = function(arraybuffer, start, end) {
   return result.buffer;
 };
 
-},{}],18:[function(_dereq_,module,exports){
+},{}],19:[function(_dereq_,module,exports){
 /*
  * base64-arraybuffer
  * https://github.com/niklasvh/base64-arraybuffer
@@ -4547,7 +4749,7 @@ module.exports = function(arraybuffer, start, end) {
   };
 })("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/");
 
-},{}],19:[function(_dereq_,module,exports){
+},{}],20:[function(_dereq_,module,exports){
 (function (global){
 /**
  * Create a blob builder even when vendor prefixes exist
@@ -4600,7 +4802,7 @@ module.exports = (function() {
 })();
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],20:[function(_dereq_,module,exports){
+},{}],21:[function(_dereq_,module,exports){
 (function (global){
 /*! http://mths.be/utf8js v2.0.0 by @mathias */
 ;(function(root) {
@@ -4833,7 +5035,7 @@ module.exports = (function() {
 }(this));
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],21:[function(_dereq_,module,exports){
+},{}],22:[function(_dereq_,module,exports){
 
 /**
  * Module dependencies.
@@ -4858,7 +5060,7 @@ try {
   module.exports = false;
 }
 
-},{"global":22}],22:[function(_dereq_,module,exports){
+},{"global":23}],23:[function(_dereq_,module,exports){
 
 /**
  * Returns `this`. Execute this without a "context" (i.e. without it being
@@ -4868,7 +5070,7 @@ try {
 
 module.exports = (function () { return this; })();
 
-},{}],23:[function(_dereq_,module,exports){
+},{}],24:[function(_dereq_,module,exports){
 
 var indexOf = [].indexOf;
 
@@ -4879,31 +5081,6 @@ module.exports = function(arr, obj){
   }
   return -1;
 };
-},{}],24:[function(_dereq_,module,exports){
-if (typeof Object.create === 'function') {
-  // implementation from standard node.js 'util' module
-  module.exports = function inherits(ctor, superCtor) {
-    ctor.super_ = superCtor
-    ctor.prototype = Object.create(superCtor.prototype, {
-      constructor: {
-        value: ctor,
-        enumerable: false,
-        writable: true,
-        configurable: true
-      }
-    });
-  };
-} else {
-  // old school shim for old browsers
-  module.exports = function inherits(ctor, superCtor) {
-    ctor.super_ = superCtor
-    var TempCtor = function () {}
-    TempCtor.prototype = superCtor.prototype
-    ctor.prototype = new TempCtor()
-    ctor.prototype.constructor = ctor
-  }
-}
-
 },{}],25:[function(_dereq_,module,exports){
 (function (global){
 /**
@@ -4989,20 +5166,34 @@ exports.decode = function(qs){
 var re = /^(?:(?![^:@]+:[^:@\/]*@)(http|https|ws|wss):\/\/)?((?:(([^:@]*)(?::([^:@]*))?)?@)?((?:[a-f0-9]{0,4}:){2,7}[a-f0-9]{0,4}|[^:\/?#]*)(?::(\d*))?)(((\/(?:[^?#](?![^?#\/]*\.[^?#\/.]+(?:[?#]|$)))*\/?)?([^?#\/]*))(?:\?([^#]*))?(?:#(.*))?)/;
 
 var parts = [
-    'source', 'protocol', 'authority', 'userInfo', 'user', 'password', 'host'
-  , 'port', 'relative', 'path', 'directory', 'file', 'query', 'anchor'
+    'source', 'protocol', 'authority', 'userInfo', 'user', 'password', 'host', 'port', 'relative', 'path', 'directory', 'file', 'query', 'anchor'
 ];
 
 module.exports = function parseuri(str) {
-  var m = re.exec(str || '')
-    , uri = {}
-    , i = 14;
+    var src = str,
+        b = str.indexOf('['),
+        e = str.indexOf(']');
 
-  while (i--) {
-    uri[parts[i]] = m[i] || '';
-  }
+    if (b != -1 && e != -1) {
+        str = str.substring(0, b) + str.substring(b, e).replace(/:/g, ';') + str.substring(e, str.length);
+    }
 
-  return uri;
+    var m = re.exec(str || ''),
+        uri = {},
+        i = 14;
+
+    while (i--) {
+        uri[parts[i]] = m[i] || '';
+    }
+
+    if (b != -1 && e != -1) {
+        uri.source = src;
+        uri.host = uri.host.substring(1, uri.host.length - 1).replace(/;/g, ':');
+        uri.authority = uri.authority.replace('[', '').replace(']', '').replace(/;/g, ':');
+        uri.ipv6uri = true;
+    }
+
+    return uri;
 };
 
 },{}],28:[function(_dereq_,module,exports){
@@ -5050,4 +5241,4 @@ function ws(uri, protocols, opts) {
 
 if (WebSocket) ws.prototype = WebSocket.prototype;
 
-},{}]},{},[1])
+},{}]},{},[1])})(this["Primus"]);
