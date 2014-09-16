@@ -15,98 +15,98 @@ var FOURTY_TWO_HOURS_HIGH   = 154800000;
 
 var achievements = {
   0: {
-    title: 'Hundred nopes.',
-    description: 'Send a total of 100 nopes.',
+    title: 'Hundred nopes',
+    description: 'Send a total of 100 nopes',
     hasEarned: hasEarnedTotalNopes.bind(null, 100)
   },
   1: {
-    title: 'Thousand nopes.',
-    description: 'Send a total of 1 000 nopes.',
+    title: 'Thousand nopes',
+    description: 'Send a total of 1 000 nopes',
     hasEarned: hasEarnedTotalNopes.bind(null, 1000)
   },
   2: {
-    title: 'Ten thousand nopes.',
-    description: 'Send a total of 10 000 nopes.',
+    title: 'Ten thousand nopes',
+    description: 'Send a total of 10 000 nopes',
     hasEarned: hasEarnedTotalNopes.bind(null, 10000)
   },
   3: {
-    title: 'A hundred thousand nopes.',
-    description: 'Send a total of 100 000 nopes.',
+    title: 'A hundred thousand nopes',
+    description: 'Send a total of 100 000 nopes',
     hasEarned: hasEarnedTotalNopes.bind(null, 100000)
   },
   4: {
     title: 'Million noper.',
-    description: 'Send a total of 1 000 000 nopes.',
+    description: 'Send a total of 1 000 000 nopes',
     hasEarned: hasEarnedTotalNopes.bind(null, 1000000)
   },
   5: {
-    title: 'Duel of 100 nopes.',
+    title: 'Skirmish of 100 nopes',
     description: 'Send 100 nopes to a single opponent',
     hasEarned: hasEarnedOpponentNopes.bind(null, 100)
   },
   6: {
-    title: 'Duel of 1 000 nopes.',
+    title: 'Clash of 1 000 nopes',
     description: 'Send 1 000 nopes to a single opponent',
     hasEarned: hasEarnedOpponentNopes.bind(null, 1000)
   },
   7: {
-    title: 'Duel of 10 000 nopes.',
+    title: 'Duel of 10 000 nopes',
     description: 'Send 10 000 nopes to a single opponent',
     hasEarned: hasEarnedOpponentNopes.bind(null, 10000)
   },
   8: {
-    title: 'Duel of 100 000 nopes.',
+    title: 'Battle of 100 000 nopes',
     description: 'Send 100 000 nopes to a single opponent',
     hasEarned: hasEarnedOpponentNopes.bind(null, 100000)
   },
   9: {
-    title: 'Duel of 1 000 000 nopes.',
+    title: 'War of 1 000 000 nopes',
     description: 'Send 1 000 000 nopes to a single opponent',
     hasEarned: hasEarnedOpponentNopes.bind(null, 1000000)
   },
   10: {
     title: 'Pi noper.',
-    description: 'Answer nope. in 3.14 seconds',
+    description: 'Answer "nope" in 3.14 seconds',
     hasEarned: function(user, nopeData) {
       return nopeData.timeDiff >= PI_SECONDS_LOW && nopeData.timeDiff < PI_SECONDS_HIGH;
     }
   },
   11: {
     title: 'Pi noper 2',
-    description: 'Answer nope. in 3 minutes and 14 seconds',
+    description: 'Answer "nope" in 3 minutes and 14 seconds',
     hasEarned: function(user, nopeData) {
       return nopeData.timeDiff >= PI_MINUTES_LOW && nopeData.timeDiff < PI_MINUTES_HIGH;
     }
   },
   12: {
     title: 'Pi noper 3',
-    description: 'Answer nope. in 3 hours and 14 minutes',
+    description: 'Answer "nope" in 3 hours and 14 minutes',
     hasEarned: function(user, nopeData) {
       return nopeData.timeDiff >= PI_HOURS_LOW && nopeData.timeDiff < PI_HOURS_HIGH;
     }
   },
   13: {
     title: 'The answer to life, the universe, and everything',
-    description: 'Answer nope. in 42 seconds',
+    description: 'Answer "nope" in 42 seconds',
     hasEarned: function(user, nopeData) {
-      return nopeData.timeDiff >= FOURTY_TWO_SECONDS_LOW
-        && nopeData.timeDiff < FOURTY_TWO_SECONDS_HIGH;
+      return nopeData.timeDiff >= FOURTY_TWO_SECONDS_LOW &&
+        nopeData.timeDiff < FOURTY_TWO_SECONDS_HIGH;
     }
   },
   14: {
     title: 'The answer to life, the universe, and everything 2',
-    description: 'Answer nope. in 42 minutes',
+    description: 'Answer "nope" in 42 minutes',
     hasEarned: function(user, nopeData) {
-      return nopeData.timeDiff >= FOURTY_TWO_MINUTES_LOW
-        && nopeData.timeDiff < FOURTY_TWO_MINUTES_HIGH;
+      return nopeData.timeDiff >= FOURTY_TWO_MINUTES_LOW &&
+        nopeData.timeDiff < FOURTY_TWO_MINUTES_HIGH;
     }
   },
   15: {
     title: 'The answer to life, the universe, and everything 3',
-    description: 'Answer nope. in 42 hours',
+    description: 'Answer "nope" in 42 hours',
     hasEarned: function(user, nopeData) {
-      return nopeData.timeDiff >= FOURTY_TWO_HOURS_LOW
-        && nopeData.timeDiff < FOURTY_TWO_HOURS_HIGH;
+      return nopeData.timeDiff >= FOURTY_TWO_HOURS_LOW &&
+        nopeData.timeDiff < FOURTY_TWO_HOURS_HIGH;
     }
   },
   16: {

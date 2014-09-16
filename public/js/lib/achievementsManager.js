@@ -2,68 +2,68 @@
 NopeGame.AchievementsManager = Ember.Object.extend({
   achievements: {
     0: {
-      title: 'Hundred nopes.',
-      description: 'Send a total of 100 nopes.',
+      title: 'Hundred nopes',
+      description: 'Send a total of 100 nopes',
     },
     1: {
-      title: 'Thousand nopes.',
-      description: 'Send a total of 1 000 nopes.',
+      title: 'Thousand nopes',
+      description: 'Send a total of 1 000 nopes',
     },
     2: {
-      title: 'Ten thousand nopes.',
-      description: 'Send a total of 10 000 nopes.',
+      title: 'Ten thousand nopes',
+      description: 'Send a total of 10 000 nopes',
     },
     3: {
-      title: 'A hundred thousand nopes.',
-      description: 'Send a total of 100 000 nopes.',
+      title: 'A hundred thousand nopes',
+      description: 'Send a total of 100 000 nopes',
     },
     4: {
       title: 'Million noper.',
-      description: 'Send a total of 1 000 000 nopes.',
+      description: 'Send a total of 1 000 000 nopes',
     },
     5: {
-      title: 'Duel of 100 nopes.',
+      title: 'Skirmish of 100 nopes',
       description: 'Send 100 nopes to a single opponent',
     },
     6: {
-      title: 'Duel of 1 000 nopes.',
+      title: 'Clash of 1 000 nopes',
       description: 'Send 1 000 nopes to a single opponent',
     },
     7: {
-      title: 'Duel of 10 000 nopes.',
+      title: 'Duel of 10 000 nopes',
       description: 'Send 10 000 nopes to a single opponent',
     },
     8: {
-      title: 'Duel of 100 000 nopes.',
+     title: 'Battle of 100 000 nopes',
       description: 'Send 100 000 nopes to a single opponent',
     },
     9: {
-      title: 'Duel of 1 000 000 nopes.',
+     title: 'War of 1 000 000 nopes',
       description: 'Send 1 000 000 nopes to a single opponent',
     },
     10: {
       title: 'Pi noper.',
-      description: 'Answer nope. in 3.14 seconds',
+      description: 'Answer "nope" in 3.14 seconds',
     },
     11: {
       title: 'Pi noper 2',
-      description: 'Answer nope. in 3 minutes and 14 seconds',
+      description: 'Answer "nope" in 3 minutes and 14 seconds',
     },
     12: {
       title: 'Pi noper 3',
-      description: 'Answer nope. in 3 hours and 14 minutes',
+      description: 'Answer "nope" in 3 hours and 14 minutes',
     },
     13: {
       title: 'The answer to life, the universe, and everything',
-      description: 'Answer nope. in 42 seconds',
+      description: 'Answer "nope" in 42 seconds',
     },
     14: {
       title: 'The answer to life, the universe, and everything 2',
-      description: 'Answer nope. in 42 minutes',
+      description: 'Answer "nope" in 42 minutes',
     },
     15: {
       title: 'The answer to life, the universe, and everything 3',
-      description: 'Answer nope. in 42 hours',
+      description: 'Answer "nope" in 42 hours',
     },
     16: {
       title: 'Social noper',
