@@ -345,7 +345,8 @@ NopeGame.NopeServerManager = Ember.Object.extend({
             } else {
               toastr.warning(
                 '<a href="mailto:' + email + '?subject=Nope.wtf&body=Join%20www.nope.wtf!">Invite them to Nope! <i class="fa fa-envelope"></i></a>',
-                email + ' is not a member!'
+                email + ' is not a member!',
+                { timeOut: 15000 }
               );
             }
           }

@@ -307,11 +307,10 @@
 				<section>
 					<h2 class="major"><span>Add a friend</span></h2>
 					<form {{action 'addOpponent' email on='submit'}}>
-						<div class="form-group">
-							<label>Email</label>
-							{{input type='email' placeholder='Enter E-mail' name="email" class='form-control' value=email}}
+						<div class="InputAddOn">
+							{{input type='email' placeholder="Enter a friend's E-mail adress" name="email" class="InputAddOn-field" value=email}}
+						  <button class="InputAddOn-item" type="submit">Add</button>
 						</div>
-						<button class="addUser button button-big" type="submit">Add</button>
 					</form>
 				</section>
 		</script>
