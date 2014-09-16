@@ -199,18 +199,20 @@
 				<div class="alert alert-danger">{{message}}</div>
 			{{/if}}
 
-			<!-- LOGIN FORM -->
-			<form {{action 'authenticate' on='submit'}}>
-				<div class="form-group">
-					<label>Email</label>
-					{{input type='email' placeholder='Enter E-mail' value=identification}}
-				</div>
-				<div class="form-group">
-					<label>Password</label>
-					{{input placeholder='Enter Password' type='password' value=password}}
+			<form {{action 'authenticate' on='submit'}} class="flex-form">
+
+				<div class="InputAddOn">
+					<span class="InputAddOn-item"><i class="fa fa-envelope"></i> E-mail</span>
+					{{input type='email' placeholder='Enter your E-mail' value=identification class="InputAddOn-field"}}
 				</div>
 
-				<button type="submit" class="btn btn-warning btn-lg">Login</button><input type="hidden" name="_csrf" value="{{_csrf}}"/>
+				<div class="InputAddOn">
+					<span class="InputAddOn-item"><i class="fa fa-key"></i> Password</span>
+					{{input placeholder='Enter your password' type='password' value=password class="InputAddOn-field"}}
+				</div>
+
+				<button type="submit" class="InputAddOn-item">Login</button>
+				<input type="hidden" name="_csrf" value="{{_csrf}}"/>
 			</form>
 
 			<hr>
@@ -225,22 +227,23 @@
 				<div class="alert alert-danger">{{message}}</div>
 			{{/if}}
 
-			<!-- LOGIN FORM -->
 			<form {{action 'signup' this on='submit'}}>
-				<div class="form-group">
-					<label>Email</label>
-					{{input type='email' placeholder='Enter E-mail' class='form-control' value=email}}
-				</div>
-				<div class="form-group">
-					<label>Name</label>
-					{{input type='name' placeholder='Enter an username' class='form-control' value=name}}
-				</div>
-				<div class="form-group">
-					<label>Password</label>
-					{{input placeholder='Enter Password' type='password' class='form-control' value=password}}
+				<div class="InputAddOn">
+					<span class="InputAddOn-item"><i class="fa fa-user"> Name</i></span>
+					{{input type='email' placeholder='Enter an username' class="InputAddOn-field" value=name}}
 				</div>
 
-				<button type="submit" class="btn btn-warning btn-lg">Signup</button>
+				<div class="InputAddOn">
+					<span class="InputAddOn-item"><i class="fa fa-envelope"> E-mail</i></span>
+					{{input type='email' placeholder='Enter your E-mail' class="InputAddOn-field" value=email}}
+				</div>
+
+				<div class="InputAddOn">
+					<span class="InputAddOn-item"><i class="fa fa-key"> Password</i></span>
+					{{input placeholder='Enter your password' type='password' value=password class="InputAddOn-field"}}
+				</div>
+
+				<button type="submit" class="InputAddOn-item">Signup</button>
 				<input type="hidden" name="_csrf" value="{{_csrf}}"/>
 			</form>
 
@@ -306,10 +309,10 @@
 		<script type="text/x-handlebars" data-template-name="newOpponent">
 				<section>
 					<h2 class="major"><span>Add a friend</span></h2>
-					<form {{action 'addOpponent' email on='submit'}}>
+					<form {{action 'addOpponent' email on='submit'}} class="flex-form">
 						<div class="InputAddOn">
 							{{input type='email' placeholder="Enter a friend's E-mail adress" name="email" class="InputAddOn-field" value=email}}
-						  <button class="InputAddOn-item" type="submit">Add</button>
+							<button class="InputAddOn-item" type="submit">Add</button>
 						</div>
 					</form>
 				</section>

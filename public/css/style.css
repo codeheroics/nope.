@@ -709,6 +709,10 @@ html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockq
 		color: red;
 	}
 
+	.flex-form input, .flex-form button {
+		margin: 0;
+	}
+
 	.InputAddOn {
 		display: flex;
 		margin-bottom: 1em;
@@ -716,12 +720,12 @@ html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockq
 
 	.InputAddOn-field {
 		flex: 1;
-		&:not(:first-child) {
-			border-left: 0;
-		}
-		&:not(:last-child) {
-			border-right: 0;
-		}
+	}
+	.InputAddOn-field:not(:first-child) {
+		border-left: 0;
+	}
+	.InputAddOn-field:not(:last-child) {
+		border-right: 0;
 	}
 
 	.InputAddOn-item {
@@ -734,10 +738,10 @@ html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockq
 	.InputAddOn-field, .InputAddOn-item {
 		border: 1px solid hsla(31, 15%, 50%, 0.25);
 		padding: 0.5em 0.75em;
-		&:first-child {
-			border-radius: 2px 0 0 2px;
-		}
-		&:last-child {
-			border-radius: 0 2px 2px 0;
-		}
+	}
+	.InputAddOn-field:first-child, .InputAddOn-item:first-child {
+		border-radius: 2px 0 0 2px;
+	}
+	.InputAddOn-field:last-child, .InputAddOn-item:last-child {
+		border-radius: 0 2px 2px 0;
 	}

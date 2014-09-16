@@ -420,4 +420,9 @@
 	#titlebar {
 		display: none;
 	}
+
+/** HUGO */
+	.flex-form {
+		width: 50%;
+	}
 }
