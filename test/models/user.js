@@ -7,14 +7,26 @@ var User    = require('../../models/user');
 
 describe('User', function() {
   beforeEach(function(done) {
-    var userA = new User({name: 'A', email: 'a@a.a'});
-    var userB = new User({name: 'B', email: 'b@b.b'});
+    var userA = new User({
+      name: 'A',
+      email: 'a@a.a'
+    });
+    var userB = new User({
+      name: 'B',
+      email: 'b@b.b'
+    });
 
     async.series([
       function(cbSeries) {
         userA.save(cbSeries); },
       function(cbSeries) {
         userB.sendFriendRequest(userA.email, cbSeries);
+      },
+      function(cbSeries) {
+        User.findById(userA.email, function(err, updatedUserA) {
+          expect(err).to.not.exist;
+          updatedUserA.sendFriendRequest(userB.email, cbSeries);
+        });
       }
     ], done);
   });
@@ -35,7 +47,6 @@ describe('User', function() {
 
         userA.nopeAt(userB.email, function(err, status) {
           expect(err).to.not.exist;
-          expect(status).to.not.exist;
 
           // The userB that we have in memory is not up to date anymore
           // Saving should send back an error, but noping should

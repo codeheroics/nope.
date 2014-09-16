@@ -207,9 +207,7 @@ User.prototype.nopeAt = function(opponentEmail, callback) {
 
     // okay, we can nope
 
-    var timeDiff = now - self.friendsNopes[opponentEmail].time;
-    if (isNaN(timeDiff)) console.error('NaN!', timeDiff, self, userNoped); // FOR DEBUGGING if problem
-
+    var timeDiff = now - self.friendsNopes[opponentEmail].time || 0;
 
     // From here, this can be repeated in case of CAS error
 
@@ -294,8 +292,6 @@ User.prototype.nopeAtUserIgnoringMe = function(userIgnoring, now, callback) {
   var timeDiff = now - this.friendsNopes[userIgnoring.email].time;
   this.setNopingAt(userIgnoring, now, timeDiff);
   this.totalNopes++;
-
-  if (isNaN(timeDiff)) console.error('NaN!', timeDiff, this, userIgnoring); // FOR DEBUGGING if problem
 
   var ignoringUserFriendsNopeForMe = userIgnoring.removeFromIgnoredUsers(this.email) || {};
   var updatedIgnoringUserFriendsNopeForMe = { // Equivalent of calling setNopedBy for ignored user
