@@ -242,7 +242,7 @@
 				<div class="alert alert-danger">{{message}}</div>
 			{{/if}}
 
-			<form {{action 'signup' this on='submit'}}>
+			<form {{action 'signup' this on='submit'}} class="flex-form">
 				<div class="InputAddOn">
 					<span class="InputAddOn-item"><i class="fa fa-user"> Name</i></span>
 					{{input type='email' placeholder='Enter an username' class="InputAddOn-field" value=name}}
@@ -370,8 +370,8 @@
 					<div style="text-align: center;">
 						<legend class="nopesSent">nopes sent</legend>
 					</div>
-					<div style="text-align: center;">
-						<button type="button" {{action 'ignore' model}}>Ignore {{name}}</button>
+					<div style="text-align: center; margin-top:15px;">
+						<button type="button" class="InputAddOn-item" {{action 'ignore' model}}>Ignore {{name}}</button>
 					</div>
 
 				</section>
