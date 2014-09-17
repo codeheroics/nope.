@@ -3,6 +3,8 @@
 var couchbase   = require('couchbase');
 var async       = require('async');
 var validator   = require('validator');
+var winston     = require('winston');
+
 var db          = require('../lib/couchbase');
 var redisClient = require('../lib/redisClient');
 var userAchievements = require('./userAchievements');
@@ -227,6 +229,7 @@ User.prototype.nopeAt = function(opponentEmail, callback) {
               userNoped.save(function(errSave, result) {
                 // There was an error saving due to the CAS : We'll update the object and retry saving
                 if (errSave && errSave.code === couchbase.errors.keyAlreadyExists) {
+                  winston.warn('Got CAS error for ' + userNoped.email + ', should be ok after retry');
                   User.findById(userNoped.email, function(errGet, updateUserNoped) {
                     if (errGet) return cbRetry(errGet);
                     userNoped = updateUserNoped;
@@ -251,6 +254,7 @@ User.prototype.nopeAt = function(opponentEmail, callback) {
               self.save(function(errSave, result) {
                 // There was an error saving due to the CAS : We'll update the object and retry saving
                 if (errSave && errSave.code === couchbase.errors.keyAlreadyExists) {
+                  winston.warn('Got CAS error for ' + self.email  + ', should be ok after retry');
                   User.findById(self.email, function(errGet, nopingUser) {
                     if (errGet) return cbRetry(errGet);
                     self = nopingUser;
@@ -266,7 +270,10 @@ User.prototype.nopeAt = function(opponentEmail, callback) {
         }
       ],
       function(err) {
-        if (err) return callback(err);
+        if (err) {
+          winston.error('Got error while saving a poke from ' + self.email  + ' to ' + userNoped.email, err);
+          return callback(err);
+        }
 
         redisClient.publish(
           self.email,

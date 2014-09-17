@@ -1,6 +1,7 @@
 'use strict';
 
 var validator   = require('validator');
+var winston     = require('winston');
 var User        = require('../models/user');
 
 module.exports = function(app) {
@@ -24,7 +25,8 @@ module.exports = function(app) {
         if (err instanceof User.FriendError) {
           return res.jsonp(403, { message: err.message, status: err.status });
         }
-        return res.jsonp(500, { message: err.message });
+        winston.error('Server error while ' + req.user.email + ' tried to befriend' + req.body.friendEmail, err);
+        return res.jsonp(500, {});
       }
       // TODO Send an e-mail to the unexisting user ? --> Propose this in-app to the current user ?
       return res.jsonp({message: status});

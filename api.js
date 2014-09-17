@@ -5,6 +5,9 @@ var app = express();
 var config = require('config');
 var bodyParser = require('body-parser');
 
+var winston = require('winston');
+winston.add(winston.transports.File, { filename: './log/api.log' });
+
 app.use(bodyParser.urlencoded({ extended: false })); // Forms
 app.use(bodyParser.json());
 // app.use(bodyParser.json({ type: 'application/vnd.api+json' }))

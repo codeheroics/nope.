@@ -2,8 +2,12 @@
 var express    = require('express');
 var bodyParser = require('body-parser');
 var async      = require('async');
-var User       = require('./models/user');
 var config     = require('config');
+var User       = require('./models/user');
+
+var winston    = require('winston');
+winston.add(winston.transports.File, { filename: './log/realtime.log' });
+
 var app        = express();
 
 app.use(bodyParser.json());

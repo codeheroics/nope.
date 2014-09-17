@@ -1,6 +1,7 @@
 'use strict';
 
 var validator = require('validator');
+var winston   = require('winston');
 var User      = require('../models/user');
 
 module.exports = function (app) {
@@ -37,7 +38,8 @@ module.exports = function (app) {
         if (err instanceof User.FriendError || err instanceof User.NopeError) {
           return res.jsonp(403, { message: err.message, status: err.status });
         }
-        return res.jsonp(500, { message: err.message });
+        winston.error('Server error while ' + req.user.email + ' tried to poke' + req.body.friendEmail, err);
+        return res.jsonp(500, {});
       }
 
       res.jsonp(nopeInfos);
