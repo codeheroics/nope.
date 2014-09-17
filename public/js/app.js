@@ -65,10 +65,16 @@ var CustomAuthenticator = Ember.SimpleAuth.Authenticators.Base.extend({
           window.localStorage.setItem('token', data);
           resolve();
         })
-        .fail(function(a, b, c) {
-          toastr.error('Incorrect password. Please try again.');
-          console.log(a, b, c);
-          reject('failed');
+        .fail(function(xhr) {
+          if (xhr.status === 401) {
+            toastr.error('Incorrect password. Please try again.');
+          } else if (xhr.satus === 403) {
+            toastr.error('Your account is currently locked after too many failed login attempts, ' +
+              ' please try again in a few minutes.');
+          } else {
+            toastr.error('Server error. Please try again in a few minutes');
+          }
+          reject();
         });
     });
   },
