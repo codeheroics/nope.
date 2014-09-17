@@ -213,10 +213,6 @@
 
 			<h1><span class="fa fa-sign-in"></span> Login</h1>
 
-			{{#if message}}
-				<div class="alert alert-danger">{{message}}</div>
-			{{/if}}
-
 			<form {{action 'authenticate' on='submit'}} class="flex-form">
 
 				<div class="InputAddOn">
@@ -230,7 +226,6 @@
 				</div>
 
 				<button type="submit" class="InputAddOn-item">Login</button>
-				<input type="hidden" name="_csrf" value="{{_csrf}}"/>
 			</form>
 
 			<hr>
@@ -240,10 +235,6 @@
 
 		<script type="text/x-handlebars" data-template-name="signup">
 			<h1><span class="fa fa-sign-in"></span> Signup</h1>
-
-			{{#if message}}
-				<div class="alert alert-danger">{{message}}</div>
-			{{/if}}
 
 			<form {{action 'signup' this on='submit'}} class="flex-form">
 				<div class="InputAddOn">
@@ -262,7 +253,6 @@
 				</div>
 
 				<button type="submit" class="InputAddOn-item">Signup</button>
-				<input type="hidden" name="_csrf" value="{{_csrf}}"/>
 			</form>
 
 			<hr>
