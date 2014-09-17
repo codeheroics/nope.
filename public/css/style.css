@@ -72,11 +72,6 @@ html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockq
 			display: inline-block;
 		}
 
-		#footer h2.major span
-		{
-			background: #f2f5f3;
-		}
-
 	a
 	{
 		font-weight: bold;
@@ -477,6 +472,8 @@ html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockq
 
 	#footer
 	{
+		font-style: italic;
+		 padding: 0 20px;
 	}
 
 		#footer a
