@@ -145,6 +145,11 @@ html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockq
 		color: #c1cac5;
 	}
 
+	.soft-byline {
+		font-weight: 700;
+		color: #c1cac5;
+	}
+
 	.button
 	{
 		display: inline-block;
