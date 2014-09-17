@@ -87,10 +87,10 @@
 				</header>
 			<!-- /Header -->
 
-			<div id="titleBar" class="skel-panels-overlay skel-panels-overlay-top-left"><span class="title" data-action="copyHTML" data-args="logo">Nope.</span></div>
+			<div id="titleBar"><span class="title" data-action="copyHTML" data-args="logo">Nope.</span></div>
 
 			<!-- Nav -->
-				<nav id="nav" class="skel-panels-fixed">
+				<nav id="nav">
 					<ul>
 						{{#if session.isAuthenticated}}
 							<li>{{#link-to "index" }}Home{{/link-to}}</li>
@@ -129,7 +129,7 @@
 				<div id="main-wrapper">
 					<div id="main" class="container">
 						<div class="row">
-							<div class="12u skel-cell-important">
+							<div>
 								<div class="content">
 									{{outlet}}
 								</div>
