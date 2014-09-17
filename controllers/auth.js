@@ -1,13 +1,15 @@
 'use strict';
 
-var moment    = require('moment');
-var jwt       = require('jwt-simple');
-var config    = require('config');
-var log       = require('winston');
-var passport  = require('passport');
-var validator = require('validator');
-var User      = require('../models/user');
-var mail      = require('../lib/mail');
+var moment     = require('moment');
+var jwt        = require('jwt-simple');
+var config     = require('config');
+var log        = require('winston');
+var passport   = require('passport');
+var validator  = require('validator');
+
+var User       = require('../models/user');
+var mail       = require('../lib/mail');
+var bruteforce = require('../lib/bruteforce');
 
 module.exports = function(app) {
   var isLoggedIn = require('../lib/utils/middlewares')(app).isLoggedIn;
@@ -55,11 +57,21 @@ module.exports = function(app) {
    });
 
   // process the login form
-  app.post('/login', function(req, res, next) {
+  app.post(
+    '/login',
+    bruteforce.global.prevent,
+    bruteforce.user.getMiddleware({
+        key: function(req, res, next) {
+          // prevent too many attempts for the same username
+          next(req.body.email);
+        }
+    }),
+    function(req, res, next) {
     passport.authenticate('local-login', function(err, user) {
       if (err) log.error(err.message, err);
       if (err || !user) return outputLoginError(req, res);
 
+      req.brute.reset(function() {}); // Don't wanna condition the next step to this
       res.jsonp(createAccessToken(user));
     })(req, res, next);
   });
