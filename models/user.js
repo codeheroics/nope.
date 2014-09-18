@@ -4,6 +4,7 @@ var couchbase   = require('couchbase');
 var async       = require('async');
 var validator   = require('validator');
 var winston     = require('winston');
+var sanitizer   = require('sanitizer');
 
 var db          = require('../lib/couchbase');
 var redisClient = require('../lib/redisClient');
@@ -14,8 +15,8 @@ var User = function(params) {
   if (!params) throw new Error('Missing properties');
   if (!params.name) throw new Error('No name');
   if (!params.email) throw new Error('No email');
-  this.name = params.name;
-  this.email = params.email.toLowerCase();
+  this.name = params.name.trim();
+  this.email = params.email.toLowerCase().trim();
   this.password = params.password;
   this.confirmed = !! params.confirmed;
   this.friendsNopes = params.friendsNopes ? params.friendsNopes : {};
@@ -54,7 +55,7 @@ var NopeError = User.NopeError = function(message) {
 User.NopeError.prototype = new Error();
 
 User.findById = function(email, callback) {
-  email = email.toLowerCase();
+  email = email.toLowerCase().trim();
   db.get(email, function(err, result) {
     if (err) return callback(err);
     if (!result || !result.value) return callback(null, null);
@@ -65,14 +66,17 @@ User.findById = function(email, callback) {
 };
 
 User.prototype.save = function(callback) {
+  this.email = this.email.toLowerCase().trim();
   if (!validator.isEmail(this.email)) return callback(new Error('Invalid email'));
+  this.name = sanitizer.sanitize(this.name).trim();
+  if (!this.name.length) return callback(new Error('Invalid name'));
 
   var options = {};
   if (this.cas) {
     options.cas = this.cas;
   }
 
-  db.set(this.email.toLowerCase(), this.toDbJSON(), options, callback);
+  db.set(this.email, this.toDbJSON(), options, callback);
 };
 
 User.prototype.toDbJSON = function() {
@@ -115,7 +119,7 @@ User.prototype.toPublicJSON = function() {
 };
 
 User.prototype.hasFriend = function(email) {
-  return this.friendsNopes[email.toLowerCase()] ? true : false;
+  return this.friendsNopes[email] ? true : false;
 };
 
 User.prototype.hasIgnored = function(email) {
@@ -143,17 +147,15 @@ User.prototype.hasPending = function(email) {
  * @param {[type]} timeDiff [description]
  */
 User.prototype.setNopingAt = function(userNoped, now, timeDiff) {
-  var email = userNoped.email;
-  email = email.toLowerCase().trim();
-  var oldNope = this.friendsNopes[email] || {};
-  this.friendsNopes[email] = {
+  var oldNope = this.friendsNopes[userNoped.email] || {};
+  this.friendsNopes[userNoped.email] = {
     time: now,
     myTimeNoping: (oldNope.myTimeNoping || 0),
     opponentTimeNoping: (oldNope.opponentTimeNoping || 0) + (timeDiff || 0),
     timeDiff: timeDiff || 0,
     nopesCpt: (oldNope.nopesCpt || 0) + 1,
     isNopingMe: false,
-    opponentName: userNoped.name.trim()
+    opponentName: userNoped.name
   };
 };
 
@@ -173,13 +175,15 @@ User.prototype.setNopedBy = function(userNoping, now, timeDiff) {
     timeDiff: timeDiff || 0,
     nopesCpt: oldNope.nopesCpt || 0,
     opponentTimeNoping: (oldNope.opponentTimeNoping || 0),
-    opponentName: userNoping.name.trim()
+    opponentName: userNoping.name
   };
 };
 
 User.prototype.nopeAt = function(opponentEmail, callback) {
   var self = this;
   var now = Date.now();
+
+  opponentEmail = opponentEmail.toLowerCase().trim();
 
   if (!this.hasFriend(opponentEmail)) return callback(new FriendError(User.FRIEND_STATUSES.NOT_FRIEND));
 
@@ -333,7 +337,7 @@ User.prototype.nopeAtUserIgnoringMe = function(userIgnoring, now, callback) {
 
 User.prototype.sendFriendRequest = function(email, callback) {
   var currentUser = this;
-  email = email.toLowerCase();
+  email = email.toLowerCase().trim();
   if (email === this.email) return callback(new FriendError(User.FRIEND_STATUSES.SELF));
 
   if (this.hasInvited(email)) {
@@ -436,7 +440,7 @@ User.prototype.removeFromIgnoredUsers = function(email) {
 
 User.prototype.ignoreUser = function(email, callback) {
   var self = this;
-  email = email.toLowerCase();
+  email = email.toLowerCase().trim();
 
   if (self.hasIgnored(email)) { // already ignored
     return callback();
@@ -473,7 +477,7 @@ User.prototype.ignoreUser = function(email, callback) {
 };
 
 User.prototype.unIgnoreUser = function(email, callback) {
-  email = email.toLowerCase();
+  email = email.toLowerCase().trim();
 
   var restoredUser = this.removeFromIgnoredUsers(email);
   if (!restoredUser) return callback(); // Was not ignored

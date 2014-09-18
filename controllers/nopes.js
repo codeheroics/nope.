@@ -31,14 +31,15 @@ module.exports = function (app) {
   });
 
   app.post('/nopes', isLoggedIn, function(req, res, next) {
-    if (!validator.isEmail(req.body.friendEmail)) return res.jsonp(400, {message: 'Invalid E-mail'});
+    var email = req.body.friendEmail && req.body.friendEmail.toLowerCase().trim();
+    if (!validator.isEmail(email)) return res.jsonp(400, {message: 'Invalid E-mail'});
 
-    req.user.nopeAt(req.body.friendEmail.toLowerCase().trim(), function(err, nopeInfos) {
+    req.user.nopeAt(email, function(err, nopeInfos) {
       if (err) {
         if (err instanceof User.FriendError || err instanceof User.NopeError) {
           return res.jsonp(403, { message: err.message, status: err.status });
         }
-        winston.error('Server error while ' + req.user.email + ' tried to poke' + req.body.friendEmail, err);
+        winston.error('Server error while ' + req.user.email + ' tried to poke' + email, err);
         return res.jsonp(500, {});
       }
 

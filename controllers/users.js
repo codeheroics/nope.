@@ -18,14 +18,14 @@ module.exports = function(app) {
 
   // Send a friend request
   app.post('/users', isLoggedIn, function(req, res, next) {
-    if (!validator.isEmail(req.body.friendEmail)) return res.jsonp(400, {message: 'Invalid E-mail'});
-    var friendEmail = req.body.friendEmail.toLowerCase().trim();
-    req.user.sendFriendRequest(friendEmail, function(err, status) {
+    var email = req.body.friendEmail && req.body.friendEmail.toLowerCase().trim();
+    if (!validator.isEmail(email)) return res.jsonp(400, {message: 'Invalid E-mail'});
+    req.user.sendFriendRequest(email, function(err, status) {
       if (err) {
         if (err instanceof User.FriendError) {
           return res.jsonp(403, { message: err.message, status: err.status });
         }
-        winston.error('Server error while ' + req.user.email + ' tried to befriend' + req.body.friendEmail, err);
+        winston.error('Server error while ' + req.user.email + ' tried to befriend' + email, err);
         return res.jsonp(500, {});
       }
       // TODO Send an e-mail to the unexisting user ? --> Propose this in-app to the current user ?
@@ -35,9 +35,9 @@ module.exports = function(app) {
 
   // Patch (my relationship) to an user
   app.patch('/users', isLoggedIn, function(req, res, next) {
-    if (!validator.isEmail(req.body.friendEmail)) return res.jsonp(400, {message: 'Invalid E-mail'});
-    var friendEmail = req.body.friendEmail.toLowerCase().trim();
-    req.user.unIgnoreUser(friendEmail, function(err) {
+    var email = req.body.friendEmail && req.body.friendEmail.toLowerCase().trim();
+    if (!validator.isEmail(email)) return res.jsonp(400, {message: 'Invalid E-mail'});
+    req.user.unIgnoreUser(email, function(err) {
       if (err) return next(err);
       res.jsonp(200);
     });
@@ -45,9 +45,9 @@ module.exports = function(app) {
 
   // Ignore an user
   app.delete('/users', isLoggedIn, function(req, res, next) {
-    if (!validator.isEmail(req.body.friendEmail)) return res.jsonp(400, {message: 'Invalid E-mail'});
-    var friendEmail = req.body.friendEmail.toLowerCase().trim();
-    req.user.ignoreUser(friendEmail, function(err) {
+    var email = req.body.friendEmail && req.body.friendEmail.toLowerCase().trim();
+    if (!validator.isEmail(email)) return res.jsonp(400, {message: 'Invalid E-mail'});
+    req.user.ignoreUser(email, function(err) {
       if (err) return next(err);
       res.jsonp(200);
     });
