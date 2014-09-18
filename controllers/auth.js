@@ -72,6 +72,17 @@ module.exports = function(app) {
       if (err || !user) return outputLoginError(req, res);
 
       req.brute.reset(function() {}); // Don't wanna condition the next step to this
+
+      if (!user.confirmed) {
+        return res.jsonp(
+          403,
+          {
+            title: 'Unconfirmed',
+            detail: 'Confirmation needed'
+          }
+        );
+      }
+
       res.jsonp(createAccessToken(user));
     })(req, res, next);
   });

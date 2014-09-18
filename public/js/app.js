@@ -67,12 +67,18 @@ var CustomAuthenticator = Ember.SimpleAuth.Authenticators.Base.extend({
         })
         .fail(function(xhr) {
           if (xhr.status === 401) {
-            toastr.error('Incorrect password. Please try again.');
-          } else if (xhr.satus === 403) {
-            toastr.error('Your account is currently locked after too many failed login attempts, ' +
-              ' please try again in a few minutes.');
+            toastr.error('Please try again.', 'Incorrect password', {timeOut: 5000});
+          } else if (xhr.status === 403) {
+            if (xhr.responseJSON.title === 'Unconfirmed') {
+              toastr.error('Check your mail for a confirmation link!', 'Unconfirmed account', {timeOut: 10000});
+            } else if (xhr.responseJSON.title === 'Too many requests') {
+              toastr.error('Your account is currently locked after too many failed login attempts, ' +
+                ' please try again in a few minutes.', 'Locked account', {timeOut: 10000});
+            } else {
+              toastr.error('Please try again in a few minutes', 'Identification error', {timeOut: 10000});
+            }
           } else {
-            toastr.error('Server error. Please try again in a few minutes');
+            toastr.error('Please try again in a few minutes', 'Server error', {timeOut: 10000});
           }
           reject();
         });
