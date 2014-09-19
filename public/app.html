@@ -359,6 +359,9 @@
 					<div style="text-align: center;">
 						<legend class="nopesSent">nopes sent</legend>
 					</div>
+					<div style="text-align: center;">
+						Currently {{#if isWinning}} losing {{else}} winning {{/if}} by {{duration timeDiff}}
+					</div>
 					<div style="text-align: center; margin-top:15px;">
 						<button type="button" class="InputAddOn-item" {{action 'ignore' model}}>Ignore {{name}}</button>
 					</div>

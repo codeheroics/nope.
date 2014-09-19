@@ -22,4 +22,10 @@ NopeGame.OpponentNopesController = Ember.ObjectController.extend({
     var timeAgainst = this.get('model.timeAgainst');
     return timeFor > timeAgainst;
   }.property('model.timeFor', 'model.timeAgainst'),
+
+  timeDiff: function() {
+    var timeFor = this.get('model.timeFor');
+    var timeAgainst = this.get('model.timeAgainst');
+    return Math.abs(timeFor - timeAgainst);
+  }.property('model.timeFor', 'model.timeAgainst')
 });
