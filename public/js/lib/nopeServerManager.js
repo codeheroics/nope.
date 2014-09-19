@@ -23,6 +23,11 @@ NopeGame.NopeServerManager = Ember.Object.extend({
       }
     );
 
+    // If we were deconnected and reconnect, we need to get the data we missed
+    this.primus.on('reconnected', function() {
+      this.getAllNopes();
+    }.bind(this));
+
     // For convenience we use the private event `outgoing::url` to append the
     // authorization token in the query string of our connection URL.
     this.primus.on('outgoing::url', function connectionURL(url) {
