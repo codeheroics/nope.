@@ -12,7 +12,7 @@ var SIGNUP_ROUTE = SERVER_URL + '/signup';
 var PRIMUS_ROUTE = REALTIME_SERVER_URL;
 var CALLBACK_NAME = 'nopecb';
 
-var GRAVATAR_BASE = 'http://www.gravatar.com/avatar/';
+var GRAVATAR_BASE = 'https://www.gravatar.com/avatar/';
 
 var PENDING_USERS_KEY = 'pendingUsers';
 var IGNORED_USERS_KEY = 'ignoredUsers';
