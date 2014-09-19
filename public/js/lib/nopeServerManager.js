@@ -17,8 +17,8 @@ NopeGame.NopeServerManager = Ember.Object.extend({
         strategy : ['online', 'disconnect'],
         reconnect: {
           maxDelay: 600000, // Number: The max delay for a reconnect retry.
-          minDelay: 500, // Number: The minimum delay before we reconnect.
-          retries: 10 // Number: How many times should we attempt to reconnect.
+          minDelay: 15000, // Number: The minimum delay before we reconnect.
+          retries: 100000 // Number: How many times should we attempt to reconnect.
         }
       }
     );
