@@ -7,6 +7,7 @@ var User       = require('./models/user');
 
 var winston    = require('winston');
 winston.add(winston.transports.File, { filename: './log/realtime.log' });
+winston.remove(winston.transports.Console);
 
 var app        = express();
 

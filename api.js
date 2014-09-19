@@ -7,6 +7,7 @@ var bodyParser = require('body-parser');
 
 var winston = require('winston');
 winston.add(winston.transports.File, { filename: './log/api.log' });
+winston.remove(winston.transports.Console);
 
 app.use(bodyParser.urlencoded({ extended: false })); // Forms
 app.use(bodyParser.json());

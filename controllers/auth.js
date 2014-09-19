@@ -112,7 +112,7 @@ module.exports = function(app) {
   app.get('/confirm', function(req, res, next) {
     if (!req.query.token) return outputConfirmError(new Error('Invalid token'), req, res);
 
-    var decoded = jwt.decode(req.query.token, config.jwtTokenSecretForEmail);
+    var decoded = jwt.decode(req.query.token, config.jwtTokenSecretForConfirm);
       // if user is authenticated in the session, carry on
       if (!validator.isEmail(decoded.email)) {
          return outputConfirmError(new Error('Invalid token'), req, res);
