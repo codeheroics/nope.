@@ -17,7 +17,7 @@ NopeGame.Router.map(function() {
   this.resource('history', { path: '/history' });
   this.resource('profile', { path: '/profile' });
   this.resource('help', { path: '/help' });
-  this.resource('about', { path: '/about' });
+  this.resource('share', { path: '/share' });
 });
 
 function createServerManager() {
