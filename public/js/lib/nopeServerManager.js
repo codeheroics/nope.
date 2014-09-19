@@ -84,6 +84,11 @@ NopeGame.NopeServerManager = Ember.Object.extend({
     });
   },
 
+  endPrimus: function() {
+    if (!this.primus) return;
+    this.primus.end();
+  },
+
   nopeAt: function(opponentEmail) {
     $.ajax(
       {

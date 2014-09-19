@@ -87,6 +87,9 @@ var CustomAuthenticator = Ember.SimpleAuth.Authenticators.Base.extend({
   invalidate: function() {
     return new Ember.RSVP.Promise(function(resolve) {
       window.localStorage.clear();
+      if (NopeGame.serverManager) {
+        NopeGame.serverManager.endPrimus();
+      }
       resolve();
     });
   }
