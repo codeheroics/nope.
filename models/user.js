@@ -83,6 +83,7 @@ User.prototype.toDbJSON = function() {
   return {
     name: this.name,
     password: this.password,
+    confirmed: this.confirmed,
     friendsNopes: this.friendsNopes,
     invitedUsers: this.invitedUsers,
     ignoredUsers: this.ignoredUsers,
