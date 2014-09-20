@@ -20,7 +20,7 @@ module.exports = function(app) {
   app.post('/users', isLoggedIn, function(req, res, next) {
     var email = req.body.friendEmail && req.body.friendEmail.toLowerCase().trim();
     if (!validator.isEmail(email)) return res.jsonp(400, {message: 'Invalid E-mail'});
-    req.user.sendFriendRequest(email, function(err, status) {
+    req.user.sendFriendRequest(email, function(err, status, nopeInfos) {
       if (err) {
         if (err instanceof User.FriendError) {
           return res.jsonp(403, { message: err.message, status: err.status });
@@ -28,8 +28,13 @@ module.exports = function(app) {
         winston.error('Server error while ' + req.user.email + ' tried to befriend' + email + ': ' + err.message, err);
         return res.jsonp(500, {});
       }
-      // TODO Send an e-mail to the unexisting user ? --> Propose this in-app to the current user ?
-      return res.jsonp({message: status});
+
+      var responseObject = { message: status };
+      if (status === User.FRIEND_STATUSES.FRIEND) {
+        responseObject.nopeData = nopeInfos;
+      }
+
+      return res.jsonp(responseObject);
     });
   });
 

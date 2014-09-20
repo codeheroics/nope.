@@ -410,8 +410,8 @@ User.prototype.sendFriendRequest = function(email, callback) {
         );
         return callback(null, callbackStatus);
       }
-      currentUser.nopeAt(potentialFriend.email, function(err) {
-        return callback(err, callbackStatus);
+      currentUser.nopeAt(potentialFriend.email, function(err, nopeInfos) {
+        return callback(err, callbackStatus, nopeInfos);
       });
     });
   });

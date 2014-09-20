@@ -315,12 +315,18 @@ NopeGame.NopeServerManager = Ember.Object.extend({
 
   getNopesFrom: function(email) {
     // TODO implement me, for now redirecting to getallnopes
-    console.log('Implement me (getNopesFrom)');
+    // console.log('Implement me (getNopesFrom)');
     return this.getAllNopes();
   },
 
   addOpponent: function(email) {
     var self = this;
+
+    var existingOpponent = NopeGame.Opponent.find(email);
+    if (existingOpponent.isLoaded && existingOpponent.get('status') !== 'pending') {
+      return Promise.reject();
+    }
+
     return new Promise(function(resolve, reject) {
 
       $.ajax(
@@ -337,7 +343,10 @@ NopeGame.NopeServerManager = Ember.Object.extend({
       )
         .done(function(object) {
           if (object.message === 'Friend') {
-            return self.getNopesFrom(email).then(resolve);
+            if (!object.nopeData) {
+              return self.getNopesFrom(email).then(resolve);
+            }
+            self.handleNopeResult(object.nopeData).then(self.notifyNoping.bind(this, object.nopeData));
           }
           toastr.info(
             'Sent a request to <span style="font-weight:bold;">' + email + '</span>',
