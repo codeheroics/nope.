@@ -300,9 +300,8 @@
 				<ul class="columns">
 					{{#each}}
 						<li>
-							<button style="float:right;" type="button" {{action 'unIgnoreOpponent' this}}>Unignore</button>
+							<button style="float:right;" class="InputAddOn-item" type="button" {{action 'unIgnoreOpponent' this}}>Unignore</button>
 							<h3>
-								<i class="fa fa-stop"></i>
 								<img width="20" height="20" style="border-radius: 10px;" {{bind-attr src="avatar"}} />
 								{{name}}
 							</h3>
