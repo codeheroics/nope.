@@ -365,6 +365,9 @@ NopeGame.NopeServerManager = Ember.Object.extend({
             if (xhr.status !== 403) {
               toastr.error('Sorry, there was an error with the server when trying to add ' + email);
             } else {
+              if (xhr.responseJSON.status === 'Self') {
+                return toastr.error('Sorry. You can not be your own friend.', 'Nope.', {timeOut: 5000});
+              }
               toastr.info(
                 '<a href="mailto:' + email + '?subject=Nope.wtf&body=Join%20www.nope.wtf!">Invite them to Nope! <i class="fa fa-envelope"></i></a>',
                 email + ' is not a member!',
