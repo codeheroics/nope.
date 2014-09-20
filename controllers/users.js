@@ -25,7 +25,7 @@ module.exports = function(app) {
         if (err instanceof User.FriendError) {
           return res.jsonp(403, { message: err.message, status: err.status });
         }
-        winston.error('Server error while ' + req.user.email + ' tried to befriend' + email, err);
+        winston.error('Server error while ' + req.user.email + ' tried to befriend' + email + ': ' + err.message, err);
         return res.jsonp(500, {});
       }
       // TODO Send an e-mail to the unexisting user ? --> Propose this in-app to the current user ?
