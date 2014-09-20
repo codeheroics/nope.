@@ -126,6 +126,7 @@ NopeGame.NopeServerManager = Ember.Object.extend({
 
   handleNopeResult: function(dataNope, email) {
     email = email ? email : dataNope.email;
+    if (!email) return Promise.reject(); // may correct problems with duplicate users
     var nopeId = '' + dataNope.time + email;
 
     var nope = NopeGame.Nope.find(nopeId);
