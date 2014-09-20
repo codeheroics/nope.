@@ -1,5 +1,7 @@
 {
   "jwtTokenSecret": "ALL HAIL BRITANNIA!",
   "jwtTokenSecretForConfirm": "ELEVEN BANZAI!",
-  "primusChannel": "primus"
+  "primusChannel": "primus",
+  "sendMails": false,
+  "requireUserConfirmation": false
 }

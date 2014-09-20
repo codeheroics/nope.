@@ -5,11 +5,12 @@ var async       = require('async');
 var validator   = require('validator');
 var winston     = require('winston');
 var sanitizer   = require('sanitizer');
+var _           = require('lodash');
+var config      = require('config');
 
 var db          = require('../lib/couchbase');
 var redisClient = require('../lib/redisClient');
 var userAchievements = require('./userAchievements');
-var _           = require('lodash');
 
 var User = function(params) {
   if (!params) throw new Error('Missing properties');
@@ -18,7 +19,7 @@ var User = function(params) {
   this.name = params.name.trim();
   this.email = params.email.toLowerCase().trim();
   this.password = params.password;
-  this.confirmed = !! params.confirmed;
+  this.confirmed = !! params.confirmed || !config.requireUserConfirmation;
   this.friendsNopes = params.friendsNopes ? params.friendsNopes : {};
   this.invitedUsers = params.invitedUsers ? params.invitedUsers : [];
   this.ignoredUsers = params.ignoredUsers ? params.ignoredUsers : [];

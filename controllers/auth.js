@@ -6,6 +6,7 @@ var config     = require('config');
 var log        = require('winston');
 var passport   = require('passport');
 var validator  = require('validator');
+var winston    = require('winston');
 
 var User       = require('../models/user');
 var mail       = require('../lib/mail');
@@ -103,7 +104,8 @@ module.exports = function(app) {
       if (err || !user) return outputSignupError(err, req, res);
 
       mail.sendConfirmationMail(user, createConfirmToken(user), function(err, json) {
-        console.log('TODO signal to the user if any problems');
+        if (err) winston.error('error while sending confirmation email:' + err.message, err);
+        // TODO signal to the user if error
         res.jsonp(null);
       });
     })(req, res, next);
