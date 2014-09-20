@@ -100,7 +100,8 @@ function buildJSFromSources(isProdBuild) {
     'components/ember-model/ember-model.js',
     'components/ember-model-localstorage-adapter/ember-model-localstorage-adapter.js',
     'components/toastr/toastr.js',
-    'components/js-md5/js/md5.js'
+    'components/js-md5/js/md5.js',
+    'components/validator-js/validator.js'
   ];
 
   var jsMinComponents = [
@@ -112,7 +113,8 @@ function buildJSFromSources(isProdBuild) {
     'components/ember-model/ember-model.js',
     'components/ember-model-localstorage-adapter/ember-model-localstorage-adapter.js',
     'components/toastr/toastr.min.js',
-    'components/js-md5/js/md5.min.js'
+    'components/js-md5/js/md5.min.js',
+    'components/validator-js/validator.min.js'
   ];
 
   var jsDependencies = [

@@ -322,8 +322,11 @@ NopeGame.NopeServerManager = Ember.Object.extend({
   addOpponent: function(email) {
     var self = this;
 
+    if (!validator.isEmail(email)) return toastr.error('Invalid e-mail');
+
     var existingOpponent = NopeGame.Opponent.find(email);
     if (existingOpponent.isLoaded && existingOpponent.get('status') !== 'pending') {
+      toastr.warning('You already have this user as ' + existingOpponent.get('status'), undefined, {timeOut: 5000});
       return Promise.reject();
     }
 
@@ -376,6 +379,8 @@ NopeGame.NopeServerManager = Ember.Object.extend({
 
   ignoreOpponent: function(email) {
 
+    if (!validator.isEmail(email)) return toastr.error('Invalid e-mail');
+
     return new Promise(function(resolve, reject) {
 
       $.ajax(
@@ -411,6 +416,8 @@ NopeGame.NopeServerManager = Ember.Object.extend({
   unIgnoreOpponent: function(opponent) {
     var self = this;
     var email = opponent.get('email');
+    if (!validator.isEmail(email)) return toastr.error('Invalid e-mail');
+
     return new Promise(function(resolve, reject) {
 
       $.ajax(

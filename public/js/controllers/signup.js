@@ -3,11 +3,7 @@ NopeGame.SignupController = Ember.ObjectController.extend({
   content: {},
   actions: {
     signup: function(formData) {
-      var isEmail = function(email) { // FIXME use a better email verification
-        var regex = /^([a-zA-Z0-9_.+-])+\@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/;
-        return regex.test(email);
-      };
-      if (!isEmail(formData.email)) return toastr.error('Invalid email', undefined, { timeOut: 5000 });
+      if (!validator.isEmail(formData.email)) return toastr.error('Invalid email', undefined, { timeOut: 5000 });
 
       $.ajax(
         {
