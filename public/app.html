@@ -334,20 +334,20 @@
 						{{#if isWinning }}
 							<div class="score score-left winning">
 								<img class="avatar" {{bind-attr src="avatar"}} /><br>
-								{{name}}<br>{{duration timeFor}}
+								<b>{{name}}</b> had the last word for<br><b>{{duration timeFor}}</b>
 							</div>
 							<div class="score score-right losing">
 								<img class="avatar" {{bind-attr src="myAvatar"}} /><br>
-								You<br>{{duration timeAgainst}}
+								<b>You</b> had the last word for<br><b>{{duration timeAgainst}}</b>
 							</div>
 						{{else}}
 							<div class="score score-left losing">
 								<img class="avatar" {{bind-attr src="avatar"}} /><br>
-								{{name}}<br>{{duration timeFor}}
+								<b>{{name}}</b> had the last word for<br><b>{{duration timeFor}}</b>
 							</div>
 							<div class="score score-right winning">
 								<img class="avatar" {{bind-attr src="myAvatar"}} /><br>
-								You<br>{{duration timeAgainst}}<br>
+								<b>You</b> had the last word for<br><b>{{duration timeAgainst}}</b>
 							</div>
 					{{/if}}
 					</div>
