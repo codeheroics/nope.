@@ -47,12 +47,11 @@ primus.on('connection', function connection(spark) {
 });
 
 primus.on('error', function handleError(err) {
-  console.error('An error has occured', err);
+  winston.warning('An error has occured with primus', err);
 });
 
 server.listen(8080, function () {
-  console.log(
-    new Date(),
+  winston.info(
     'realtime.js has started. Primus channel : ' + config.primusChannel
   );
 });

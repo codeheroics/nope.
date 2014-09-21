@@ -284,7 +284,9 @@
 							</h3>
 						</li>
 					{{/each}}
-					<li style="visibility:hidden;"></li><!-- FIXME Quickfix for columns problem -->
+					{{#if singleOpponent}}
+					  <li style="visibility:hidden;"></li><!-- FIXME Quickfix for columns problem -->
+					{{/if}}
 				</ul>
 			</section>
 			<section style="text-align:center;">
