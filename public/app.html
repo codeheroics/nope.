@@ -180,7 +180,7 @@
 								<li>
 									{{#link-to 'opponentNopes' id}}
 										<img width="20" height="20" style="border-radius: 10px;" {{bind-attr src="avatar"}} />
-										{{name}} {{relativeDateFormat lastNopeTime}}
+										{{name}} {{relativeDateFormat lastNopeTime clock.pulse}}
 										<i class="fa fa-mail-forward solo"></i>
 									{{/link-to}}
 								</li>
@@ -328,7 +328,7 @@
 		</script>
 
 		<script type="text/x-handlebars" data-template-name="opponentNopes">
-				<section>
+				<section style="text-align:center;">
 					<h2 class="major"><span>VS {{name}} ({{email}})</span></h2>
 					<div style="display:flex; border-radius: 8px;">
 						{{#if isWinning }}
@@ -352,6 +352,10 @@
 					{{/if}}
 					</div>
 
+					<div>
+						Last nope {{duration timeDiffSinceLast clock.pulse}} ago
+					</div>
+
 					{{#if isScoring}}
 						{{#if isLoading}}
 							<button class="nopeActions isLoading button button-big" disabled>Sending...</button>
@@ -364,13 +368,13 @@
 					{{/if}}
 
 					<p class="nopesSent">{{nopesCpt}}</p>
-					<div style="text-align: center;">
+					<div>
 						<legend class="nopesSent">nopes sent</legend>
 					</div>
-					<div style="text-align: center;">
+					<div>
 						Currently {{#if isWinning}} losing {{else}} winning {{/if}} by {{duration timeDiff}}
 					</div>
-					<div style="text-align: center; margin-top:15px;">
+					<div style="margin-top:15px;">
 						<button type="button" class="InputAddOn-item" {{action 'ignore' model}}>Ignore {{name}}</button>
 					</div>
 
@@ -393,7 +397,7 @@
 									<ul class="meta">
 										<li class="fa fa-clock-o">{{relativeDateFormat date}}</li>
 										<li class="fa fa-comments">
-											{{#if isReceived}}{{opponent.name}}{{else}}You{{/if}} had the advantage for {{duration timeDiff}}
+											{{#if isReceived}}{{opponent.name}}{{else}}You{{/if}} had the advantage for {{duration timeDiff clock.pulse}}
 										</li>
 									</ul>
 								</article>
@@ -412,7 +416,7 @@
 							<p class="nopesSent">{{totalNopes}}</p>
 							<div>
 								<legend class="nopesSent">nopes sent</legend>
-								<legend class="nopesSent"><small>{{duration timeNoping}}</small></li>
+								<legend class="nopesSent">{{duration timeNoping}}</li>
 							</div>
 						</section>
 						<section>

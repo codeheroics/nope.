@@ -19,7 +19,7 @@ NopeGame.IndexController = Ember.ArrayController.extend({
     var friends = opponents.filterBy('status', 'friend');
     var scoringOpponents = friends.filterBy('isScoring', true);
     return scoringOpponents.length > 0 ? scoringOpponents : null;
-  }.property('model.@each.isScoring'),
+  }.property('model.@each.isScoring', 'clock.pulse'),
 
   pendingOpponents: function() {
     var opponents = this.get('model');

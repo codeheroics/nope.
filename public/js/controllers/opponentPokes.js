@@ -35,5 +35,11 @@ NopeGame.OpponentNopesController = Ember.ObjectController.extend({
     var timeFor = this.get('model.timeFor');
     var timeAgainst = this.get('model.timeAgainst');
     return Math.abs(timeFor - timeAgainst);
-  }.property('model.timeFor', 'model.timeAgainst')
+  }.property('model.timeFor', 'model.timeAgainst'),
+
+  timeDiffSinceLast: function() {
+    var lastNopeTime = this.get('model.lastNopeTime');
+    var now = Date.now();
+    return now - lastNopeTime;
+  }.property('model.lastNopeTime', 'clock.pulse')
 });

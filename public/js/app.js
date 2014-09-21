@@ -120,6 +120,29 @@ Ember.Application.initializer({
   }
 });
 
+var ClockService = Ember.Object.extend({
+  pulse: Ember.computed.oneWay('_seconds').readOnly(),
+  tick: function () {
+    Ember.run.later(function () {
+      var seconds = this.get('_seconds');
+      if (typeof seconds === 'number') {
+        this.set('_seconds', seconds + 1);
+      }
+    }.bind(this), 1000);
+  }.observes('_seconds').on('init'),
+  _seconds: 0,
+});
+
+Ember.Application.initializer({
+  name: 'clockServiceInitializer',
+  initialize: function(container, application) {
+    container.register('clock:service', ClockService);
+    application.inject('controller:index', 'clock', 'clock:service');
+    application.inject('controller:opponentNopes', 'clock', 'clock:service');
+    application.inject('controller:history', 'clock', 'clock:service');
+  }
+});
+
 Ember.Handlebars.registerBoundHelper('dateFormat', function(date, format) {
   return moment(date).format(format);
 });
