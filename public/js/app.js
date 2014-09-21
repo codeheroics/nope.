@@ -125,7 +125,8 @@ Ember.Handlebars.registerBoundHelper('dateFormat', function(date, format) {
 });
 
 Ember.Handlebars.registerBoundHelper('relativeDateFormat', function(date) {
-  return moment(date).fromNow();
+  var now = Date.now();
+  return moment(date.valueOf() > now ? now : date).fromNow();
 });
 
 Ember.Handlebars.registerBoundHelper('duration', function(milliseconds) {
