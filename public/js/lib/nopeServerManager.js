@@ -77,6 +77,11 @@ NopeGame.NopeServerManager = Ember.Object.extend({
         self.achievementsManager.unlock(data.achievement);
         return;
       }
+
+      // time difference between us and the server
+      if (data.time !== undefined) {
+        window.localStorage.setItem('serverTimeDiff', (Date.now() - data.time) || 0);
+      }
     });
 
     this.primus.on('error', function error(err) {

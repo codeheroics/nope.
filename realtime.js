@@ -37,32 +37,13 @@ primus.use('redis', PrimusRedisRooms);
 
 primus.authorize(require('./lib/utils/middlewares')(app).checkWebSocketLogin);
 
-//
-// Listen for connections and echo the events send.
-//
 primus.on('connection', function connection(spark) {
-  // Can't keep the same user object in memory,
-  // We remove it once his job is done, then get it again.
-
   var email = spark.request.user.email;
-  spark.request = null; // Cleanup of useless data
-
   spark.join(email);
 
-  spark.on('data', function received(opponentId) {
-    User.findById(email, function(err, user) {
-      if (err || !user) return console.error('Error fetching email ' + email, err);
-      user.nopeAt(opponentId, function(err) {
-        if (!err) return;
-        console.error('Error when ' + email + ' tried to nope ' + opponentId, err);
-        spark.write('Nope, will not do that');
-      });
-    });
-  });
-
-  // spark.on('end', function endSparkConnection() {
-  //   // Remove room ? Is that necessary ?
-  // });
+  // We write to the user the current time so he knows the difference
+  // between him and the server
+  spark.write({time: Date.now()});
 });
 
 primus.on('error', function handleError(err) {
@@ -70,5 +51,8 @@ primus.on('error', function handleError(err) {
 });
 
 server.listen(8080, function () {
-  console.log(new Date(), 'realtime.js has started');
+  console.log(
+    new Date(),
+    'realtime.js has started. Primus channel : ' + config.primusChannel
+  );
 });

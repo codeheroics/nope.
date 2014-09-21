@@ -40,6 +40,8 @@ NopeGame.OpponentNopesController = Ember.ObjectController.extend({
   timeDiffSinceLast: function() {
     var lastNopeTime = this.get('model.lastNopeTime');
     var now = Date.now();
-    return now - lastNopeTime;
+    return now - lastNopeTime - (
+      parseInt(window.localStorage.getItem('serverTimeDiff') || 0, 10)
+    );
   }.property('model.lastNopeTime', 'clock.pulse')
 });
