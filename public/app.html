@@ -351,9 +351,13 @@
 					</div>
 
 					{{#if isScoring}}
+						{{#if isLoading}}
+							<button class="nopeActions isLoading button button-big" disabled>Sending...</button>
+						{{else}}
 							<button class="nopeActions needsNopeBack button button-big" {{action 'nope' model}}>Nope.</button>
+						{{/if}}
 					{{else}}
-							<button type="button" class="nopeActions hasNopedBack button button-big" style="border:0;" disabled>
+						<button type="button" class="nopeActions hasNopedBack button button-big" disabled>
 							Yep. No retort yet.</button>
 					{{/if}}
 

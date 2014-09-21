@@ -90,38 +90,45 @@ NopeGame.NopeServerManager = Ember.Object.extend({
   },
 
   nopeAt: function(opponentEmail) {
-    $.ajax(
-      {
-        dataType: 'jsonp',
-        data: { friendEmail: opponentEmail },
-        jsonp: CALLBACK_NAME,
-        headers: {
-          'x-access-token': window.localStorage.getItem('token')
-        },
-        method: 'POST',
-        url: NOPES_ROUTE
-      }
-    )
-    .done(function(data) {
-      this.handleNopeResult(data).then(this.notifyNoping.bind(this, data));
-    }.bind(this))
-    .fail(function(xhr) {
-      if (!xhr.responseJSON) {
-        toastr.error('Could not reach the Internet :(');
-      } else {
-        toastr.error('Sorry, there was an error with the server when trying to send a nope to ' + opponentEmail);
-      }
-    });
+    return new Promise(function(resolve, reject) {
+      $.ajax(
+        {
+          dataType: 'jsonp',
+          data: { friendEmail: opponentEmail },
+          jsonp: CALLBACK_NAME,
+          headers: {
+            'x-access-token': window.localStorage.getItem('token')
+          },
+          method: 'POST',
+          url: NOPES_ROUTE
+        }
+      )
+      .done(function(data) {
+        this.handleNopeResult(data)
+        .then(this.notifyNoping.bind(this, data))
+        .then(resolve);
+      }.bind(this))
+      .fail(function(xhr) {
+        if (!xhr.responseJSON) {
+          toastr.error('Could not reach the Internet :(');
+        } else {
+          toastr.error('Sorry, there was an error with the server when trying to send a nope to ' + opponentEmail);
+        }
+        reject();
+      }.bind(this));
+    }.bind(this));
   },
 
   notifyNoped: function(nopeData) {
     toastr.warning('received from <span style="font-weight:bold;">' + nopeData.opponentName + '</span>.', 'Nope.');
+    return Promise.resolve();
     // .click(function() {
     //   this.transitionTo('/opponents/' + nopeData.opponentEmail);
     // }.bind(this));
   },
   notifyNoping: function(nopeData) {
     toastr.success('sent to <span style="font-weight:bold;">' + nopeData.opponentName + '</span>.', 'Nope.');
+    return Promise.resolve();
   },
 
   handleNopeResult: function(dataNope, email) {

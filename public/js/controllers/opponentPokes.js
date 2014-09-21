@@ -2,7 +2,13 @@
 NopeGame.OpponentNopesController = Ember.ObjectController.extend({
   actions: {
     nope: function(opponent) {
-      NopeGame.serverManager.nopeAt(opponent.get('email'));
+      var endLoading = function() {
+        this.set('isLoading', false);
+      }.bind(this);
+
+      this.set('isLoading', true);
+      NopeGame.serverManager.nopeAt(opponent.get('email'))
+      .then(endLoading, endLoading);
     },
 
     ignore: function(opponent) {
@@ -12,6 +18,8 @@ NopeGame.OpponentNopesController = Ember.ObjectController.extend({
       }.bind(this));
     }
   },
+
+  isLoading: false,
 
   myAvatar: function() {
     return NopeGame.User.find(1).get('avatar');
