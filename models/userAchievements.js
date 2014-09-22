@@ -14,6 +14,7 @@ var FOURTY_TWO_HOURS_HIGH   = 154800000;
 
 
 var achievements = {
+  // Original achievements : 0 to 18
   0: {
     title: 'Hundred nopes',
     description: 'Send a total of 100 nopes',
@@ -130,9 +131,21 @@ var achievements = {
       return Object.keys(user.friendsNopes).length > 15;
     }
   },
+
+  // Added after going live
+  19: {
+    title: 'First nope',
+    description: 'Send your first nope',
+    hasEarned: hasEarnedTotalNopes.bind(null, 1)
+  },
+  20: {
+    title: 'This is Sparta!',
+    description: 'Send 300 nopes to a single opponent',
+    hasEarned: hasEarnedOpponentNopes.bind(null, 300)
+  },
 };
 
-var achievableByNopingIds = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+var achievableByNopingIds = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 19, 20];
 var achievableByNewFriendsIds = [16, 17, 18];
 
 function hasEarnedTotalNopes(nopesToObtain, user) {

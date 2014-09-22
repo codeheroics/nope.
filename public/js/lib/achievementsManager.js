@@ -76,8 +76,24 @@ NopeGame.AchievementsManager = Ember.Object.extend({
     18: {
       title: 'Charisma noper',
       description: 'Have at least 15 friends',
+    },
+
+    // New, after first live version
+    19: {
+      title: 'First nope!',
+      description: 'Send your first nope'
+    },
+    20: {
+      title: 'This is Sparta!',
+      description: 'Send 300 nopes to a single opponent',
     }
   },
+
+  // Kinda ugly but ooooooh well
+  achievementsOrder: [
+    19,0,1,2,3,4,5,20,6,7,8,9,10,11,12,13,14,15,16,17,18
+  ],
+
   init: function() {
     var user = NopeGame.User.find(1);
     var userAchievements = user.get('achievements') || [];

@@ -5,7 +5,7 @@
 
 NopeGame.NopeServerManager = Ember.Object.extend({
   init: function() {
-    this.achievementsManager = NopeGame.AchievementsManager.create();
+    NopeGame.achievementsManager = NopeGame.AchievementsManager.create();
     return this.getAllNopes().then(this.initPrimus.bind(this));
   },
 
@@ -74,7 +74,7 @@ NopeGame.NopeServerManager = Ember.Object.extend({
       }
 
       if (data.achievement !== undefined) {
-        self.achievementsManager.unlock(data.achievement);
+        NopeGame.achievementsManager.unlock(data.achievement);
         return;
       }
 
@@ -204,7 +204,7 @@ NopeGame.NopeServerManager = Ember.Object.extend({
           user.set('avatar', generateGravatar(data.email));
           user.set('timeNoping', data.timeNoping);
           user.set('totalNopes', data.totalNopes);
-          self.achievementsManager.update(data.achievements);
+          NopeGame.achievementsManager.update(data.achievements);
 
           user.save()
           .then(self.updateFriendsInfos.bind(self, data))
