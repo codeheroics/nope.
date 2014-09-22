@@ -193,11 +193,11 @@
 					<div>
 						<h3>They want to send you nopes!</h3>
 						<ul>
-							{{#each pendingOpponent in pendingOpponents}}
+							{{#each pendingOpponents}}
 								<li>
-									{{pendingOpponent.name}} - {{pendingOpponent.email}} -
-									<a href="#" {{action 'addOpponent' pendingOpponent.email}}>Send the first nope</a> /
-									<a href="#" {{action 'ignoreOpponent' pendingOpponent.email}}>Ignore</a>
+									{{name}} - {{email}} -
+									<a href="#" {{action 'addOpponent' email}}>Send the first nope</a> /
+									<a href="#" {{action 'ignoreOpponent' email}}>Ignore</a>
 								</li>
 							{{/each}}
 						</ul>
@@ -262,14 +262,26 @@
 
 		<script type="text/x-handlebars" data-template-name="opponents">
 			<section>
+				{{#if pendingOpponents}}
+					<h2 class="major"><span>Waiting for an answer</span></h2>
+					<ul class="columns">
+						{{#each pendingOpponents}}
+							<li>
+								<img width="20" height="20" style="border-radius: 10px;" {{bind-attr src="avatar"}} /> {{name}} - {{email}} -
+								<a href="#" {{action 'addOpponent' email}}>Send the first nope</a> /
+								<a href="#" {{action 'ignoreOpponent' email}}>Ignore</a>
+							</li>
+						{{/each}}
+					</ul>
+				{{/if}}
 				<h2 class="major"><span>Friends</span></h2>
-				{{#if model.length}}{{else}}
+				{{#if friendOpponents.length}}{{else}}
 					<div style="text-align:center;">
 						No friends yet, add some!
 						</div>
 				{{/if}}
 				<ul class="columns">
-					{{#each}}
+					{{#each friendOpponents}}
 						<li>
 							<h3>
 								{{#link-to 'opponentNopes' id}}

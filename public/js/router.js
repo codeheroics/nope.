@@ -115,7 +115,7 @@ NopeGame.OpponentsRoute = Ember.Route.extend(
   NopeGame.AuthenticatedRouteMixin,
   {
     model: function() {
-      return NopeGame.Opponent.findQuery({status: 'friend'});
+      return NopeGame.Opponent.find();
     }
   }
 );

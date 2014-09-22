@@ -384,11 +384,11 @@ User.prototype.sendFriendRequest = function(email, callback) {
       // Send friend request
       currentUser.invitedUsers.push({
         email: potentialFriend.email,
-        name: potentialFriend.name
+        opponentName: potentialFriend.name
       });
       potentialFriend.pendingUsers.push({
         email: currentUser.email,
-        name: currentUser.name
+        opponentName: currentUser.name
       });
       callbackStatus = User.FRIEND_STATUSES.PENDING;
     }
