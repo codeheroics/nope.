@@ -24,10 +24,10 @@ NopeGame.OpponentsController = Ember.ArrayController.extend({
   }.property('model.@each.status'),
   pendingOpponents: function() {
     var opponents = this.get('model');
-    return opponents.filterBy('status', 'pending');
+    return opponents.filterBy('status', 'pending').sortBy('name');
   }.property('model.@each.status'),
   friendOpponents: function() {
     var opponents = this.get('model');
-    return opponents.filterBy('status', 'friend');
+    return opponents.filterBy('status', 'friend').sortBy('name');
   }.property('model.@each.status')
 });
