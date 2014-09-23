@@ -52,7 +52,7 @@ NopeGame.NopeServerManager = Ember.Object.extend({
 
       if (data.pendingUser !== undefined) {
         // New pending user
-        self.createPendingOrIgnoredUser(data.pendingUser, 'pending')
+        self.createUser(data.pendingUser, 'pending')
         .then(function(pendingOpponent) {
           toastr.info('A new noper, <span style="font-weight:bold;">' + pendingOpponent.get('name') +
             '</span>, challenges you!');
@@ -62,7 +62,7 @@ NopeGame.NopeServerManager = Ember.Object.extend({
 
       if (data.ignoredUser !== undefined) {
         // New ignored user
-        self.createPendingOrIgnoredUser(data.ignoredUser, 'ignored');
+        self.createUser(data.ignoredUser, 'ignored');
         return;
         // No toastr here : user has feedback from HTTP DELETE on device where he ignores,
         // let's not introduce any race condition wondering if a toastr should be shown or not (HTTP VS Websocket speed
@@ -258,15 +258,15 @@ NopeGame.NopeServerManager = Ember.Object.extend({
     return Promise.all([
       Promise.all(this.removePendingOrIgnoredUsers(removedIgnoredUsers, 'ignored')),
       Promise.all(this.removePendingOrIgnoredUsers(removedPendingUsers, 'pending')),
-      Promise.all(this.createPendingOrIgnoredUsers(newIgnoredUsers, 'ignored')),
-      Promise.all(this.createPendingOrIgnoredUsers(newPendingUsers, 'pending')),
+      Promise.all(this.createUsers(newIgnoredUsers, 'ignored')),
+      Promise.all(this.createUsers(newPendingUsers, 'pending')),
     ]);
   },
 
   // TODO this has nothing to do with "server" logic
   // This function must ONLY be used for pending or ignored opponents
   // Data is missing to be used for friends.
-  createPendingOrIgnoredUsers: function(usersData, status) {
+  createUsers: function(usersData, status) {
     if (usersData instanceof Array === false) usersData = [usersData];
     return usersData.map(function(userData) {
 
@@ -284,8 +284,8 @@ NopeGame.NopeServerManager = Ember.Object.extend({
     });
   },
 
-  createPendingOrIgnoredUser: function(userData, status) {
-    return Promise.all(this.createPendingOrIgnoredUsers(userData, status)).then(function(results) {
+  createUser: function(userData, status) {
+    return Promise.all(this.createUsers(userData, status)).then(function(results) {
       return results[0];
     });
   },
@@ -364,12 +364,19 @@ NopeGame.NopeServerManager = Ember.Object.extend({
             }
             self.handleNopeResult(object.nopeData).then(self.notifyNoping.bind(this, object.nopeData));
           }
-          toastr.info(
-            'Sent a request to <span style="font-weight:bold;">' + email + '</span>',
-            undefined,
-            { timeOut: 5000 }
-          );
-          resolve();
+
+          self.createUser(object.invitedUser, 'invited')
+          .then(function(invitedUser) {
+
+            toastr.info(
+              'Sent a request to <span style="font-weight:bold;">' + invitedUser.get('name') +
+              '</span> (' + invitedUser.get('email') + ')',
+              undefined,
+              { timeOut: 5000 }
+            );
+            resolve();
+          });
+
         })
         .fail(function(xhr) {
           if (!xhr.responseJSON) {

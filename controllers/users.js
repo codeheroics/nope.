@@ -20,7 +20,7 @@ module.exports = function(app) {
   app.post('/users', isLoggedIn, function(req, res, next) {
     var email = req.body.friendEmail && req.body.friendEmail.toLowerCase().trim();
     if (!validator.isEmail(email)) return res.jsonp(400, {message: 'Invalid E-mail'});
-    req.user.sendFriendRequest(email, function(err, status, nopeInfos) {
+    req.user.sendFriendRequest(email, function(err, status, data) {
       if (err) {
         if (err instanceof User.FriendError) {
           return res.jsonp(403, { message: err.message, status: err.status });
@@ -31,7 +31,9 @@ module.exports = function(app) {
 
       var responseObject = { message: status };
       if (status === User.FRIEND_STATUSES.FRIEND) {
-        responseObject.nopeData = nopeInfos;
+        responseObject.nopeData = data;
+      } else if (status === User.FRIEND_STATUSES.PENDING) {
+        responseObject.invitedUser = data;
       }
 
       return res.jsonp(responseObject);

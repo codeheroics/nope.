@@ -55,6 +55,8 @@
 		<script src="js/controllers/opponents.js"></script>
 		<script src="js/controllers/opponentNopes.js"></script>
 		<script src="js/controllers/newOpponent.js"></script>
+		<script src="js/controllers/ignoredOpponents.js"></script>
+		<script src="js/controllers/invitedOpponents.js"></script>
 		<script src="js/controllers/history.js"></script>
 		<script src="js/controllers/profile.js"></script>
 		<script src="js/controllers/login.js"></script>
@@ -303,6 +305,7 @@
 			</section>
 			<section style="text-align:center;">
 				<div>{{#link-to 'newOpponent' class="addUser button button-big"}}Add a friend{{/link-to}}</div>
+				<div>{{#link-to 'invitedOpponents'}}See invited opponents{{/link-to}}</div>
 				<div>{{#link-to 'ignoredOpponents'}}See ignored opponents{{/link-to}}</div>
 			</section>
 		</script>
@@ -317,6 +320,29 @@
 					{{#each}}
 						<li>
 							<button style="float:right;" class="InputAddOn-item" type="button" {{action 'unIgnoreOpponent' this}}>Unignore</button>
+							<h3>
+								<img width="20" height="20" style="border-radius: 10px;" {{bind-attr src="avatar"}} />
+								{{name}}
+							</h3>
+						</li>
+					<li style="visibility:hidden;"></li><!-- FIXME Quickfix for columns problem -->
+					{{/each}}
+				</ul>
+			</section>
+		</script>
+
+
+		<script type="text/x-handlebars" data-template-name="invitedOpponents">
+			<section>
+				<h2 class="major"><span>Invited users</span></h2>
+				{{#if invitedOpponents}}
+					They need to add you before you can send them nopes!
+				{{else}}
+					Nope. You are not waiting for anyone to answer to your invitation.
+				{{/if}}
+				<ul class="columns">
+					{{#each invitedOpponents}}
+						<li>
 							<h3>
 								<img width="20" height="20" style="border-radius: 10px;" {{bind-attr src="avatar"}} />
 								{{name}}

@@ -13,6 +13,7 @@ NopeGame.Router.map(function() {
   this.resource('opponentNopes', { path: '/opponents/:opponent_id/nopes' });
   this.resource('opponents', { path: '/opponents' });
   this.resource('ignoredOpponents', { path: '/opponents?ignored' });
+  this.resource('invitedOpponents', { path: '/opponents?invited' });
   this.resource('newOpponent', { path: '/opponents/new' });
   this.resource('history', { path: '/history' });
   this.resource('profile', { path: '/profile' });
@@ -125,6 +126,15 @@ NopeGame.IgnoredOpponentsRoute = Ember.Route.extend(
   {
     model: function() {
       return NopeGame.Opponent.findQuery({status: 'ignored'});
+    }
+  }
+);
+
+NopeGame.InvitedOpponentsRoute = Ember.Route.extend(
+  NopeGame.AuthenticatedRouteMixin,
+  {
+    model: function() {
+      return NopeGame.Opponent.find();
     }
   }
 );
