@@ -42,9 +42,10 @@ module.exports = function(app) {
   app.patch('/users', isLoggedIn, function(req, res, next) {
     var email = req.body.friendEmail && req.body.friendEmail.toLowerCase().trim();
     if (!validator.isEmail(email)) return res.jsonp(400, {message: 'Invalid E-mail'});
-    req.user.unIgnoreUser(email, function(err) {
+    req.user.unIgnoreUser(email, function(err, status, nopeInfos) {
       if (err) return next(err);
-      res.jsonp(200);
+      // We only have nopeInfos if we ignored the user before adding has a friend
+      res.jsonp(nopeInfos ? {nopeData: nopeInfos} : 200);
     });
   });
 

@@ -448,13 +448,16 @@ NopeGame.NopeServerManager = Ember.Object.extend({
           url: USERS_ROUTE
         }
       )
-      .done(function() {
+      .done(function(data) {
         return self.getNopesFrom(email).then(function() {
           opponent.set('status', 'friend');
           return opponent.save();
         })
         .then(function() {
           toastr.info('is no longer ignored', opponent.get('name'));
+          if (data.nopeData) {
+            return self.handleNopeResult(data.nopeData).then(resolve);
+          }
           resolve();
         });
       })

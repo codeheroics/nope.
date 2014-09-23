@@ -483,9 +483,13 @@ User.prototype.unIgnoreUser = function(email, callback) {
 
   var restoredUser = this.removeFromIgnoredUsers(email);
   if (!restoredUser) return callback(); // Was not ignored
-  this.friendsNopes[restoredUser.email] = restoredUser;
-  delete this.friendsNopes[restoredUser.email].email; // Data just added for save in ignored users
-  this.save(callback);
+  if (!! restoredUser.nopesCpt) { // We previously had the user as friend
+    this.friendsNopes[restoredUser.email] = restoredUser;
+    delete this.friendsNopes[restoredUser.email].email; // Data just added for save in ignored users
+    return this.save(callback);
+  }
+  // If we're here, it means the user did not have the other one as friend
+  this.sendFriendRequest(email, callback); // so this is the first nope
 };
 
 /**
