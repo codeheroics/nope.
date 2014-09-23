@@ -152,16 +152,27 @@ Ember.Handlebars.registerBoundHelper('relativeDateFormat', function(date) {
   return moment(date.valueOf() > now ? now : date).fromNow();
 });
 
-Ember.Handlebars.registerBoundHelper('duration', function(milliseconds) {
-  var units = ['years', 'days', 'hours', 'minutes', 'seconds'];
+(function() {
+  var durationHelper = function(milliseconds) {
+    milliseconds = Math.abs(milliseconds);
+    var units = ['years', 'days', 'hours', 'minutes', 'seconds'];
 
-  return units.reduce(function(previousValue, unit) {
-    var unitValue = moment.duration(milliseconds)[unit]();
+    return units.reduce(function(previousValue, unit) {
+      var unitValue = moment.duration(milliseconds)[unit]();
 
-    if (unitValue === 0) return previousValue;
-    return previousValue + (previousValue === '' ?  '' : ', ') + unitValue + ' ' + unit;
-  }, '').replace(/,([^,]*)$/,' and'+'$1') || 'less than a second';
-});
+      if (unitValue === 0) return previousValue;
+      return previousValue + (previousValue === '' ?  '' : ', ') + unitValue + ' ' + unit;
+    }, '').replace(/,([^,]*)$/,' and'+'$1') || 'less than a second';
+  };
+
+  Ember.Handlebars.registerBoundHelper('duration', durationHelper);
+  Ember.Handlebars.registerBoundHelper('winningDuration', function(myTime, opponentTime) {
+    if (!myTime && !opponentTime) return;
+    var milliseconds = (myTime || 0) - (opponentTime || 0);
+    var winningStatus = milliseconds > 0 ? 'winning' : 'losing';
+    return 'Currently ' + winningStatus + ' by ' + durationHelper(milliseconds);
+  });
+})();
 
 Ember.View.reopen({
   didInsertElement : function() {

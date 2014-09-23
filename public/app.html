@@ -285,8 +285,8 @@
 				<ul class="columns">
 					{{#each friendOpponents}}
 						<li>
-							<h3>
-								{{#link-to 'opponentNopes' id}}
+							{{#link-to 'opponentNopes' id}}
+								<h3 style="display: inline;">
 									{{#if isScoring}}
 										<i class="fa fa-hand-o-right"></i>
 									{{else}}
@@ -294,8 +294,11 @@
 									{{/if}}
 									<img width="20" height="20" style="border-radius: 10px;" {{bind-attr src="avatar"}} />
 									{{name}}
-								{{/link-to}}
-							</h3>
+								</h3>
+								<span class="discrete">
+									{{winningDuration timeFor timeAgainst}}
+								</span>
+							{{/link-to}}
 						</li>
 					{{/each}}
 					{{#if singleOpponent}}
@@ -427,20 +430,17 @@
 					<ul class="style2">
 						{{#each nopes}}
 							<li>
-								<article class="is-post-summary">
-									<h3>
-										{{#link-to 'opponentNopes' opponent}}
-											{{#if isReceived}}Nope received from {{opponent.name}}
-											{{else}} Nope sent to {{opponent.name}}.{{/if}}
-										{{/link-to}}
-									</h3>
-									<ul class="meta">
-										<li class="fa fa-clock-o">{{relativeDateFormat date}}</li>
-										<li class="fa fa-comments">
-											{{#if isReceived}}You{{else}}{{opponent.name}}{{/if}} had the last word for {{duration timeDiff clock.pulse}}
-										</li>
-									</ul>
-								</article>
+								<h3>
+									{{#link-to 'opponentNopes' opponent}}
+										{{#if isReceived}}Nope received from {{opponent.name}}
+										{{else}}Nope sent to {{opponent.name}}{{/if}}
+									{{/link-to}}
+								</h3>
+								<div class="discrete">
+									<i class="fa fa-clock-o"></i>{{relativeDateFormat date}}
+									<i class="fa fa-comments"></i>
+									{{#if isReceived}}You{{else}}{{opponent.name}}{{/if}} had the last word for {{duration timeDiff clock.pulse}}
+								</div>
 							</li>
 						{{/each}}
 					</ul>
@@ -483,21 +483,19 @@
 		<script type="text/x-handlebars" data-template-name="help">
 			<section>
 				<h2 class="major"><span>Help</span></h2>
-				<article class="is-post-summary">
-					<h3>
-						How to use Nope.
-					</h3>
-					<p>
-						{{#link-to 'newOpponent'}}Invite your friends by entering their emails{{/link-to}}, then start sending them "nopes".<br>
-						Whoever has the advantage longer than the other wins!
-					</p>
-					<h3>
-						Changing your avatar
-					</h3>
-					<p>
-						Avatars are associated to your e-mail adress via <a href="https://www.gravatar.com">Gravatar</a>. If you want to change your avatar, you need to create an account there.
-					</p>
-				</article>
+				<h3>
+					How to use Nope.
+				</h3>
+				<p>
+					{{#link-to 'newOpponent'}}Invite your friends by entering their emails{{/link-to}}, then start sending them "nopes".<br>
+					Whoever has the advantage longer than the other wins!
+				</p>
+				<h3>
+					Changing your avatar
+				</h3>
+				<p>
+					Avatars are associated to your e-mail adress via <a href="https://www.gravatar.com">Gravatar</a>. If you want to change your avatar, you need to create an account there.
+				</p>
 			</section>
 		</script>
 

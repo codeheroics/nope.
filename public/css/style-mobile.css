@@ -127,68 +127,6 @@
 			display: none;
 		}
 
-	.is-post-summary
-	{
-		margin: 0 !important;
-	}
-
-		.is-post-summary h3
-		{
-			font-size: 1.25em;
-		}
-
-	.is-post
-	{
-	}
-
-		.is-post h3
-		{
-			font-size: 2.25em;
-			line-height: 1.25em;
-			margin: 0 0 0.5em 0;
-		}
-
-		.is-post .byline
-		{
-			margin: 0 0 0.75em 0;
-		}
-
-		.is-post ul.meta
-		{
-			margin: 0 0 0.5em 0;
-		}
-
-		.is-post header
-		{
-			margin: 0 0 3em 0;
-		}
-
-	.is-page-content
-	{
-	}
-
-		.is-page-content h2
-		{
-			font-size: 2.25em;
-			line-height: 1.25em;
-			margin: 0 0 0.5em 0;
-		}
-
-		.is-page-content .byline
-		{
-			margin: 0 0 0.75em 0;
-		}
-
-		.is-page-content ul.meta
-		{
-			margin: 0 0 0.5em 0;
-		}
-
-		.is-page-content header
-		{
-			margin: 0 0 3em 0;
-		}
-
 /*********************************************************************************/
 /* Sidebar + Content                                                             */
 /*********************************************************************************/
