@@ -114,21 +114,21 @@ var achievements = {
     title: 'Social noper',
     description: 'Have at least 5 friends',
     hasEarned: function(user, nopeData) {
-      return Object.keys(user.friendsNopes).length > 5;
+      return Object.keys(user.friendsNopes).length >= 5;
     }
   },
   17: {
     title: 'Party noper',
     description: 'Have at least 10 friends',
     hasEarned: function(user, nopeData) {
-      return Object.keys(user.friendsNopes).length > 10;
+      return Object.keys(user.friendsNopes).length >= 10;
     }
   },
   18: {
     title: 'Charisma noper',
     description: 'Have at least 15 friends',
     hasEarned: function(user, nopeData) {
-      return Object.keys(user.friendsNopes).length > 15;
+      return Object.keys(user.friendsNopes).length >= 15;
     }
   },
 
