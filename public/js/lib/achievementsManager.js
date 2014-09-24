@@ -86,12 +86,20 @@ NopeGame.AchievementsManager = Ember.Object.extend({
     20: {
       title: 'This is Sparta!',
       description: 'Send 300 nopes to a single opponent',
+    },
+    21: {
+      title: 'Vade retro, Satanas!',
+      description: 'Send 666 nopes to a single opponent',
+    },
+    22: {
+      title: 'Lucky bastard',
+      description: '??????',
     }
   },
 
   // Kinda ugly but ooooooh well
   achievementsOrder: [
-    19,0,1,2,3,4,5,20,6,7,8,9,10,11,12,13,14,15,16,17,18
+    19,0,1,2,3,4,5,20,21,6,7,8,9,10,11,12,13,14,15,16,17,18,22
   ],
 
   init: function() {

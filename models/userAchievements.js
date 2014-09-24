@@ -143,10 +143,22 @@ var achievements = {
     description: 'Send 300 nopes to a single opponent',
     hasEarned: hasEarnedOpponentNopes.bind(null, 300)
   },
+  21: {
+    title: 'Vade retro, Satanas!',
+    description: 'Send 666 nopes to a single opponent',
+    hasEarned: hasEarnedOpponentNopes.bind(null, 666)
+  },
+  22: {
+    title: 'Lucky bastard',
+    description: '??????',
+    hasEarned: function() {
+      return Math.floor(Math.random() * 1000) === 0;
+    }
+  }
 };
 
-var achievableByNopingIds = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 19, 20];
-var achievableByNewFriendsIds = [16, 17, 18];
+var achievableByNopingIds = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 19, 20, 21, 22];
+var achievableByNewFriendsIds = [16, 17, 18, 22];
 
 function hasEarnedTotalNopes(nopesToObtain, user) {
   return user.totalNopes >= nopesToObtain;
