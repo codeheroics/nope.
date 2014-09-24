@@ -21,21 +21,34 @@ NopeGame.OpponentNopesController = Ember.ObjectController.extend({
 
   isLoading: false,
 
+  timeFor: function() {
+    return this.get('model.timeFor') +
+    (this.get('isScoring') ? this.get('timeDiffSinceLast') : 0);
+  }.property('model.timeFor', 'model.isScoring', 'timeDiffSinceLast'),
+
+  timeAgainst: function() {
+    return this.get('model.timeAgainst') +
+    (this.get('isScoring') ? 0 : this.get('timeDiffSinceLast'));
+  }.property('model.timeAgainst', 'model.isScoring', 'timeDiffSinceLast'),
+
   myAvatar: function() {
     return NopeGame.User.find(1).get('avatar');
   }.property('myAvatar'),
 
   isWinning: function() {
-    var timeFor = this.get('model.timeFor');
-    var timeAgainst = this.get('model.timeAgainst');
+    var timeFor = this.get('timeFor');
+    var timeAgainst = this.get('timeAgainst');
     return timeFor > timeAgainst;
-  }.property('model.timeFor', 'model.timeAgainst'),
+  }.property('timeFor', 'timeAgainst'),
 
   timeDiff: function() {
     var timeFor = this.get('model.timeFor');
     var timeAgainst = this.get('model.timeAgainst');
-    return Math.abs(timeFor - timeAgainst);
-  }.property('model.timeFor', 'model.timeAgainst'),
+    return Math.abs(
+      timeFor - timeAgainst +
+        this.get('timeDiffSinceLast') * (this.get('isScoring') ? 1 : -1)
+    );
+  }.property('model.timeFor', 'model.timeAgainst', 'clock.pulse'),
 
   timeDiffSinceLast: function() {
     var lastNopeTime = this.get('model.lastNopeTime');
