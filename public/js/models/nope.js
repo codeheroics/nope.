@@ -1,3 +1,4 @@
+'use strict';
 NopeGame.Nope = Ember.Model.extend({
   id:               Ember.attr(), // string
   opponent:         Ember.belongsTo('NopeGame.Opponent', { key: 'opponentId' }),
