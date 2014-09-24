@@ -264,6 +264,7 @@
 
 		<script type="text/x-handlebars" data-template-name="opponents">
 			<section>
+				<div style="display:none;">{{clock.pulse}}</div>
 				{{#if pendingOpponents}}
 					<h2 class="major"><span>Waiting for an answer</span></h2>
 					<ul class="columns">
@@ -296,7 +297,7 @@
 									{{name}}
 								</h3>
 								<span class="discrete">
-									{{winningDuration timeFor timeAgainst}}
+									{{winningDuration timeFor timeAgainst lastNopeTime isScoring}}
 								</span>
 							{{/link-to}}
 						</li>

@@ -140,6 +140,7 @@ Ember.Application.initializer({
   initialize: function(container, application) {
     container.register('clock:service', ClockService);
     application.inject('controller:index', 'clock', 'clock:service');
+    application.inject('controller:opponents', 'clock', 'clock:service');
     application.inject('controller:opponentNopes', 'clock', 'clock:service');
     application.inject('controller:history', 'clock', 'clock:service');
   }
@@ -168,9 +169,10 @@ Ember.Handlebars.registerBoundHelper('relativeDateFormat', function(date) {
   };
 
   Ember.Handlebars.registerBoundHelper('duration', durationHelper);
-  Ember.Handlebars.registerBoundHelper('winningDuration', function(myTime, opponentTime) {
+  Ember.Handlebars.registerBoundHelper('winningDuration', function(myTime, opponentTime, lastNopeTime, isScoring) {
     if (!myTime && !opponentTime) return;
     var milliseconds = (myTime || 0) - (opponentTime || 0);
+    milliseconds += (Date.now() - lastNopeTime) * (isScoring ? 1 : -1);
     var winningStatus = milliseconds > 0 ? 'wins' : 'loses';
     return winningStatus + ' by ' + durationHelper(milliseconds);
   });
