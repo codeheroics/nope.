@@ -61,6 +61,8 @@
 		<script src="js/controllers/profile.js"></script>
 		<script src="js/controllers/login.js"></script>
 		<script src="js/controllers/signup.js"></script>
+		<script src="js/controllers/forgottenPassword.js"></script>
+		<script src="js/controllers/passwordReset.js"></script>
 		<script src="js/lib/nopeServerManager.js"></script>
 		<script src="js/lib/achievementManager.js"></script>
 		<!-- endbuild -->
@@ -227,11 +229,13 @@
 				</div>
 
 				<button type="submit" class="InputAddOn-item">Login</button>
+				<br>
+				{{#link-to 'forgottenPassword'}}Forgotten your password?{{/link-to}}
 			</form>
 
 			<hr>
 
-			<p>Need an account? {{#link-to 'signup'}}Signup{{/link-to}}</p>
+			<p>Need an account? {{#link-to 'signup'}}Signup{{/link-to}}!</p>
 		</script>
 
 		<script type="text/x-handlebars" data-template-name="signup">
@@ -259,7 +263,47 @@
 			<hr>
 
 			<p>Already have an account? {{#link-to 'login'}}Login{{/link-to}}</p>
+		</script>
 
+
+		<script type="text/x-handlebars" data-template-name="forgottenPassword">
+
+			<form {{action 'sendPasswordResetRequest' this on='submit'}} class="flex-form">
+				<h1>Reset your Nope.wtf account's password - Enter your e-mail</h1>
+
+				<div class="InputAddOn">
+					<span class="InputAddOn-item"><i class="fa fa-envelope"></i> E-mail</span>
+					{{input type='email' placeholder='Enter your E-mail' value=email class="InputAddOn-field"}}
+				</div>
+
+				<button type="submit" class="InputAddOn-item">Reset my password!</button>
+			</form>
+
+			<hr>
+
+			<p>{{#link-to 'login'}}Login{{/link-to}} / {{#link-to 'login'}}Signup{{/link-to}}</p>
+		</script>
+
+		<script type="text/x-handlebars" data-template-name="passwordReset">
+
+			<form {{action 'sendNewPassword' this on='submit'}} class="flex-form">
+				<h1>Enter your new password (twice)</h1>
+
+				{{input type="hidden" value=resetToken }}
+
+				<div class="InputAddOn">
+					{{input placeholder='Enter your password' type='password' value=password1 class="InputAddOn-field"}}
+				</div>
+				<div class="InputAddOn">
+					{{input placeholder='Enter your password' type='password' value=password2 class="InputAddOn-field"}}
+				</div>
+
+				<button type="submit" class="InputAddOn-item">Reset password</button>
+			</form>
+
+			<hr>
+
+			<p>{{#link-to 'login'}}Login{{/link-to}} / {{#link-to 'login'}}Signup{{/link-to}}</p>
 		</script>
 
 		<script type="text/x-handlebars" data-template-name="opponents">

@@ -9,6 +9,9 @@ var SELF_ROUTE = USERS_ROUTE + '?me';
 var NOPES_ROUTE = SERVER_URL + '/nopes';
 var LOGIN_ROUTE = SERVER_URL + '/login';
 var SIGNUP_ROUTE = SERVER_URL + '/signup';
+var FORGOTTEN_PASSWORD_ROUTE = SERVER_URL + '/forgotten-password';
+var PASSWORD_RESET_ROUTE = SERVER_URL + '/password-reset';
+
 var PRIMUS_ROUTE = REALTIME_SERVER_URL;
 var CALLBACK_NAME = 'nopecb';
 

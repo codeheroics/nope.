@@ -1,16 +1,18 @@
 'use strict';
 
-var moment     = require('moment');
-var jwt        = require('jwt-simple');
-var config     = require('config');
-var log        = require('winston');
-var passport   = require('passport');
-var validator  = require('validator');
-var winston    = require('winston');
+var moment        = require('moment');
+var jwt           = require('jwt-simple');
+var config        = require('config');
+var log           = require('winston');
+var passport      = require('passport');
+var validator     = require('validator');
+var winston       = require('winston');
 
-var User       = require('../models/user');
-var mail       = require('../lib/mail');
-var bruteforce = require('../lib/bruteforce');
+var User          = require('../models/user');
+var mail          = require('../lib/mail');
+var bruteforce    = require('../lib/bruteforce');
+var passwordUtils = require('../lib/utils/password');
+var uuid          = require('node-uuid');
 
 module.exports = function(app) {
   var isLoggedIn = require('../lib/utils/middlewares')(app).isLoggedIn;
@@ -112,24 +114,104 @@ module.exports = function(app) {
   });
 
   app.get('/confirm', function(req, res, next) {
-    if (!req.query.token) return outputConfirmError(new Error('Invalid token'), req, res);
+    if (!req.query.token) return outputConfirmError(null, req, res);
 
-    var decoded = jwt.decode(req.query.token, config.jwtTokenSecretForConfirm);
-      // if user is authenticated in the session, carry on
-      if (!validator.isEmail(decoded.email)) {
-         return outputConfirmError(new Error('Invalid token'), req, res);
-      }
+    var decoded;
+    try {
+      decoded = jwt.decode(req.query.token, config.jwtTokenSecretForConfirm);
+    }
+    catch(err) {
+      return outputConfirmError(null, req, res);
+    }
 
-      User.findById(decoded.email, function(err, user) {
-        if (err || !user) return outputConfirmError(err, req, res);
-        user.confirmed = true;
+    User.findById(decoded.email, function(err, user) {
+      if (err || !user) return outputConfirmError(err, req, res);
+      user.confirmed = true;
+      user.save(function(err) {
+        if (err) return outputConfirmError(err, req, res);
+        // if (req.xhr) return res.jsonp(null);
+        res.redirect('/app.html#/login?confirmed');
+      });
+    });
+  });
+
+  app.post(
+    '/forgotten-password',
+    bruteforce.global.prevent,
+    bruteforce.user.getMiddleware({
+        key: function(req, res, next) {
+          // prevent too many attempts for the same username
+          next(req.body.email);
+        }
+    }),
+    function(req, res, next) {
+      if (!req.body.email) return res.jsonp(400, {});
+      var email = req.body.email.trim();
+      if (! validator.isEmail(email)) return res.jsonp(400, {});
+
+      User.findById(email, function(err, user) {
+        if (err) return next(err);
+        if (!user) return res.jsonp(404, {});
+
+        // "Enhance your calm" if too many request too fast
+        if (user.passwordReset.time > Date.now() - 300000) return res.jsonp(420, {});
+
+        user.passwordReset.time = Date.now();
+        user.passwordReset.resetToken = uuid.v4();
+
         user.save(function(err) {
-          if (err) return outputConfirmError(err, req, res);
-          if (req.xhr) return res.jsonp(null);
-          res.redirect('/app.html#/login?confirmed');
+          if (err) return next(err);
+
+          var jwtToken = jwt.encode({
+            email: user.email,
+            resetToken: user.passwordReset.resetToken
+          }, config.jwtTokenSecretForPassword);
+
+          mail.sendForgottenPasswordEmail(email, jwtToken, function(err) {
+            if (err) return next(err);
+            return res.jsonp(200, {});
+          });
         });
       });
+    }
+  );
 
+
+  app.get('/password-reset', function(req, res, next) {
+    res.redirect('/app.html#/password-reset?resetToken=' + req.query.token);
+  });
+
+  app.post('/password-reset', function(req, res, next) {
+    if (!req.body.password || !req.body.token) return res.jsonp(400, {});
+
+    var decoded;
+    try {
+      decoded = jwt.decode(req.body.token, config.jwtTokenSecretForPassword);
+    }
+    catch(err) {
+      return outputConfirmError(null, req, res);
+    }
+
+    var resetToken = decoded.resetToken;
+    var email = decoded.email;
+
+    if (!resetToken || !email) return res.jsonp(400, {});
+
+    User.findById(email, function(err, user) {
+      if (err) return next(err);
+      if (!user) return res.jsonp(404, {});
+      if (user.passwordReset.resetToken !== resetToken) return res.jsonp(403, {});
+
+      passwordUtils.generateHash(req.body.password, function(err, hash) {
+        if (err) return next(err);
+        user.password = hash;
+        delete user.passwordReset.resetToken; // Do not remove time to allow "enhance your calm" check
+        user.save(function(err) {
+          if (err) return next(err);
+          res.jsonp(200, {});
+        });
+      });
+    });
   });
 
   // =====================================
@@ -137,6 +219,5 @@ module.exports = function(app) {
   // =====================================
   app.get('/logout', function(req, res) {
     req.logout();
-    //res.redirect('/');
   });
 };

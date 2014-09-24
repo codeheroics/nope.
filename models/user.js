@@ -19,6 +19,7 @@ var User = function(params) {
   this.name = params.name.trim();
   this.email = params.email.toLowerCase().trim();
   this.password = params.password;
+  this.passwordReset = params.passwordReset ? params.passwordReset : {};
   this.confirmed = !! params.confirmed || !config.requireUserConfirmation;
   this.friendsNopes = params.friendsNopes ? params.friendsNopes : {};
   this.invitedUsers = params.invitedUsers ? params.invitedUsers : [];
@@ -84,6 +85,7 @@ User.prototype.toDbJSON = function() {
   return {
     name: this.name,
     password: this.password,
+    passwordReset: this.passwordReset,
     confirmed: this.confirmed,
     friendsNopes: this.friendsNopes,
     invitedUsers: this.invitedUsers,

@@ -10,6 +10,8 @@ NopeGame.Router.map(function() {
   this.resource('index', { path: '/'  });
   this.resource('login', { path: '/login' });
   this.resource('signup', { path: '/signup' });
+  this.resource('forgottenPassword', { path: '/forgotten-password' });
+  this.resource('passwordReset', { path: '/password-reset' });
   this.resource('opponentNopes', { path: '/opponents/:opponent_id/nopes' });
   this.resource('opponents', { path: '/opponents' });
   this.resource('ignoredOpponents', { path: '/opponents?ignored' });
@@ -61,17 +63,25 @@ NopeGame.LoginRoute = Ember.Route.extend(
     beforeModel: function(params) {
       if (this.get('session').get('isAuthenticated')) return this.transitionTo('index');
 
-
-      if (params.queryParams.confirmed) {
-        toastr.success(
-          'You have successfully completed your registration! You can now login!',
-          'Welcome!',
-          {timeOut: 30000}
-        );
-      }
+      if (!params.queryParams.confirmed) return;
+      toastr.success(
+        'You have successfully completed your registration! You can now login!',
+        'Welcome!',
+        {timeOut: 30000}
+      );
     }
   }
 );
+
+NopeGame.PasswordResetRoute = Ember.Route.extend({
+  beforeModel: function(params) {
+    if (params.queryParams.resetToken) return;
+    this.transitionTo('index');
+  },
+  model: function(params) {
+    return params.queryParams;
+  }
+});
 
 NopeGame.IndexRoute = Ember.Route.extend(
   NopeGame.AuthenticatedRouteMixin,
