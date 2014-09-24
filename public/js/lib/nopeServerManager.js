@@ -389,7 +389,9 @@ NopeGame.NopeServerManager = Ember.Object.extend({
             if (!object.nopeData) {
               return self.getNopesFrom(email).then(resolve);
             }
-            self.handleNopeResult(object.nopeData).then(self.notifyNoping.bind(this, object.nopeData));
+            return self.handleNopeResult(object.nopeData)
+            .then(self.notifyNoping.bind(this, object.nopeData))
+            .then(resolve);
           }
 
           self.createUser(object.invitedUser, 'invited')
