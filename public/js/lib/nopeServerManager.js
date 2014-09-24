@@ -111,6 +111,7 @@ NopeGame.NopeServerManager = Ember.Object.extend({
       .done(function(data) {
         this.handleNopeResult(data)
         .then(this.notifyNoping.bind(this, data))
+        .then(this.cleanNopeDatas.bind(this))
         .then(resolve);
       }.bind(this))
       .fail(function(xhr) {
@@ -174,6 +175,32 @@ NopeGame.NopeServerManager = Ember.Object.extend({
 
     return opponent.save().then(function() {
       return nopeRecord.save();
+    });
+  },
+
+  cleanNopeDatas: function() {
+
+    // We do not touch the 25 most recent nopes keep 25 of them for history
+    var allNopes = NopeGame.Nope.find().sortBy('time').reverse();
+
+    if (allNopes.length < 100) return; // Prevents this being called too often
+
+    var usersWithPreviousNopes = [];
+
+    allNopes.forEach(function(nope, index) {
+      var noperMail = nope.get('opponent').get('email');
+
+      // Do not clean up :
+      // * nopes for users for which we did not have nopes yet
+      // * the 25 first nopes.
+      if (usersWithPreviousNopes.indexOf(noperMail) === -1) {
+        usersWithPreviousNopes.push(noperMail);
+        return;
+      }
+
+      if (index < NOPES_HISTORY_LENGTH) return;
+      // We can cleanup this nope
+      nope.deleteRecord();
     });
   },
 

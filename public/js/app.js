@@ -17,6 +17,8 @@ var GRAVATAR_BASE = 'https://www.gravatar.com/avatar/';
 var PENDING_USERS_KEY = 'pendingUsers';
 var IGNORED_USERS_KEY = 'ignoredUsers';
 
+var NOPES_HISTORY_LENGTH = 25;
+
 toastr.options = {
   showDuration: 300,
   hideDuration: 300,
