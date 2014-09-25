@@ -101,7 +101,8 @@ function buildJSFromSources(isProdBuild) {
     'components/ember-model-localstorage-adapter/ember-model-localstorage-adapter.js',
     'components/toastr/toastr.js',
     'components/js-md5/js/md5.js',
-    'components/validator-js/validator.js'
+    'components/validator-js/validator.js',
+    'components/lodash/dist/lodash.min.js'
   ];
 
   var jsMinComponents = [

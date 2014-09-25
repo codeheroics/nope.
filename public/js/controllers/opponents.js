@@ -26,11 +26,19 @@ NopeGame.OpponentsController = Ember.ArrayController.extend({
 
   pendingOpponents: function() {
     var opponents = this.get('model');
-    return opponents.filterBy('status', 'pending').sortBy('name');
+    return _.uniq( // FIXME this is a crutch to avoid duplicates, but still better than nothing
+      opponents.filterBy('status', 'pending').sortBy('name'),
+      true,
+      function(el) { return el.get('email'); }
+    );
   }.property('model.@each.status', 'clock.pulse'),
 
   friendOpponents: function() {
     var opponents = this.get('model');
-    return opponents.filterBy('status', 'friend').sortBy('name');
+    return _.uniq( // FIXME this is a crutch to avoid duplicates, but still better than nothing
+      opponents.filterBy('status', 'friend').sortBy('name'),
+      true,
+      function(el) { return el.get('email'); }
+    );
   }.property('model.@each.status', 'clock.pulse')
 });

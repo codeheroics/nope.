@@ -28,7 +28,7 @@
     "dojo": false,
 
     // Custom predefined globals.
-    "predef": ["NopeGame", "Ember", "console", "Promise", "alert", "moment", "toastr", "validator"],
+    "predef": ["NopeGame", "Ember", "console", "Promise", "alert", "moment", "toastr", "validator", "_"],
 
     // Development
 
