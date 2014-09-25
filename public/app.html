@@ -424,7 +424,7 @@
 
 		<script type="text/x-handlebars" data-template-name="opponentNopes">
 				<section style="text-align:center;">
-					<h2 class="major"><span>VS {{name}} ({{email}})</span></h2>
+					<h2 class="major"><span>VS {{name}}</span></h2>
 					<div style="display:flex; border-radius: 8px;">
 						{{#if isWinning }}
 							<div class="score score-left winning">
@@ -448,6 +448,9 @@
 					</div>
 
 					<div>
+						Currently {{#if isWinning}} losing {{else}} winning {{/if}} by {{duration timeDiff}}
+					</div>
+					<div>
 						Last nope {{duration timeDiffSinceLast clock.pulse}} ago
 					</div>
 
@@ -465,9 +468,6 @@
 					<p class="nopesSent">{{nopesCpt}}</p>
 					<div>
 						<legend class="nopesSent">nopes sent</legend>
-					</div>
-					<div>
-						Currently {{#if isWinning}} losing {{else}} winning {{/if}} by {{duration timeDiff}}
 					</div>
 					<div style="margin-top:15px;">
 						<button type="button" class="InputAddOn-item" {{action 'ignore' model}}>Ignore {{name}}</button>
