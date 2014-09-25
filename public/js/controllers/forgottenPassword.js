@@ -17,7 +17,8 @@ NopeGame.ForgottenPasswordController = Ember.ObjectController.extend({
           undefined,
           {timeOut: 10000}
         );
-      })
+        this.set('hasSent', true);
+      }.bind(this))
       .fail(function(xhr) {
         if (xhr.status === 400) {
           toastr.error('Invalid e-mail.', 'Error', {timeOut: 10000});
@@ -34,5 +35,6 @@ NopeGame.ForgottenPasswordController = Ember.ObjectController.extend({
       });
     }
   },
-  content: {}
+  content: {},
+  hasSent: false
 });

@@ -277,7 +277,12 @@
 					{{input type='email' placeholder='Enter your E-mail' value=email class="InputAddOn-field"}}
 				</div>
 
-				<button type="submit" class="InputAddOn-item">Reset my password!</button>
+
+				{{#if hasSent}}
+					<i class="fa fa-check green"></i>
+				{{else}}
+					<button type="submit" class="InputAddOn-item">Reset my password!</button>
+				{{/if}}
 			</form>
 
 			<hr>
