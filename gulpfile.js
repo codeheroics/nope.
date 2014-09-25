@@ -102,7 +102,7 @@ function buildJSFromSources(isProdBuild) {
     'components/toastr/toastr.js',
     'components/js-md5/js/md5.js',
     'components/validator-js/validator.js',
-    'components/lodash/dist/lodash.min.js'
+    'components/lodash/dist/lodash.js'
   ];
 
   var jsMinComponents = [
