@@ -5,7 +5,6 @@
 
 NopeGame.NopeServerManager = Ember.Object.extend({
   init: function() {
-    NopeGame.achievementsManager = NopeGame.AchievementsManager.create();
     return this.getAllNopes().then(this.initPrimus.bind(this));
   },
 
@@ -39,7 +38,7 @@ NopeGame.NopeServerManager = Ember.Object.extend({
         // Data from a nope
         self.handleNopeResult(data).then(function() {
           if (data.isNopingMe) {
-            self.notifyNoped(data);
+            NopeGame.notificationManager.notifyNoped(data);
           }
           // else {
             // We are notify that we are noping because we made the HTTP call there
@@ -110,7 +109,7 @@ NopeGame.NopeServerManager = Ember.Object.extend({
       )
       .done(function(data) {
         this.handleNopeResult(data)
-        .then(this.notifyNoping.bind(this, data))
+        .then(NopeGame.notificationManager.notifyNoping.bind(NopeGame.notificationManager, data))
         .then(this.cleanNopeDatas.bind(this))
         .then(resolve);
       }.bind(this))
@@ -123,18 +122,6 @@ NopeGame.NopeServerManager = Ember.Object.extend({
         reject();
       }.bind(this));
     }.bind(this));
-  },
-
-  notifyNoped: function(nopeData) {
-    toastr.warning('received from <span style="font-weight:bold;">' + nopeData.opponentName + '</span>.', 'Nope.');
-    return Promise.resolve();
-    // .click(function() {
-    //   this.transitionTo('/opponents/' + nopeData.opponentEmail);
-    // }.bind(this));
-  },
-  notifyNoping: function(nopeData) {
-    toastr.success('sent to <span style="font-weight:bold;">' + nopeData.opponentName + '</span>.', 'Nope.');
-    return Promise.resolve();
   },
 
   handleNopeResult: function(dataNope, email) {
@@ -390,7 +377,7 @@ NopeGame.NopeServerManager = Ember.Object.extend({
               return self.getNopesFrom(email).then(resolve);
             }
             return self.handleNopeResult(object.nopeData)
-            .then(self.notifyNoping.bind(this, object.nopeData))
+            .then(NopeGame.notificationManager.notifyNoping.bind(NopeGame.notificationManager, object.nopeData))
             .then(resolve);
           }
 

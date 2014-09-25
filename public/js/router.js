@@ -23,17 +23,20 @@ NopeGame.Router.map(function() {
   this.resource('share', { path: '/share' });
 });
 
-function createServerManager() {
+function createManagers() {
   if (NopeGame.serverManager) return;
   NopeGame.serverManager = NopeGame.NopeServerManager.create();
+  NopeGame.achievementsManager = NopeGame.AchievementsManager.create();
+  NopeGame.notificationManager = NopeGame.NotificationManager.create();
 }
+
 
 
 NopeGame.ApplicationRoute = Ember.Route.extend(
   Ember.SimpleAuth.ApplicationRouteMixin, {
     actions: {
       sessionAuthenticationSucceeded: function(transition, queryParams) {
-        createServerManager();
+        createManagers();
         this._super(transition, queryParams);
       }
     }
@@ -45,7 +48,7 @@ NopeGame.AuthenticatedRouteMixin = Ember.Mixin.create(
     beforeModel: function(transition, queryParams) {
       this._super(transition, queryParams);
       if (this.get('session').get('isAuthenticated')) {
-        createServerManager();
+        createManagers();
 
         // Load everything - without this, errors pop, single instances can't be found...
         NopeGame.User.find();
