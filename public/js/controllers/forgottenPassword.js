@@ -21,11 +21,11 @@ NopeGame.ForgottenPasswordController = Ember.ObjectController.extend({
       .fail(function(xhr) {
         if (xhr.status === 400) {
           toastr.error('Invalid e-mail.', 'Error', {timeOut: 10000});
-        }
-        if (xhr.status === 403) {
+        } else if (xhr.status === 403) {
           toastr.error('Invalid: Too many requests.', 'Error', {timeOut: 10000});
-        }
-        if (xhr.status === 404) {
+        } else if (xhr.status === 420) {
+          toastr.error('You have already requested a password reset less than 5 minutes ago', 'Error', {timeOut: 10000});
+        } else if (xhr.status === 404) {
           toastr.error('Invalid: No user with that email address.', 'Error', {timeOut: 10000});
         }
         else { // FIXME detect not connected
