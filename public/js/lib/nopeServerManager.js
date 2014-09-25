@@ -213,9 +213,12 @@ NopeGame.NopeServerManager = Ember.Object.extend({
             });
           }
 
+          var avatar = generateGravatar(data.email);
+
           user.set('name', data.name);
           user.set('email', data.email);
-          user.set('avatar', generateGravatar(data.email));
+          user.set('avatar', avatar);
+          localStorage.setItem('avatar', avatar);
           user.set('timeNoping', data.timeNoping);
           user.set('totalNopes', data.totalNopes);
           NopeGame.achievementsManager.update(data.achievements);

@@ -32,8 +32,8 @@ NopeGame.OpponentNopesController = Ember.ObjectController.extend({
   }.property('model.timeAgainst', 'model.isScoring', 'timeDiffSinceLast'),
 
   myAvatar: function() {
-    return NopeGame.User.find(1).get('avatar');
-  }.property('clock.pulse'),
+    return localStorage.getItem('avatar');
+  }.property('myAvatar'),
 
   isWinning: function() {
     var timeFor = this.get('timeFor');
