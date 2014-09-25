@@ -47,7 +47,8 @@ module.exports = function(app) {
 
   var createToken = function(tokenSecretLabel, user) {
     return jwt.encode({
-      email: user.email
+      email: user.email,
+      random: uuid.v4() // Random token as salt to complexify the token, not used.
     }, config[tokenSecretLabel]);
   };
 
