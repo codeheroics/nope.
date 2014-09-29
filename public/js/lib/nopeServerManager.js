@@ -83,8 +83,6 @@ NopeGame.NopeServerManager = Ember.Object.extend({
         if (!opponent.isLoaded) return;
 
         if (data.victory) {
-          opponent.set('victories', data.nopeData.victories);
-          opponent.set('defeats', data.nopeData.defeats);
           toastr.success(
             opponent.get('name') + ' has admitted defeat! The counters are now reseted, continue like this!',
             'Victory!',
@@ -203,6 +201,8 @@ NopeGame.NopeServerManager = Ember.Object.extend({
     opponent.set('inTruceFrom', dataNope.truce && dataNope.truce.startTime);
     opponent.set('inTruceUntil', dataNope.truce && dataNope.truce.startTime && dataNope.truce.startTime + 3600000);
     opponent.set('truceBrokenTime', dataNope.truce && dataNope.truce.brokenTime);
+    opponent.set('victories', dataNope.victories || 0);
+    opponent.set('defeats', dataNope.defeats || 0);
     var nopes = opponent.get('nopes').pushObject(nopeRecord);
     nopeRecord.set('opponent', opponent);
 
@@ -555,8 +555,6 @@ NopeGame.NopeServerManager = Ember.Object.extend({
         }
       )
       .done(function(data) {
-        opponent.set('victories', data.nopeData.victories);
-        opponent.set('defeats', data.nopeData.defeats);
         opponent.save().then(function() {
           return this.handleNopeResult(data.nopeData, opponent.get('email'));
         }.bind(this))

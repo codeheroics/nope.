@@ -369,7 +369,6 @@ User.prototype.concedeAgainst = function(email, callback) {
   User.findById(email, function(err, opponent) {
     if (err) return callback(err);
     if (!opponent) return callback(new FriendError(User.FRIEND_STATUSES.NOT_FOUND));
-    if (!opponent.hasFriend(this.email)) return callback(new FriendError(User.FRIEND_STATUSES.NOT_FRIEND));
 
     var now = Date.now();
     this.defeats++;
@@ -380,12 +379,20 @@ User.prototype.concedeAgainst = function(email, callback) {
     this.friendsNopes[email].timeDiff = 0;
     this.friendsNopes[email].isNopingMe = false;
     opponent.victories++;
-    opponent.friendsNopes[this.email].victories++;
-    opponent.friendsNopes[this.email].myTimeNoping = 0;
-    opponent.friendsNopes[this.email].opponentTimeNoping = 0;
-    opponent.friendsNopes[this.email].time = now;
-    opponent.friendsNopes[this.email].timeDiff = 0;
-    opponent.friendsNopes[this.email].isNopingMe = true;
+
+    var opponentFriendsNopesInfosForMe = opponent.friendsNopes[this.email];
+    var opponentIsIgnoringMe = opponent.hasIgnored(this.email);
+    if (opponentIsIgnoringMe) {
+      opponentFriendsNopesInfosForMe = opponent.getIgnoredUserNopeInfos(this.email);
+    }
+
+    opponentFriendsNopesInfosForMe.victories++;
+    opponentFriendsNopesInfosForMe.myTimeNoping = 0;
+    opponentFriendsNopesInfosForMe.opponentTimeNoping = 0;
+    opponentFriendsNopesInfosForMe.time = now;
+    opponentFriendsNopesInfosForMe.timeDiff = 0;
+    opponentFriendsNopesInfosForMe.isNopingMe = true;
+    opponentFriendsNopesInfosForMe.notifiedVictory = false;
 
     async.series([ // FIXME rollback etc
       opponent.save.bind(opponent),
@@ -402,15 +409,18 @@ User.prototype.concedeAgainst = function(email, callback) {
           opponentEmail: email
         }
       );
-      redisClient.publish(
-        email,
-        {
-          victory: true,
-          totalVictories: this.victories,
-          nopeData: opponent.friendsNopes[this.email],
-          opponentEmail: this.email
-        }
-      );
+
+      if (!opponentIsIgnoringMe) {
+        redisClient.publish(
+          email,
+          {
+            victory: true,
+            totalVictories: this.victories,
+            nopeData: opponent.friendsNopes[this.email],
+            opponentEmail: this.email
+          }
+        );
+      }
 
       callback(null, this.friendsNopes[email]);
     }.bind(this));
