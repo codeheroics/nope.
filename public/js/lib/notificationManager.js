@@ -49,7 +49,8 @@ NopeGame.NotificationManager = Ember.Object.extend({
     this.clearTruceNotifications(email);
     this.truceNotifications[email].push(toastr.info(
       'You\'ll be able to send nopes again in an hour',
-      'You are now in a truce with ' + opponent.get('name'),
+      'You are now in a truce with <span style="font-weight:bold;">' +
+        opponent.get('name') + '</span>',
       { timeOut: 15000 }
     ));
   },
@@ -77,7 +78,8 @@ NopeGame.NotificationManager = Ember.Object.extend({
     var email = opponent.get('email');
     this.clearTruceNotifications(email);
     this.truceNotifications[email].push(toastr.info(
-      'You have sent a request for a truce to ' + opponent.get('name'),
+      'You have sent a request for a truce to <span style="font-weight:bold;">' +
+        opponent.get('name') + '</span>',
       undefined,
       {timeOut: 10000}
     ));
@@ -87,7 +89,8 @@ NopeGame.NotificationManager = Ember.Object.extend({
     var email = opponent.get('email');
     this.clearTruceNotifications(email);
     this.truceNotifications[email].push(toastr.info(
-      opponent.get('name') + ' has broken your truce!',
+      '<span style="font-weight:bold;">' + opponent.get('name') + '</span> ' +
+        'has broken your truce!',
       undefined,
       {timeOut: 15000}
     ));
@@ -97,7 +100,8 @@ NopeGame.NotificationManager = Ember.Object.extend({
     var email = opponent.get('email');
     this.clearTruceNotifications(email);
     this.truceNotifications[email].push(toastr.info(
-      'You have broken the truce you had with ' + opponent.get('name') + '!',
+      'You have broken the truce you had with <span style="font-weight:bold;">' +
+      opponent.get('name') + '</span>!',
       undefined,
       {timeOut: 10000}
     ));

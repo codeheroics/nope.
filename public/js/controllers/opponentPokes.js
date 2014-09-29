@@ -47,5 +47,14 @@ NopeGame.OpponentNopesController = Ember.ObjectController.extend({
 
   timeRemainingInTruce: function() {
     return this.get('model.inTruceUntil') - Date.now();
-  }.property('model.inTruceUntil', 'clock.pulse')
+  }.property('model.inTruceUntil', 'clock.pulse'),
+
+  roundNumber: function() {
+    return (this.get('victories') || 0) + (this.get('defeats') || 0) + 1;
+  }.property('victories', 'defeats'),
+
+  canConcede: function() {
+    return this.get('isScoring') &&
+      this.get('computedTimeFor') - this.get('computedTimeAgainst') > 24 * 60 * 60 * 1000; // 1 day
+  }.property('isScoring', 'clock.pulse', 'computedTimeAgainst', 'computedTimeFor')
 });

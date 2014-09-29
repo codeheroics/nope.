@@ -9,7 +9,6 @@ NopeGame.NopeServerManager = Ember.Object.extend({
   },
 
   initPrimus: function() {
-    var self = this;
     this.primus = Primus.connect(
       PRIMUS_ROUTE,
       {
@@ -36,14 +35,14 @@ NopeGame.NopeServerManager = Ember.Object.extend({
     this.primus.on('data', function(data) {
       if (data.isNopingMe !== undefined) {
         // Data from a nope
-        self.handleNopeResult(data).then(function() {
+        this.handleNopeResult(data).then(function() {
           if (data.isNopingMe) {
             NopeGame.notificationManager.notifyNoped(data);
           }
           // else {
             // We are notify that we are noping because we made the HTTP call there
             // in the nopeAt method
-            // self.notifyNoping(data);
+            // this.notifyNoping(data);
           // }
         });
         return;
@@ -51,7 +50,7 @@ NopeGame.NopeServerManager = Ember.Object.extend({
 
       if (data.pendingUser !== undefined) {
         // New pending user
-        self.createUser(data.pendingUser, 'pending')
+        this.createUser(data.pendingUser, 'pending')
         .then(function(pendingOpponent) {
           toastr.info('A new noper, <span style="font-weight:bold;">' + pendingOpponent.get('name') +
             '</span>, challenges you!');
@@ -61,7 +60,7 @@ NopeGame.NopeServerManager = Ember.Object.extend({
 
       if (data.ignoredUser !== undefined) {
         // New ignored user
-        self.createUser(data.ignoredUser, 'ignored');
+        this.createUser(data.ignoredUser, 'ignored');
         return;
         // No toastr here : user has feedback from HTTP DELETE on device where he ignores,
         // let's not introduce any race condition wondering if a toastr should be shown or not (HTTP VS Websocket speed
@@ -85,12 +84,15 @@ NopeGame.NopeServerManager = Ember.Object.extend({
 
         if (data.victory) {
           opponent.set('victories', data.nopeData.victories);
+          opponent.set('defeats', data.nopeData.defeats);
           toastr.success(
             opponent.get('name') + ' has admitted defeat! The counters are now reseted, continue like this!',
             'Victory!',
             {timeOut: 10000}
           );
-          this.handleNopeResult(data.nopeData);
+          opponent.save().then(function() {
+            this.handleNopeResult(data.nopeData, data.opponentEmail);
+          }.bind(this));
         }
         NopeGame.User.find(1).set('victories', data.totalVictories).save();
         return;
@@ -128,7 +130,7 @@ NopeGame.NopeServerManager = Ember.Object.extend({
         window.localStorage.setItem('serverTimeDiff', (Date.now() - data.time) || 0);
         return;
       }
-    });
+    }.bind(this));
   },
 
   endPrimus: function() {
@@ -175,7 +177,6 @@ NopeGame.NopeServerManager = Ember.Object.extend({
     var nope = NopeGame.Nope.find(nopeId);
 
     if (nope.isLoaded) return Promise.resolve(nope); // exit
-
     var nopeRecord = NopeGame.Nope.create({
       id: nopeId,
       isReceived: dataNope.isNopingMe,
@@ -190,6 +191,7 @@ NopeGame.NopeServerManager = Ember.Object.extend({
         email: email
       });
     }
+
     opponent.set('name', dataNope.opponentName);
     opponent.set('isScoring', dataNope.isNopingMe);
     opponent.set('timeFor', dataNope.opponentTimeNoping);
@@ -202,7 +204,6 @@ NopeGame.NopeServerManager = Ember.Object.extend({
     opponent.set('inTruceUntil', dataNope.truce && dataNope.truce.endTime);
     opponent.set('truceBrokenTime', dataNope.truce && dataNope.truce.brokenTime);
     var nopes = opponent.get('nopes').pushObject(nopeRecord);
-
     nopeRecord.set('opponent', opponent);
 
     return opponent.save().then(function() {
@@ -554,9 +555,10 @@ NopeGame.NopeServerManager = Ember.Object.extend({
         }
       )
       .done(function(data) {
-        opponent.set('victories', data.victories);
+        opponent.set('victories', data.nopeData.victories);
+        opponent.set('defeats', data.nopeData.defeats);
         opponent.save().then(function() {
-          return this.handleNopeResult(data.nopeData);
+          return this.handleNopeResult(data.nopeData, opponent.get('email'));
         }.bind(this))
         .then(function() {
           toastr.info(

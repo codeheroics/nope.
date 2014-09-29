@@ -500,7 +500,7 @@ html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockq
 	}
 
 	.avatar {
-		border-radius: 50px;
+		border-radius: 50%;
 	}
 
 	.unachieved {

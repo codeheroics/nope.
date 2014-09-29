@@ -424,7 +424,7 @@
 
 		<script type="text/x-handlebars" data-template-name="opponentNopes">
 				<section style="text-align:center;">
-					<h2 class="major"><span>VS {{name}}</span></h2>
+					<h2 class="major"><span>VS {{name}} (Round {{roundNumber}})</span></h2>
 					<div style="display:flex; border-radius: 8px;">
 						{{#if isWinning }}
 							<div class="score score-left winning">
@@ -485,9 +485,15 @@
 						<div style="margin-top:15px;">
 							<button type="button" class="InputAddOn-item" {{action 'requestTruce' model}}>Request a 1h truce</button>
 						</div>
-						<div style="margin-top:15px;">
-							<button type="button" class="InputAddOn-item" {{action 'concede' model}}>Concede your defeat for this round</button>
-						</div>
+						{{#if canConcede}}
+							<div style="margin-top:15px;">
+								<button type="button" class="InputAddOn-item" {{action 'concede' model}}>Acknowledge your defeat for this round</button>
+							</div>
+						{{else}}
+							<div style="margin-top:15px;" class="discrete">
+								You'll be able to acknowledge a defeat and move to the next round if you're losing by more than 1 day and are being noped.
+							</div>
+						{{/if}}
 					{{/if}}
 					<div style="margin-top:15px;">
 						<button type="button" class="InputAddOn-item" {{action 'ignore' model}}>Ignore {{name}}</button>

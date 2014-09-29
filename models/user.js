@@ -26,6 +26,8 @@ var User = function(params) {
   this.ignoredUsers = params.ignoredUsers ? params.ignoredUsers : [];
   this.pendingUsers = params.pendingUsers ? params.pendingUsers : [];
   this.achievements = params.achievements ? params.achievements : {};
+  this.victories = params.victories ? params.victories : 0;
+  this.defeats = params.defeats ? params.defeats : 0;
   this.timeNoping = params.timeNoping || 0;
   this.totalNopes = params.totalNopes || 0;
   this.created = params.created ? params.created : Date.now();
@@ -94,6 +96,8 @@ User.prototype.toDbJSON = function() {
     pendingUsers: this.pendingUsers,
     timeNoping: this.timeNoping,
     totalNopes: this.totalNopes,
+    victories: this.victories,
+    defeats: this.defeats,
     created: this.created,
     achievements: this.achievements
   };
@@ -109,7 +113,9 @@ User.prototype.toSelfJSON = function() {
     invitedUsers: this.invitedUsers,
     ignoredUsers: this.ignoredUsers,
     pendingUsers: this.pendingUsers,
-    achievements: this.achievements
+    achievements: this.achievements,
+    victories: this.victories,
+    defeats: this.defeats
   };
 };
 
@@ -119,7 +125,9 @@ User.prototype.toPublicJSON = function() {
     timeNoping: this.timeNoping,
     totalNopes: this.totalNopes,
     created: this.created,
-    achievements: this.achievements
+    achievements: this.achievements,
+    victories: this.victories,
+    defeats: this.defeats
   };
 };
 
@@ -167,7 +175,9 @@ User.prototype.setNopingAt = function(userNoped, now, timeDiff) {
     timeDiff: timeDiff || 0,
     nopesCpt: (oldNope.nopesCpt || 0) + 1,
     isNopingMe: false,
-    opponentName: userNoped.name
+    opponentName: userNoped.name,
+    victories: oldNope.victories || 0,
+    defeats: oldNope.defeats || 0
   };
 };
 
@@ -187,7 +197,9 @@ User.prototype.setNopedBy = function(userNoping, now, timeDiff) {
     timeDiff: timeDiff || 0,
     nopesCpt: oldNope.nopesCpt || 0,
     opponentTimeNoping: (oldNope.opponentTimeNoping || 0),
-    opponentName: userNoping.name
+    opponentName: userNoping.name,
+    victories: oldNope.victories || 0,
+    defeats: oldNope.defeats || 0
   };
 };
 
@@ -347,8 +359,9 @@ User.prototype.nopeAtUserIgnoringMe = function(userIgnoring, now, callback) {
 
 User.prototype.concedeAgainst = function(email, callback) {
   if (!this.hasFriend(email)) return callback(new FriendError(User.FRIEND_STATUSES.NOT_FRIEND));
+  if (!this.friendsNopes[email].isNopingMe) return callback(new Error('is not noping me'));
   if (this.friendsNopes[email].myTimeNoping > this.friendsNopes[email].opponentTimeNoping) {
-    return callback(new Error('not losing')); // FIXME what should this return so we can send "wtf" to the user
+    return callback(new Error('not losing'));
   }
 
   User.findById(email, function(err, opponent) {
@@ -366,7 +379,7 @@ User.prototype.concedeAgainst = function(email, callback) {
     this.friendsNopes[email].isNopingMe = false;
     opponent.victories++;
     opponent.friendsNopes[this.email].victories++;
-    opponent.friendsNopes[this.email].opponentTimeNoping = 0;
+    opponent.friendsNopes[this.email].myTimeNoping = 0;
     opponent.friendsNopes[this.email].opponentTimeNoping = 0;
     opponent.friendsNopes[this.email].time = now;
     opponent.friendsNopes[this.email].timeDiff = 0;
