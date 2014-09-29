@@ -102,8 +102,11 @@ NopeGame.NopeServerManager = Ember.Object.extend({
         if (data.inTruce) {
           opponent.set('inTruceFrom', data.nopeData.truce.startTime);
           opponent.set('inTruceUntil', data.nopeData.truce.startTime + 0.1 * 60 * 1000);
+          opponent.set('lastNopeTime', data.nopeData.time);
           opponent.save();
-          NopeGame.notificationManager.notifyAcceptedTruce(opponent);
+          if (!data.initiatedByMe) {
+            NopeGame.notificationManager.notifyAcceptedTruce(opponent);
+          }
         } else {
           NopeGame.notificationManager.notifyReceivedTruceRequest(opponent);
         }
@@ -590,13 +593,18 @@ NopeGame.NopeServerManager = Ember.Object.extend({
         }
       )
       .done(function(data) {
-        if (data.inTruce) {
+        var inTruce = data.nopeData.truce &&
+          data.nopeData.truce.startTime < Date.now() &&
+          data.nopeData.truce.startTime + 60 * 60 * 1000 > Date.now();
+
+        if (inTruce) {
           opponent.set('inTruceFrom', data.nopeData.truce.startTime);
           opponent.set('inTruceUntil', data.nopeData.truce.endTime);
+          opponent.set('lastNopeTime', data.nopeData.time);
         }
 
         opponent.save().then(function() {
-          if (data.inTruce) {
+          if (inTruce) {
             NopeGame.notificationManager.notifyAcceptedTruce(opponent);
           } else {
             NopeGame.notificationManager.notifySentTruceRequest(opponent);

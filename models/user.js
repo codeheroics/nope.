@@ -405,8 +405,9 @@ User.prototype.concedeAgainst = function(email, callback) {
 User.prototype.requestTruce = function(email, callback) {
   if (!this.hasFriend(email)) return callback(new FriendError(User.FRIEND_STATUSES.NOT_FRIEND));
   if (this.inTruce(email)) return callback(new FriendError(User.FRIEND_STATUSES.IN_TRUCE));
+
   var now = Date.now();
-  var anHourTime = 0.1 * 60 * 1000;
+  var anHourTime = 60 * 60 * 1000;
   var anHourAgoTime = now  - anHourTime;
   var anHourFromNowTime = now  + anHourTime;
   if (this.friendsNopes[email].truce && this.friendsNopes[email].truce.endTime && this.friendsNopes[email].truce.endTime > now) {
@@ -453,6 +454,7 @@ User.prototype.requestTruce = function(email, callback) {
           this.email,
           {
             inTruce: isAcceptingRequest,
+            initiatedByMe: true,
             nopeData: this.friendsNopes[email],
             opponentEmail: email
           }
@@ -463,6 +465,7 @@ User.prototype.requestTruce = function(email, callback) {
         email,
         {
           inTruce: isAcceptingRequest,
+          initiatedByMe: false,
           nopeData: opponent.friendsNopes[this.email],
           opponentEmail: this.email
         }
@@ -504,6 +507,7 @@ User.prototype.breakTruce = function(email, callback) {
 
     delete myNopeInfosForOpponent.truce.endTime;
     delete opponentFriendsNopesInfosForMe.truce.endTime;
+    // TODO delete startTimes
 
     myNopeInfosForOpponent.truce.brokenTime = now;
     myNopeInfosForOpponent.truce.brokenByMe = true;

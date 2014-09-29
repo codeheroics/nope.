@@ -314,7 +314,7 @@ html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockq
 	{
 		font-size: 0.85em;
 		font-weight: lighter;
-		text-transform: lowercase;
+		text-transform: initial;
 		color: #a1aaa5;
 	}
 
@@ -550,4 +550,12 @@ html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockq
 	}
 	.InputAddOn-field:last-child, .InputAddOn-item:last-child {
 		border-radius: 0 2px 2px 0;
+	}
+
+	.toast .InputAddOn-item {
+		background-color: #f3f2f0;
+	}
+
+	.toast .InputAddOn-field, .toast .InputAddOn-item {
+		border: #dad5cf;
 	}

@@ -65,7 +65,7 @@ NopeGame.Opponent = Ember.Model.extend({
     return (this.get('truceBrokenTime') || 0) < (this.get('inTruceUntil') || 0);
   }.property('inTruceUntil', 'truceBrokenTime'),
   nopedSinceTruce:function () {
-    return this.get('truceBrokenTime') < this.get('lastNopeTime')
+    return this.get('truceBrokenTime') < this.get('lastNopeTime');
   }.property('truceBrokenTime', 'lastNopeTime')
 });
 

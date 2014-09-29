@@ -38,10 +38,8 @@ NopeGame.OpponentNopesController = Ember.ObjectController.extend({
   }.property('myAvatar'),
 
   isWinning: function() {
-    var timeFor = this.get('timeFor');
-    var timeAgainst = this.get('timeAgainst');
-    return timeFor > timeAgainst;
-  }.property('timeFor', 'timeAgainst'),
+    return this.get('computedTimeFor') > this.get('computedTimeAgainst');
+  }.property('computedTimeFor', 'computedTimeAgainst', 'clock.pulse'),
 
   canBreakTruce: function() {
     return this.get('model.inTruceUntil') < Date.now();

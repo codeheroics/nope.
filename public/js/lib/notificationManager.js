@@ -50,7 +50,7 @@ NopeGame.NotificationManager = Ember.Object.extend({
     this.truceNotifications[email].push(toastr.info(
       'You\'ll be able to send nopes again in an hour',
       'You are now in a truce with ' + opponent.get('name'),
-      { timeOut: 10000 }
+      { timeOut: 15000 }
     ));
   },
 
@@ -89,7 +89,7 @@ NopeGame.NotificationManager = Ember.Object.extend({
     this.truceNotifications[email].push(toastr.info(
       opponent.get('name') + ' has broken your truce!',
       undefined,
-      {timeOut: 10000}
+      {timeOut: 15000}
     ));
   },
 
