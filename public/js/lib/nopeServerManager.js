@@ -201,7 +201,7 @@ NopeGame.NopeServerManager = Ember.Object.extend({
     opponent.set('status', 'friend');
     opponent.set('lastNopeTime', dataNope.time);
     opponent.set('inTruceFrom', dataNope.truce && dataNope.truce.startTime);
-    opponent.set('inTruceUntil', dataNope.truce && dataNope.truce.endTime);
+    opponent.set('inTruceUntil', dataNope.truce && dataNope.truce.startTime && dataNope.truce.startTime + 3600000);
     opponent.set('truceBrokenTime', dataNope.truce && dataNope.truce.brokenTime);
     var nopes = opponent.get('nopes').pushObject(nopeRecord);
     nopeRecord.set('opponent', opponent);
@@ -597,11 +597,11 @@ NopeGame.NopeServerManager = Ember.Object.extend({
       .done(function(data) {
         var inTruce = data.nopeData.truce &&
           data.nopeData.truce.startTime < Date.now() &&
-          data.nopeData.truce.startTime + 60 * 60 * 1000 > Date.now();
+          data.nopeData.truce.startTime + 3600000 > Date.now();
 
         if (inTruce) {
           opponent.set('inTruceFrom', data.nopeData.truce.startTime);
-          opponent.set('inTruceUntil', data.nopeData.truce.endTime);
+          opponent.set('inTruceUntil', data.nopeData.truce.startTime + 3600000);
           opponent.set('lastNopeTime', data.nopeData.time);
         }
 

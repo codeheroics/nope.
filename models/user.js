@@ -12,6 +12,8 @@ var db          = require('../lib/couchbase');
 var redisClient = require('../lib/redisClient');
 var userAchievements = require('./userAchievements');
 
+var anHourTime = 60 * 60 * 1000;
+
 var User = function(params) {
   if (!params) throw new Error('Missing properties');
   if (!params.name) throw new Error('No name');
@@ -156,8 +158,8 @@ User.prototype.hasPending = function(email) {
 User.prototype.inTruce = function(email) {
   if (!this.friendsNopes[email]) return false;
   if (!this.friendsNopes[email].truce) return false;
-  if (this.friendsNopes[email].truce.endTime > Date.now()) return true;
-  return this.friendsNopes[email].time > this.friendsNopes[email].truce.endTime;
+  if (this.friendsNopes[email].truce.startTime > Date.now() - anHourTime) return true;
+  return this.friendsNopes[email].time > this.friendsNopes[email].truce.startTime - anHourTime;
 };
 
 /**
@@ -420,10 +422,11 @@ User.prototype.requestTruce = function(email, callback) {
   if (this.inTruce(email)) return callback(new FriendError(User.FRIEND_STATUSES.IN_TRUCE));
 
   var now = Date.now();
-  var anHourTime = 60 * 60 * 1000;
   var anHourAgoTime = now  - anHourTime;
   var anHourFromNowTime = now  + anHourTime;
-  if (this.friendsNopes[email].truce && this.friendsNopes[email].truce.endTime && this.friendsNopes[email].truce.endTime > now) {
+  if (this.friendsNopes[email].truce &&
+    this.friendsNopes[email].truce.startTime &&
+    this.friendsNopes[email].truce.startTime > now - anHourAgoTime) {
     // Already in truce
     return callback(null, this.friendsNopes[email]);
   }
@@ -446,9 +449,7 @@ User.prototype.requestTruce = function(email, callback) {
       delete myNopesInfos.truce.opponentRequest;
       delete opponentNopesInfos.truce.myRequest;
 
-      myNopesInfos.truce.endTime = anHourFromNowTime;
       myNopesInfos.truce.startTime = now;
-      opponentNopesInfos.truce.endTime = anHourFromNowTime;
       opponentNopesInfos.truce.startTime = now;
     } else {
       opponentNopesInfos.truce.opponentRequest = now;
@@ -490,11 +491,12 @@ User.prototype.requestTruce = function(email, callback) {
 };
 
 User.prototype.breakTruce = function(email, callback) {
-  if (!this.hasFriend(email)) return callback(new FriendError(User.FRIEND_STATUSES.NOT_FRIEND));
   var now = Date.now();
+
+  if (!this.hasFriend(email)) return callback(new FriendError(User.FRIEND_STATUSES.NOT_FRIEND));
   if (!this.friendsNopes[email].truce) return callback(null, this.friendsNopes[email]);
-  if (!this.friendsNopes[email].truce.endTime) return callback(null, this.friendsNopes[email]);
-  if (this.friendsNopes[email].truce.endTime > now) {
+  if (!this.friendsNopes[email].truce.startTime) return callback(null, this.friendsNopes[email]);
+  if (this.friendsNopes[email].truce.startTime > now - anHourTime) {
     // Truce is not over
     return callback(new FriendError(User.FRIEND_STATUSES.IN_TRUCE));
   }
@@ -518,9 +520,8 @@ User.prototype.breakTruce = function(email, callback) {
     myNopeInfosForOpponent.time += truceDuration;
     opponentFriendsNopesInfosForMe.time += truceDuration;
 
-    delete myNopeInfosForOpponent.truce.endTime;
-    delete opponentFriendsNopesInfosForMe.truce.endTime;
-    // TODO delete startTimes
+    delete myNopeInfosForOpponent.truce.startTime;
+    delete opponentFriendsNopesInfosForMe.truce.startTime;
 
     myNopeInfosForOpponent.truce.brokenTime = now;
     myNopeInfosForOpponent.truce.brokenByMe = true;
