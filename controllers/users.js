@@ -44,6 +44,34 @@ module.exports = function(app) {
   app.patch('/users', isLoggedIn, function(req, res, next) {
     var email = req.body.friendEmail && req.body.friendEmail.toLowerCase().trim();
     if (!validator.isEmail(email)) return res.jsonp(400, {message: 'Invalid E-mail'});
+
+    if (req.query.concede !== undefined) {
+      return req.user.concedeAgainst(email, function(err, nopeInfos) {
+        if (err) return next(err);
+
+        res.jsonp({nopeData: nopeInfos});
+      });
+    }
+
+    if (req.query.requestTruce !== undefined) {
+      return req.user.requestTruce(email, function(err, nopeInfos) {
+        if (err) return next(err);
+
+        res.jsonp({nopeData: nopeInfos});
+      });
+    }
+
+    if (req.query.breakTruce !== undefined) {
+      return req.user.breakTruce(email, function(err, nopeInfos) {
+        if (err) return next(err);
+
+        res.jsonp({nopeData: nopeInfos});
+      });
+    }
+
+    // unignore user
+    // FIXME after a while, turn this on only when we have a req.query.unignore
+
     req.user.unIgnoreUser(email, function(err, status, nopeInfos) {
       if (err) return next(err);
       // We only have nopeInfos if we ignored the user before adding has a friend

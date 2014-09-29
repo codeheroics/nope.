@@ -172,10 +172,9 @@ Ember.Handlebars.registerBoundHelper('relativeDateFormat', function(date) {
   };
 
   Ember.Handlebars.registerBoundHelper('duration', durationHelper);
-  Ember.Handlebars.registerBoundHelper('winningDuration', function(myTime, opponentTime, lastNopeTime, isScoring) {
+  Ember.Handlebars.registerBoundHelper('winningDuration', function(myTime, opponentTime) {
     if (!myTime && !opponentTime) return;
     var milliseconds = (myTime || 0) - (opponentTime || 0);
-    milliseconds += (Date.now() - lastNopeTime) * (isScoring ? 1 : -1);
     var winningStatus = milliseconds > 0 ? 'wins' : 'loses';
     return winningStatus + ' by ' + durationHelper(milliseconds);
   });

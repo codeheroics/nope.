@@ -77,14 +77,54 @@ NopeGame.NopeServerManager = Ember.Object.extend({
         return;
       }
 
+      var opponent;
+
+      if (data.victory !== undefined) {
+        opponent = NopeGame.Opponent.find(data.opponentEmail);
+        if (!opponent.isLoaded) return;
+
+        if (data.victory) {
+          opponent.set('victories', data.nopeData.victories);
+          toastr.success(
+            opponent.get('name') + ' has admitted defeat! The counters are now reseted, continue like this!',
+            'Victory!',
+            {timeOut: 10000}
+          );
+          this.handleNopeResult(data.nopeData);
+        }
+        NopeGame.User.find(1).set('victories', data.totalVictories).save();
+        return;
+      }
+
+      if (data.inTruce !== undefined) {
+        opponent = NopeGame.Opponent.find(data.opponentEmail);
+        if (!opponent.isLoaded) return;
+        if (data.inTruce) {
+          opponent.set('inTruceFrom', data.nopeData.truce.startTime);
+          opponent.set('inTruceUntil', data.nopeData.truce.startTime + 0.1 * 60 * 1000);
+          opponent.save();
+          NopeGame.notificationManager.notifyAcceptedTruce(opponent);
+        } else {
+          NopeGame.notificationManager.notifyReceivedTruceRequest(opponent);
+        }
+        return;
+      }
+
+      if (data.brokenTruceTime !== undefined) {
+        opponent = NopeGame.Opponent.find(data.opponentEmail);
+        if (!opponent.isLoaded) return;
+
+        opponent.set('truceBrokenTime', data.brokenTruceTime);
+        return opponent.save().then(function() {
+          NopeGame.notificationManager.notifyTruceBrokenByOpponent(opponent);
+        }.bind(this));
+      }
+
       // time difference between us and the server
       if (data.time !== undefined) {
         window.localStorage.setItem('serverTimeDiff', (Date.now() - data.time) || 0);
+        return;
       }
-    });
-
-    this.primus.on('error', function error(err) {
-      console.error('Something horrible has happened', err);
     });
   },
 
@@ -152,10 +192,12 @@ NopeGame.NopeServerManager = Ember.Object.extend({
     opponent.set('timeFor', dataNope.opponentTimeNoping);
     opponent.set('timeAgainst', dataNope.myTimeNoping);
     opponent.set('nopesCpt', dataNope.nopesCpt);
-    opponent.set('timeDiff', dataNope.timeDiff);
     opponent.set('avatar', generateGravatar(email));
     opponent.set('status', 'friend');
     opponent.set('lastNopeTime', dataNope.time);
+    opponent.set('inTruceFrom', dataNope.truce && dataNope.truce.startTime);
+    opponent.set('inTruceUntil', dataNope.truce && dataNope.truce.endTime);
+    opponent.set('truceBrokenTime', dataNope.truce && dataNope.truce.brokenTime);
     var nopes = opponent.get('nopes').pushObject(nopeRecord);
 
     nopeRecord.set('opponent', opponent);
@@ -471,7 +513,7 @@ NopeGame.NopeServerManager = Ember.Object.extend({
           headers: {
             'x-access-token': window.localStorage.getItem('token')
           },
-          url: USERS_ROUTE
+          url: USERS_ROUTE + '?unignore'
         }
       )
       .done(function(data) {
@@ -492,5 +534,115 @@ NopeGame.NopeServerManager = Ember.Object.extend({
         reject();
       });
     });
+  },
+
+  concedeRound: function(opponent) {
+    return new Promise(function(resolve, reject) {
+      $.ajax(
+        {
+          dataType: 'jsonp',
+          data: { friendEmail: opponent.get('email') },
+          jsonp: CALLBACK_NAME,
+          method: 'PATCH',
+          headers: {
+            'x-access-token': window.localStorage.getItem('token')
+          },
+          url: USERS_ROUTE + '?concede'
+        }
+      )
+      .done(function(data) {
+        opponent.set('victories', data.victories);
+        opponent.save().then(function() {
+          return this.handleNopeResult(data.nopeData);
+        }.bind(this))
+        .then(function() {
+          toastr.info(
+            'The counters are now reseted, get back at ' + opponent.get('name') + ' during the next one!',
+            'You conceded your loss for this round',
+            {timeOut: 10000}
+          );
+          resolve();
+        });
+      }.bind(this))
+      .fail(function(xhr) {
+        if (!xhr.status) {
+          toastr.error('Unable to connect to the internet while trying to concede', undefined, {timeOut: 5000});
+        } else if (xhr.status >= 500) {
+          toastr.error('Sorry, there was a server error while trying to concede', undefined, {timeOut: 5000});
+        }
+        reject();
+      });
+    }.bind(this));
+  },
+
+  requestTruce: function(opponent) {
+    return new Promise(function(resolve, reject) {
+      $.ajax(
+        {
+          dataType: 'jsonp',
+          data: { friendEmail: opponent.get('email') },
+          jsonp: CALLBACK_NAME,
+          method: 'PATCH',
+          headers: {
+            'x-access-token': window.localStorage.getItem('token')
+          },
+          url: USERS_ROUTE + '?requestTruce'
+        }
+      )
+      .done(function(data) {
+        if (data.inTruce) {
+          opponent.set('inTruceFrom', data.nopeData.truce.startTime);
+          opponent.set('inTruceUntil', data.nopeData.truce.endTime);
+        }
+
+        opponent.save().then(function() {
+          if (data.inTruce) {
+            NopeGame.notificationManager.notifyAcceptedTruce(opponent);
+          } else {
+            NopeGame.notificationManager.notifySentTruceRequest(opponent);
+          }
+        });
+      }.bind(this))
+      .fail(function(xhr) {
+        if (!xhr.status) {
+          toastr.error('Unable to connect to the internet', undefined, {timeOut: 5000});
+        } else if (xhr.status >= 500) {
+          toastr.error('Sorry, there was a server error', undefined, {timeOut: 5000});
+        }
+        reject();
+      });
+    }.bind(this));
+  },
+
+  breakTruce: function(opponent) {
+    return new Promise(function(resolve, reject) {
+      $.ajax(
+        {
+          dataType: 'jsonp',
+          data: { friendEmail: opponent.get('email') },
+          jsonp: CALLBACK_NAME,
+          method: 'PATCH',
+          headers: {
+            'x-access-token': window.localStorage.getItem('token')
+          },
+          url: USERS_ROUTE + '?breakTruce'
+        }
+      )
+      .done(function(data) {
+        opponent.set('truceBrokenTime', data.nopeData.truce.brokenTime);
+
+        opponent.save().then(function() {
+          NopeGame.notificationManager.notifyTruceBrokenByMe(opponent);
+        });
+      }.bind(this))
+      .fail(function(xhr) {
+        if (!xhr.status) {
+          toastr.error('Unable to connect to the internet', undefined, {timeOut: 5000});
+        } else if (xhr.status >= 500) {
+          toastr.error('Sorry, there was a server error', undefined, {timeOut: 5000});
+        }
+        reject();
+      });
+    }.bind(this));
   }
 });

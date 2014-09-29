@@ -348,7 +348,7 @@
 									{{name}}
 								</h3>
 								<span class="discrete">
-									{{winningDuration timeFor timeAgainst lastNopeTime isScoring}}
+									{{winningDuration computedTimeFor computedTimeAgainst}}
 								</span>
 							{{/link-to}}
 						</li>
@@ -429,46 +429,66 @@
 						{{#if isWinning }}
 							<div class="score score-left winning">
 								<img class="avatar" {{bind-attr src="avatar"}} /><br>
-								<b>{{name}}</b> had the last word for<br><b>{{duration timeFor}}</b>
+								<b>{{name}}</b> had the last word for <b>{{duration computedTimeFor clock.pulse}}</b>
 							</div>
 							<div class="score score-right losing">
 								<img class="avatar" {{bind-attr src="myAvatar"}} /><br>
-								<b>You</b> had the last word for<br><b>{{duration timeAgainst}}</b>
+								<b>You</b> had the last word for <b>{{duration computedTimeAgainst clock.pulse}}</b>
 							</div>
 						{{else}}
 							<div class="score score-left losing">
 								<img class="avatar" {{bind-attr src="avatar"}} /><br>
-								<b>{{name}}</b> had the last word for<br><b>{{duration timeFor}}</b>
+								<b>{{name}}</b> had the last word for <b>{{duration computedTimeFor clock.pulse}}</b>
 							</div>
 							<div class="score score-right winning">
 								<img class="avatar" {{bind-attr src="myAvatar"}} /><br>
-								<b>You</b> had the last word for<br><b>{{duration timeAgainst}}</b>
+								<b>You</b> had the last word for <b>{{duration computedTimeAgainst clock.pulse}}</b>
 							</div>
 					{{/if}}
 					</div>
 
 					<div>
-						Currently {{#if isWinning}} losing {{else}} winning {{/if}} by {{duration timeDiff}}
+						Currently {{#if isWinning}} losing {{else}} winning {{/if}} by {{duration timeDiff clock.pulse}}
 					</div>
-					<div>
-						Last nope {{duration timeDiffSinceLast clock.pulse}} ago
-					</div>
+					{{#if inTruce}}{{else}}
+						<div>
+							Last nope {{duration timeDiffSinceLast clock.pulse}} ago
+						</div>
+					{{/if}}
 
-					{{#if isScoring}}
-						{{#if isLoading}}
-							<button class="nopeActions isLoading button button-big" disabled>Sending...</button>
+					{{#if inTruce}}
+						{{#if canBreakTruce}}
+								<button class="nopeActions needsNopeBack button button-big" {{action 'breakTruce' model}}>Break the truce</button>
 						{{else}}
-							<button class="nopeActions needsNopeBack button button-big" {{action 'nope' model}}>Nope.</button>
+						<button class="nopeActions isLoading button button-big" disabled>The truce ends in {{duration timeRemainingInTruce clock.pulse}}</button>
 						{{/if}}
+
 					{{else}}
-						<button type="button" class="nopeActions hasNopedBack button button-big" disabled>
-							Yep. No retort yet.</button>
+						{{#if isScoring}}
+							{{#if isLoading}}
+								<button class="nopeActions isLoading button button-big" disabled>Sending...</button>
+							{{else}}
+								<button class="nopeActions needsNopeBack button button-big" {{action 'nope' model}}>Nope.</button>
+							{{/if}}
+						{{else}}
+							<button type="button" class="nopeActions hasNopedBack button button-big" disabled>
+								Yep. No retort yet.</button>
+						{{/if}}
 					{{/if}}
 
 					<p class="nopesSent">{{nopesCpt}}</p>
 					<div>
 						<legend class="nopesSent">nopes sent</legend>
 					</div>
+
+					{{#if inTruce}}{{else}}
+						<div style="margin-top:15px;">
+							<button type="button" class="InputAddOn-item" {{action 'requestTruce' model}}>Request a 1h truce</button>
+						</div>
+						<div style="margin-top:15px;">
+							<button type="button" class="InputAddOn-item" {{action 'concede' model}}>Concede your defeat for this round</button>
+						</div>
+					{{/if}}
 					<div style="margin-top:15px;">
 						<button type="button" class="InputAddOn-item" {{action 'ignore' model}}>Ignore {{name}}</button>
 					</div>
