@@ -103,7 +103,7 @@ NopeGame.NopeServerManager = Ember.Object.extend({
         if (!opponent.isLoaded) return;
         if (data.inTruce) {
           opponent.set('inTruceFrom', data.nopeData.truce.startTime);
-          opponent.set('inTruceUntil', data.nopeData.truce.startTime + 0.1 * 60 * 1000);
+          opponent.set('inTruceUntil', data.nopeData.truce.startTime + 60 * 60 * 1000);
           opponent.set('lastNopeTime', data.nopeData.time);
           opponent.save();
           if (!data.initiatedByMe) {
