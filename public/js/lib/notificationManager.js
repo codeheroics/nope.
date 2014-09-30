@@ -88,7 +88,7 @@ NopeGame.NotificationManager = Ember.Object.extend({
     var email = opponent.get('email');
     this.clearTruceNotifications(email);
     this.truceNotifications[email].push(toastr.info(
-      'You have sent a request for a truce to <span style="font-weight:bold;">' +
+      'You have sent a truce proposal to <span style="font-weight:bold;">' +
         opponent.get('name') + '</span>. It can be accepted within an hour.',
       undefined,
       {timeOut: 10000}

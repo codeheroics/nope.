@@ -364,7 +364,7 @@ User.prototype.nopeAtUserIgnoringMe = function(userIgnoring, now, callback) {
 User.prototype.concedeAgainst = function(email, callback) {
   if (!this.hasFriend(email)) return callback(new FriendError(User.FRIEND_STATUSES.NOT_FRIEND));
   if (!this.friendsNopes[email].isNopingMe) return callback(new Error('is not noping me'));
-  if (this.friendsNopes[email].myTimeNoping > this.friendsNopes[email].opponentTimeNoping) {
+  if (this.friendsNopes[email].myTimeNoping + 24 * 60 * 60 * 1000 > this.friendsNopes[email].opponentTimeNoping) {
     return callback(new Error('not losing'));
   }
 
