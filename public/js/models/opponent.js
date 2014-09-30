@@ -58,6 +58,7 @@ NopeGame.Opponent = Ember.Model.extend({
   status:         Ember.attr(), // string : "friend", "pending", "blocked"
   victories:      Ember.attr(Number),
   defeats:        Ember.attr(Number),
+  lastResetTime:  Ember.attr(Number),
   inTruceFrom:    Ember.attr(), // In truce until *time*
   inTruceUntil:   Ember.attr(), // In truce until *time*
   truceBrokenTime:Ember.attr(),

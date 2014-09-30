@@ -373,7 +373,10 @@ User.prototype.concedeAgainst = function(email, callback) {
     if (!opponent) return callback(new FriendError(User.FRIEND_STATUSES.NOT_FOUND));
 
     var now = Date.now();
+
     this.defeats = (this.defeats || 0) + 1;
+    opponent.victories = (opponent.victories || 0) + 1;
+
     this.friendsNopes[email].defeats = (this.friendsNopes[email].defeats || 0) + 1;
     this.friendsNopes[email].myTimeNoping = 0;
     this.friendsNopes[email].opponentTimeNoping = 0;
@@ -381,7 +384,6 @@ User.prototype.concedeAgainst = function(email, callback) {
     this.friendsNopes[email].timeDiff = 0;
     this.friendsNopes[email].isNopingMe = false;
     this.friendsNopes[email].lastResetTime = now;
-    opponent.victories = (opponent.victories || 0) + 1;
 
     var opponentFriendsNopesInfosForMe = opponent.friendsNopes[this.email];
     var opponentIsIgnoringMe = opponent.hasIgnored(this.email);
