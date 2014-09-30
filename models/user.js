@@ -179,7 +179,8 @@ User.prototype.setNopingAt = function(userNoped, now, timeDiff) {
     isNopingMe: false,
     opponentName: userNoped.name,
     victories: oldNope.victories || 0,
-    defeats: oldNope.defeats || 0
+    defeats: oldNope.defeats || 0,
+    lastResetTime: oldNope.lastResetTime || null
   };
 };
 
@@ -201,7 +202,8 @@ User.prototype.setNopedBy = function(userNoping, now, timeDiff) {
     opponentTimeNoping: (oldNope.opponentTimeNoping || 0),
     opponentName: userNoping.name,
     victories: oldNope.victories || 0,
-    defeats: oldNope.defeats || 0
+    defeats: oldNope.defeats || 0,
+    lastResetTime: oldNope.lastResetTime || null
   };
 };
 
@@ -371,14 +373,15 @@ User.prototype.concedeAgainst = function(email, callback) {
     if (!opponent) return callback(new FriendError(User.FRIEND_STATUSES.NOT_FOUND));
 
     var now = Date.now();
-    this.defeats++;
-    this.friendsNopes[email].defeats++;
+    this.defeats = (this.defeats || 0) + 1;
+    this.friendsNopes[email].defeats = (this.friendsNopes[email].defeats || 0) + 1;
     this.friendsNopes[email].myTimeNoping = 0;
     this.friendsNopes[email].opponentTimeNoping = 0;
     this.friendsNopes[email].time = now;
     this.friendsNopes[email].timeDiff = 0;
     this.friendsNopes[email].isNopingMe = false;
-    opponent.victories++;
+    this.friendsNopes[email].lastResetTime = now;
+    opponent.victories = (opponent.victories || 0) + 1;
 
     var opponentFriendsNopesInfosForMe = opponent.friendsNopes[this.email];
     var opponentIsIgnoringMe = opponent.hasIgnored(this.email);
@@ -386,13 +389,13 @@ User.prototype.concedeAgainst = function(email, callback) {
       opponentFriendsNopesInfosForMe = opponent.getIgnoredUserNopeInfos(this.email);
     }
 
-    opponentFriendsNopesInfosForMe.victories++;
+    opponentFriendsNopesInfosForMe.victories = (opponentFriendsNopesInfosForMe.victories || 0) + 1;
     opponentFriendsNopesInfosForMe.myTimeNoping = 0;
     opponentFriendsNopesInfosForMe.opponentTimeNoping = 0;
     opponentFriendsNopesInfosForMe.time = now;
     opponentFriendsNopesInfosForMe.timeDiff = 0;
     opponentFriendsNopesInfosForMe.isNopingMe = true;
-    opponentFriendsNopesInfosForMe.notifiedVictory = false;
+    opponentFriendsNopesInfosForMe.lastResetTime = now;
 
     async.series([ // FIXME rollback etc
       opponent.save.bind(opponent),

@@ -149,13 +149,13 @@ Ember.Application.initializer({
   }
 });
 
-Ember.Handlebars.registerBoundHelper('dateFormat', function(date, format) {
-  return moment(date).format(format);
+Ember.Handlebars.registerBoundHelper('dateFormat', function(time, format) {
+  return moment(time).format(format);
 });
 
-Ember.Handlebars.registerBoundHelper('relativeDateFormat', function(date) {
+Ember.Handlebars.registerBoundHelper('relativeDateFormat', function(time) {
   var now = Date.now();
-  return moment(date.valueOf() > now ? now : date).fromNow();
+  return moment(time > now ? now : time).fromNow();
 });
 
 (function() {

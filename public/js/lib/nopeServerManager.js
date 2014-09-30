@@ -203,6 +203,7 @@ NopeGame.NopeServerManager = Ember.Object.extend({
     opponent.set('truceBrokenTime', dataNope.truce && dataNope.truce.brokenTime);
     opponent.set('victories', dataNope.victories || 0);
     opponent.set('defeats', dataNope.defeats || 0);
+    opponent.set('lastResetTime', dataNope.lastResetTime || null);
     var nopes = opponent.get('nopes').pushObject(nopeRecord);
     nopeRecord.set('opponent', opponent);
 

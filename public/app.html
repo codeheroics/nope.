@@ -499,6 +499,12 @@
 						<button type="button" class="InputAddOn-item" {{action 'ignore' model}}>Ignore {{name}}</button>
 					</div>
 
+					{{#if lastResetTime}}
+						<div style="margin-top:15px;" class="discrete">
+							Last reset on {{dateFormat lastResetTime 'MMMM Do, HH:mm'}}
+						</div>
+					{{/if}}
+
 				</section>
 		</script>
 
