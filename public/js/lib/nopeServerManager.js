@@ -9,7 +9,6 @@ NopeGame.NopeServerManager = Ember.Object.extend({
   },
 
   initPrimus: function() {
-    var self = this;
     this.primus = Primus.connect(
       PRIMUS_ROUTE,
       {
@@ -36,14 +35,14 @@ NopeGame.NopeServerManager = Ember.Object.extend({
     this.primus.on('data', function(data) {
       if (data.isNopingMe !== undefined) {
         // Data from a nope
-        self.handleNopeResult(data).then(function() {
+        this.handleNopeResult(data).then(function() {
           if (data.isNopingMe) {
             NopeGame.notificationManager.notifyNoped(data);
           }
           // else {
             // We are notify that we are noping because we made the HTTP call there
             // in the nopeAt method
-            // self.notifyNoping(data);
+            // this.notifyNoping(data);
           // }
         });
         return;
@@ -51,7 +50,7 @@ NopeGame.NopeServerManager = Ember.Object.extend({
 
       if (data.pendingUser !== undefined) {
         // New pending user
-        self.createUser(data.pendingUser, 'pending')
+        this.createUser(data.pendingUser, 'pending')
         .then(function(pendingOpponent) {
           toastr.info('A new noper, <span style="font-weight:bold;">' + pendingOpponent.get('name') +
             '</span>, challenges you!');
@@ -61,7 +60,7 @@ NopeGame.NopeServerManager = Ember.Object.extend({
 
       if (data.ignoredUser !== undefined) {
         // New ignored user
-        self.createUser(data.ignoredUser, 'ignored');
+        this.createUser(data.ignoredUser, 'ignored');
         return;
         // No toastr here : user has feedback from HTTP DELETE on device where he ignores,
         // let's not introduce any race condition wondering if a toastr should be shown or not (HTTP VS Websocket speed
@@ -77,15 +76,56 @@ NopeGame.NopeServerManager = Ember.Object.extend({
         return;
       }
 
+      var opponent;
+
+      if (data.victory !== undefined) {
+        opponent = NopeGame.Opponent.find(data.opponentEmail);
+        if (!opponent.isLoaded) return;
+
+        if (data.victory) {
+          // next line should be done in the handeNopeResult
+          // NopeGame.notificationManager.notifyMyVictory(opponent);
+          opponent.save().then(function() {
+            this.handleNopeResult(data.nopeData, data.opponentEmail);
+          }.bind(this));
+        }
+        NopeGame.User.find(1).set('victories', data.totalVictories).save();
+        return;
+      }
+
+      if (data.inTruce !== undefined) {
+        opponent = NopeGame.Opponent.find(data.opponentEmail);
+        if (!opponent.isLoaded) return;
+        if (data.inTruce) {
+          opponent.set('inTruceFrom', data.nopeData.truce.startTime);
+          opponent.set('inTruceUntil', data.nopeData.truce.startTime + 60 * 60 * 1000);
+          opponent.set('lastNopeTime', data.nopeData.time);
+          opponent.save();
+          if (!data.initiatedByMe) {
+            NopeGame.notificationManager.notifyAcceptedTruce(opponent);
+          }
+        } else {
+          NopeGame.notificationManager.notifyReceivedTruceRequest(opponent);
+        }
+        return;
+      }
+
+      if (data.brokenTruceTime !== undefined) {
+        opponent = NopeGame.Opponent.find(data.opponentEmail);
+        if (!opponent.isLoaded) return;
+
+        opponent.set('truceBrokenTime', data.brokenTruceTime);
+        return opponent.save().then(function() {
+          NopeGame.notificationManager.notifyTruceBrokenByOpponent(opponent);
+        }.bind(this));
+      }
+
       // time difference between us and the server
       if (data.time !== undefined) {
         window.localStorage.setItem('serverTimeDiff', (Date.now() - data.time) || 0);
+        return;
       }
-    });
-
-    this.primus.on('error', function error(err) {
-      console.error('Something horrible has happened', err);
-    });
+    }.bind(this));
   },
 
   endPrimus: function() {
@@ -132,7 +172,6 @@ NopeGame.NopeServerManager = Ember.Object.extend({
     var nope = NopeGame.Nope.find(nopeId);
 
     if (nope.isLoaded) return Promise.resolve(nope); // exit
-
     var nopeRecord = NopeGame.Nope.create({
       id: nopeId,
       isReceived: dataNope.isNopingMe,
@@ -147,21 +186,40 @@ NopeGame.NopeServerManager = Ember.Object.extend({
         email: email
       });
     }
+
+    var victoriesBefore = opponent.get('victories') || 0;
+
     opponent.set('name', dataNope.opponentName);
     opponent.set('isScoring', dataNope.isNopingMe);
     opponent.set('timeFor', dataNope.opponentTimeNoping);
     opponent.set('timeAgainst', dataNope.myTimeNoping);
     opponent.set('nopesCpt', dataNope.nopesCpt);
-    opponent.set('timeDiff', dataNope.timeDiff);
     opponent.set('avatar', generateGravatar(email));
     opponent.set('status', 'friend');
     opponent.set('lastNopeTime', dataNope.time);
+    opponent.set('inTruceFrom', dataNope.truce && dataNope.truce.startTime);
+    opponent.set('inTruceUntil', dataNope.truce && dataNope.truce.startTime && dataNope.truce.startTime + 3600000);
+    opponent.set('truceBrokenTime', dataNope.truce && dataNope.truce.brokenTime);
+    opponent.set('victories', dataNope.victories || 0);
+    opponent.set('defeats', dataNope.defeats || 0);
+    opponent.set('lastResetTime', dataNope.lastResetTime || null);
     var nopes = opponent.get('nopes').pushObject(nopeRecord);
-
     nopeRecord.set('opponent', opponent);
 
     return opponent.save().then(function() {
       return nopeRecord.save();
+    }).then(function() {
+      // If nothing was logged (re-login), give up notifying >> Do not do it. We'll suppose a lot of false positives are better than nothing.
+      // if (timeForBefore === undefined || timeAgainstBefore === undefined) return Promise.resolve();
+      var victories = dataNope.victories || 0;
+      var isOneTimeAtZero = ! dataNope.opponentTimeNoping || ! dataNope.myTimeNoping;
+      if (victories === victoriesBefore + 1 && isOneTimeAtZero) {
+        // We most probably just got a nope which was a reset.
+        if (victories === victoriesBefore + 1) {
+          NopeGame.notificationManager.notifyMyVictory(opponent);
+        }
+      }
+      return Promise.resolve();
     });
   },
 
@@ -471,7 +529,7 @@ NopeGame.NopeServerManager = Ember.Object.extend({
           headers: {
             'x-access-token': window.localStorage.getItem('token')
           },
-          url: USERS_ROUTE
+          url: USERS_ROUTE + '?unignore'
         }
       )
       .done(function(data) {
@@ -492,5 +550,115 @@ NopeGame.NopeServerManager = Ember.Object.extend({
         reject();
       });
     });
+  },
+
+  concedeRound: function(opponent) {
+    return new Promise(function(resolve, reject) {
+      $.ajax(
+        {
+          dataType: 'jsonp',
+          data: { friendEmail: opponent.get('email') },
+          jsonp: CALLBACK_NAME,
+          method: 'PATCH',
+          headers: {
+            'x-access-token': window.localStorage.getItem('token')
+          },
+          url: USERS_ROUTE + '?concede'
+        }
+      )
+      .done(function(data) {
+        opponent.save().then(function() {
+          return this.handleNopeResult(data.nopeData, opponent.get('email'));
+        }.bind(this))
+        .then(function() {
+          NopeGame.notificationManager.notifyMyDefeat(opponent);
+          resolve();
+        });
+      }.bind(this))
+      .fail(function(xhr) {
+        if (!xhr.status) {
+          toastr.error('Unable to connect to the internet while trying to concede', undefined, {timeOut: 5000});
+        } else if (xhr.status >= 500) {
+          toastr.error('Sorry, there was a server error while trying to concede', undefined, {timeOut: 5000});
+        }
+        reject();
+      });
+    }.bind(this));
+  },
+
+  requestTruce: function(opponent) {
+    return new Promise(function(resolve, reject) {
+      $.ajax(
+        {
+          dataType: 'jsonp',
+          data: { friendEmail: opponent.get('email') },
+          jsonp: CALLBACK_NAME,
+          method: 'PATCH',
+          headers: {
+            'x-access-token': window.localStorage.getItem('token')
+          },
+          url: USERS_ROUTE + '?requestTruce'
+        }
+      )
+      .done(function(data) {
+        var inTruce = data.nopeData.truce &&
+          data.nopeData.truce.startTime < Date.now() &&
+          data.nopeData.truce.startTime + 3600000 > Date.now();
+
+        if (inTruce) {
+          opponent.set('inTruceFrom', data.nopeData.truce.startTime);
+          opponent.set('inTruceUntil', data.nopeData.truce.startTime + 3600000);
+          opponent.set('lastNopeTime', data.nopeData.time);
+        }
+
+        opponent.save().then(function() {
+          if (inTruce) {
+            NopeGame.notificationManager.notifyAcceptedTruce(opponent);
+          } else {
+            NopeGame.notificationManager.notifySentTruceRequest(opponent);
+          }
+        });
+      }.bind(this))
+      .fail(function(xhr) {
+        if (!xhr.status) {
+          toastr.error('Unable to connect to the internet', undefined, {timeOut: 5000});
+        } else if (xhr.status >= 500) {
+          toastr.error('Sorry, there was a server error', undefined, {timeOut: 5000});
+        }
+        reject();
+      });
+    }.bind(this));
+  },
+
+  breakTruce: function(opponent) {
+    return new Promise(function(resolve, reject) {
+      $.ajax(
+        {
+          dataType: 'jsonp',
+          data: { friendEmail: opponent.get('email') },
+          jsonp: CALLBACK_NAME,
+          method: 'PATCH',
+          headers: {
+            'x-access-token': window.localStorage.getItem('token')
+          },
+          url: USERS_ROUTE + '?breakTruce'
+        }
+      )
+      .done(function(data) {
+        opponent.set('truceBrokenTime', data.nopeData.truce.brokenTime);
+
+        opponent.save().then(function() {
+          NopeGame.notificationManager.notifyTruceBrokenByMe(opponent);
+        });
+      }.bind(this))
+      .fail(function(xhr) {
+        if (!xhr.status) {
+          toastr.error('Unable to connect to the internet', undefined, {timeOut: 5000});
+        } else if (xhr.status >= 500) {
+          toastr.error('Sorry, there was a server error', undefined, {timeOut: 5000});
+        }
+        reject();
+      });
+    }.bind(this));
   }
 });

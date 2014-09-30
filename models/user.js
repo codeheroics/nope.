@@ -12,6 +12,8 @@ var db          = require('../lib/couchbase');
 var redisClient = require('../lib/redisClient');
 var userAchievements = require('./userAchievements');
 
+var anHourTime = 60 * 60 * 1000;
+
 var User = function(params) {
   if (!params) throw new Error('Missing properties');
   if (!params.name) throw new Error('No name');
@@ -26,6 +28,8 @@ var User = function(params) {
   this.ignoredUsers = params.ignoredUsers ? params.ignoredUsers : [];
   this.pendingUsers = params.pendingUsers ? params.pendingUsers : [];
   this.achievements = params.achievements ? params.achievements : {};
+  this.victories = params.victories ? params.victories : 0;
+  this.defeats = params.defeats ? params.defeats : 0;
   this.timeNoping = params.timeNoping || 0;
   this.totalNopes = params.totalNopes || 0;
   this.created = params.created ? params.created : Date.now();
@@ -38,6 +42,7 @@ User.FRIEND_STATUSES = {
   PENDING: 'Pending',
   INVITED: 'Invited',
   FRIEND: 'Friend',
+  IN_TRUCE: 'Truce',
   NOT_FRIEND: 'Not Friend',
   SELF: 'Self',
   UNKNOWN: 'Unknown'
@@ -93,6 +98,8 @@ User.prototype.toDbJSON = function() {
     pendingUsers: this.pendingUsers,
     timeNoping: this.timeNoping,
     totalNopes: this.totalNopes,
+    victories: this.victories,
+    defeats: this.defeats,
     created: this.created,
     achievements: this.achievements
   };
@@ -108,7 +115,9 @@ User.prototype.toSelfJSON = function() {
     invitedUsers: this.invitedUsers,
     ignoredUsers: this.ignoredUsers,
     pendingUsers: this.pendingUsers,
-    achievements: this.achievements
+    achievements: this.achievements,
+    victories: this.victories,
+    defeats: this.defeats
   };
 };
 
@@ -118,7 +127,9 @@ User.prototype.toPublicJSON = function() {
     timeNoping: this.timeNoping,
     totalNopes: this.totalNopes,
     created: this.created,
-    achievements: this.achievements
+    achievements: this.achievements,
+    victories: this.victories,
+    defeats: this.defeats
   };
 };
 
@@ -144,6 +155,13 @@ User.prototype.hasPending = function(email) {
   });
 };
 
+User.prototype.inTruce = function(email) {
+  if (!this.friendsNopes[email]) return false;
+  if (!this.friendsNopes[email].truce) return false;
+  if (this.friendsNopes[email].truce.startTime > Date.now() - anHourTime) return true;
+  return this.friendsNopes[email].time > this.friendsNopes[email].truce.startTime - anHourTime;
+};
+
 /**
  * [setNopingAt description]
  * @param {User} userNoped    user noped
@@ -159,7 +177,10 @@ User.prototype.setNopingAt = function(userNoped, now, timeDiff) {
     timeDiff: timeDiff || 0,
     nopesCpt: (oldNope.nopesCpt || 0) + 1,
     isNopingMe: false,
-    opponentName: userNoped.name
+    opponentName: userNoped.name,
+    victories: oldNope.victories || 0,
+    defeats: oldNope.defeats || 0,
+    lastResetTime: oldNope.lastResetTime || null
   };
 };
 
@@ -179,7 +200,10 @@ User.prototype.setNopedBy = function(userNoping, now, timeDiff) {
     timeDiff: timeDiff || 0,
     nopesCpt: oldNope.nopesCpt || 0,
     opponentTimeNoping: (oldNope.opponentTimeNoping || 0),
-    opponentName: userNoping.name
+    opponentName: userNoping.name,
+    victories: oldNope.victories || 0,
+    defeats: oldNope.defeats || 0,
+    lastResetTime: oldNope.lastResetTime || null
   };
 };
 
@@ -190,6 +214,7 @@ User.prototype.nopeAt = function(opponentEmail, callback) {
   opponentEmail = opponentEmail.toLowerCase().trim();
 
   if (!this.hasFriend(opponentEmail)) return callback(new FriendError(User.FRIEND_STATUSES.NOT_FRIEND));
+  if (this.inTruce(opponentEmail)) return callback(new FriendError(User.FRIEND_STATUSES.IN_TRUCE));
 
   // === false because undefined would mean it is not defined yet (user just added has friend)
   // we send back the data, maybe the user did not get it before
@@ -217,8 +242,7 @@ User.prototype.nopeAt = function(opponentEmail, callback) {
 
     // okay, we can nope
 
-    var timeDiff = now - self.friendsNopes[opponentEmail].time || 0;
-
+    var timeDiff = (now - self.friendsNopes[opponentEmail].time) || 0;
     // From here, this can be repeated in case of CAS error
 
     // TODO be careful, even with this, we could be getting cases of locks
@@ -308,18 +332,16 @@ User.prototype.nopeAtUserIgnoringMe = function(userIgnoring, now, callback) {
   this.setNopingAt(userIgnoring, now, timeDiff);
   this.totalNopes++;
 
-  var ignoringUserFriendsNopeForMe = userIgnoring.removeFromIgnoredUsers(this.email) || {};
-  var updatedIgnoringUserFriendsNopeForMe = { // Equivalent of calling setNopedBy for ignored user
-    time: now,
-    isNopingMe: true,
-    myTimeNoping: (ignoringUserFriendsNopeForMe.myTimeNoping || 0) + (timeDiff || 0),
-    timeDiff: timeDiff || 0,
-    nopesCpt: ignoringUserFriendsNopeForMe.nopesCpt || 0,
-    opponentTimeNoping: (ignoringUserFriendsNopeForMe.opponentTimeNoping || 0) + 1, // Increment + 1, he noped
-    opponentName: this.name,
-    email: ignoringUserFriendsNopeForMe.email
-  };
-  userIgnoring.ignoredUsers.push(updatedIgnoringUserFriendsNopeForMe);
+  var ignoringUserFriendsNopeForMe = userIgnoring.getIgnoredUserNopeInfos(this.email);
+  // Equivalent of calling setNopedBy for ignored user
+  ignoringUserFriendsNopeForMe.time = now;
+  ignoringUserFriendsNopeForMe.isNopingMe = true;
+  ignoringUserFriendsNopeForMe.myTimeNoping = (ignoringUserFriendsNopeForMe.myTimeNoping || 0) + (timeDiff || 0);
+  ignoringUserFriendsNopeForMe.timeDiff = timeDiff || 0;
+  ignoringUserFriendsNopeForMe.nopesCpt = ignoringUserFriendsNopeForMe.nopesCpt || 0;
+  ignoringUserFriendsNopeForMe.opponentTimeNoping = (ignoringUserFriendsNopeForMe.opponentTimeNoping || 0) + 1, // Increment + 1, he nope;
+  ignoringUserFriendsNopeForMe.opponentName = this.name;
+  ignoringUserFriendsNopeForMe.email = ignoringUserFriendsNopeForMe.email;
 
   this.save(function(err) {
     if (err) return callback(err);
@@ -337,6 +359,211 @@ User.prototype.nopeAtUserIgnoringMe = function(userIgnoring, now, callback) {
       callback(null, this.friendsNopes[userIgnoring.email]);
     }.bind(this));
   }.bind(this));
+};
+
+User.prototype.concedeAgainst = function(email, callback) {
+  if (!this.hasFriend(email)) return callback(new FriendError(User.FRIEND_STATUSES.NOT_FRIEND));
+  if (!this.friendsNopes[email].isNopingMe) return callback(new Error('is not noping me'));
+  if (this.friendsNopes[email].myTimeNoping + 24 * 60 * 60 * 1000 > this.friendsNopes[email].opponentTimeNoping) {
+    return callback(new Error('not losing'));
+  }
+
+  User.findById(email, function(err, opponent) {
+    if (err) return callback(err);
+    if (!opponent) return callback(new FriendError(User.FRIEND_STATUSES.NOT_FOUND));
+
+    var now = Date.now();
+
+    this.defeats = (this.defeats || 0) + 1;
+    opponent.victories = (opponent.victories || 0) + 1;
+
+    this.friendsNopes[email].defeats = (this.friendsNopes[email].defeats || 0) + 1;
+    this.friendsNopes[email].myTimeNoping = 0;
+    this.friendsNopes[email].opponentTimeNoping = 0;
+    this.friendsNopes[email].time = now;
+    this.friendsNopes[email].timeDiff = 0;
+    this.friendsNopes[email].isNopingMe = false;
+    this.friendsNopes[email].lastResetTime = now;
+    this.friendsNopes[email].nopesCpt++;
+
+    var opponentFriendsNopesInfosForMe = opponent.friendsNopes[this.email];
+    var opponentIsIgnoringMe = opponent.hasIgnored(this.email);
+    if (opponentIsIgnoringMe) {
+      opponentFriendsNopesInfosForMe = opponent.getIgnoredUserNopeInfos(this.email);
+    }
+
+    opponentFriendsNopesInfosForMe.victories = (opponentFriendsNopesInfosForMe.victories || 0) + 1;
+    opponentFriendsNopesInfosForMe.myTimeNoping = 0;
+    opponentFriendsNopesInfosForMe.opponentTimeNoping = 0;
+    opponentFriendsNopesInfosForMe.time = now;
+    opponentFriendsNopesInfosForMe.timeDiff = 0;
+    opponentFriendsNopesInfosForMe.isNopingMe = true;
+    opponentFriendsNopesInfosForMe.lastResetTime = now;
+
+    async.series([ // FIXME rollback etc
+      opponent.save.bind(opponent),
+      this.save.bind(this),
+    ], function(err) {
+      if (err) return callback(err);
+      // FIXME handle CAS error
+
+      redisClient.publish(
+        this.email,
+        {
+          victory: false,
+          nopeData: this.friendsNopes[email],
+          opponentEmail: email
+        }
+      );
+
+      if (!opponentIsIgnoringMe) {
+        redisClient.publish(
+          email,
+          {
+            victory: true,
+            totalVictories: this.victories,
+            nopeData: opponent.friendsNopes[this.email],
+            opponentEmail: this.email
+          }
+        );
+      }
+
+      callback(null, this.friendsNopes[email]);
+    }.bind(this));
+  }.bind(this));
+};
+
+User.prototype.requestTruce = function(email, callback) {
+  if (!this.hasFriend(email)) return callback(new FriendError(User.FRIEND_STATUSES.NOT_FRIEND));
+  if (this.inTruce(email)) return callback(new FriendError(User.FRIEND_STATUSES.IN_TRUCE));
+
+  var now = Date.now();
+  var anHourAgoTime = now  - anHourTime;
+  var anHourFromNowTime = now  + anHourTime;
+  if (this.friendsNopes[email].truce &&
+    this.friendsNopes[email].truce.startTime &&
+    this.friendsNopes[email].truce.startTime > now - anHourAgoTime) {
+    // Already in truce
+    return callback(null, this.friendsNopes[email]);
+  }
+
+  User.findById(email, function(err, opponent) {
+    if (err) return callback(err);
+    if (!opponent) return callback(new FriendError(User.FRIEND_STATUSES.NOT_FOUND));
+    if (!opponent.hasFriend(this.email)) return callback(null, this.friendsNopes[email]); // has ignored
+
+    var myNopesInfos = this.friendsNopes[email];
+    var opponentNopesInfos = opponent.friendsNopes[this.email];
+    var isAcceptingRequest = false;
+
+    if (!myNopesInfos.truce) myNopesInfos.truce = {};
+    if (!opponentNopesInfos.truce) opponentNopesInfos.truce = {};
+
+    if (myNopesInfos.truce.opponentRequest && myNopesInfos.truce.opponentRequest > anHourAgoTime) {
+      // accept truce since there was a request less than an hour ago
+      isAcceptingRequest = true;
+      delete myNopesInfos.truce.opponentRequest;
+      delete opponentNopesInfos.truce.myRequest;
+
+      myNopesInfos.truce.startTime = now;
+      opponentNopesInfos.truce.startTime = now;
+    } else {
+      opponentNopesInfos.truce.opponentRequest = now;
+      myNopesInfos.truce.myRequest = now;
+    }
+
+    return async.series([ // FIXME rollback etc
+      opponent.save.bind(opponent),
+      this.save.bind(this),
+    ], function(err) {
+      if (err) return callback(err);
+
+      // Useless to know that I just asked for a truce
+      if (isAcceptingRequest) {
+        redisClient.publish(
+          this.email,
+          {
+            inTruce: isAcceptingRequest,
+            initiatedByMe: true,
+            nopeData: this.friendsNopes[email],
+            opponentEmail: email
+          }
+        );
+      }
+
+      redisClient.publish(
+        email,
+        {
+          inTruce: isAcceptingRequest,
+          initiatedByMe: false,
+          nopeData: opponent.friendsNopes[this.email],
+          opponentEmail: this.email
+        }
+      );
+
+      callback(null, myNopesInfos);
+    }.bind(this));
+  }.bind(this));
+};
+
+User.prototype.breakTruce = function(email, callback) {
+  var now = Date.now();
+
+  if (!this.hasFriend(email)) return callback(new FriendError(User.FRIEND_STATUSES.NOT_FRIEND));
+  if (!this.friendsNopes[email].truce) return callback(null, this.friendsNopes[email]);
+  if (!this.friendsNopes[email].truce.startTime) return callback(null, this.friendsNopes[email]);
+  if (this.friendsNopes[email].truce.startTime > now - anHourTime) {
+    // Truce is not over
+    return callback(new FriendError(User.FRIEND_STATUSES.IN_TRUCE));
+  }
+
+  User.findById(email, function(err, opponent) {
+    if (err) return callback(err);
+    if (!opponent) return callback(new FriendError(User.FRIEND_STATUSES.NOT_FOUND));
+
+    var myNopeInfosForOpponent = this.friendsNopes[email];
+    var opponentFriendsNopesInfosForMe = opponent.friendsNopes[this.email];
+    var opponentIsIgnoringMe = opponent.hasIgnored(this.email);
+    if (opponentIsIgnoringMe) {
+      opponentFriendsNopesInfosForMe = opponent.getIgnoredUserNopeInfos(this.email);
+    }
+
+    // Changing the time of the last nope so next nope doesn't take in account
+    // the truce
+
+    // The truce lasted for now - time of truce end - 1h
+    var truceDuration = now - myNopeInfosForOpponent.truce.startTime;
+    myNopeInfosForOpponent.time += truceDuration;
+    opponentFriendsNopesInfosForMe.time += truceDuration;
+
+    delete myNopeInfosForOpponent.truce.startTime;
+    delete opponentFriendsNopesInfosForMe.truce.startTime;
+
+    myNopeInfosForOpponent.truce.brokenTime = now;
+    myNopeInfosForOpponent.truce.brokenByMe = true;
+    opponentFriendsNopesInfosForMe.truce.brokenTime = now;
+    opponentFriendsNopesInfosForMe.truce.brokenByMe = false;
+
+    return async.series([ // FIXME rollback etc
+      opponent.save.bind(opponent),
+      this.save.bind(this),
+    ], function(err) {
+      if (err) return callback(err);
+
+      if (opponentIsIgnoringMe) return callback(null, this.friendsNopes[email]);
+
+      redisClient.publish(
+        email,
+        {
+          brokenTruceTime: now,
+          opponentEmail: this.email
+        }
+      );
+
+      callback(null, this.friendsNopes[email]);
+    }.bind(this));
+  }.bind(this));
+
 };
 
 User.prototype.sendFriendRequest = function(email, callback) {
@@ -395,7 +622,7 @@ User.prototype.sendFriendRequest = function(email, callback) {
       callbackStatus = User.FRIEND_STATUSES.PENDING;
     }
 
-    async.parallel([
+    async.series([
       function(cbParallel) { currentUser.save(cbParallel); },
       function(cbParallel) { potentialFriend.save(cbParallel); }
     ], function(err) {
@@ -447,6 +674,16 @@ User.prototype.removeFromPendingUsers = function(email) {
 
 User.prototype.removeFromIgnoredUsers = function(email) {
   return this._removeFromUsers('ignoredUsers', email);
+};
+
+User.prototype.getIgnoredUserNopeInfos = function(email) {
+  var ignoredUser = null;
+  this.ignoredUsers.some(function(user) {
+    if (user.email !== email) return false;
+    ignoredUser = user;
+    return true;
+  });
+  return ignoredUser;
 };
 
 User.prototype.ignoreUser = function(email, callback) {

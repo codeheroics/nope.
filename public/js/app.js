@@ -149,13 +149,13 @@ Ember.Application.initializer({
   }
 });
 
-Ember.Handlebars.registerBoundHelper('dateFormat', function(date, format) {
-  return moment(date).format(format);
+Ember.Handlebars.registerBoundHelper('dateFormat', function(time, format) {
+  return moment(time).format(format);
 });
 
-Ember.Handlebars.registerBoundHelper('relativeDateFormat', function(date) {
+Ember.Handlebars.registerBoundHelper('relativeDateFormat', function(time) {
   var now = Date.now();
-  return moment(date.valueOf() > now ? now : date).fromNow();
+  return moment(time > now ? now : time).fromNow();
 });
 
 (function() {
@@ -172,10 +172,9 @@ Ember.Handlebars.registerBoundHelper('relativeDateFormat', function(date) {
   };
 
   Ember.Handlebars.registerBoundHelper('duration', durationHelper);
-  Ember.Handlebars.registerBoundHelper('winningDuration', function(myTime, opponentTime, lastNopeTime, isScoring) {
+  Ember.Handlebars.registerBoundHelper('winningDuration', function(myTime, opponentTime) {
     if (!myTime && !opponentTime) return;
     var milliseconds = (myTime || 0) - (opponentTime || 0);
-    milliseconds += (Date.now() - lastNopeTime) * (isScoring ? 1 : -1);
     var winningStatus = milliseconds > 0 ? 'wins' : 'loses';
     return winningStatus + ' by ' + durationHelper(milliseconds);
   });

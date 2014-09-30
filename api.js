@@ -30,5 +30,9 @@ require('./controllers/auth')(app);
 require('./controllers/nopes')(app);
 require('./controllers/users')(app);
 
+app.use(function(err, req, res, next){
+  res.send(500, {message: 'Server error'});
+});
+
 app.listen(8000);
 console.log(new Date(), 'api.js has started');

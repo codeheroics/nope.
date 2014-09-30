@@ -16,50 +16,45 @@ NopeGame.OpponentNopesController = Ember.ObjectController.extend({
       .then(function() {
         this.transitionToRoute('opponents');
       }.bind(this));
+    },
+
+    concede: function(opponent) {
+      NopeGame.serverManager.concedeRound(opponent);
+    },
+
+    requestTruce: function(opponent) {
+      NopeGame.serverManager.requestTruce(opponent);
+    },
+
+    breakTruce: function(opponent) {
+      NopeGame.serverManager.breakTruce(opponent);
     }
   },
 
   isLoading: false,
-
-  timeFor: function() {
-    return this.get('model.timeFor') +
-    (this.get('isScoring') ? this.get('timeDiffSinceLast') : 0);
-  }.property('model.timeFor', 'model.isScoring', 'timeDiffSinceLast'),
-
-  timeAgainst: function() {
-    return this.get('model.timeAgainst') +
-    (this.get('isScoring') ? 0 : this.get('timeDiffSinceLast'));
-  }.property('model.timeAgainst', 'model.isScoring', 'timeDiffSinceLast'),
 
   myAvatar: function() {
     return localStorage.getItem('avatar');
   }.property('myAvatar'),
 
   isWinning: function() {
-    var timeFor = this.get('timeFor');
-    var timeAgainst = this.get('timeAgainst');
-    return timeFor > timeAgainst;
-  }.property('timeFor', 'timeAgainst'),
+    return this.get('computedTimeFor') > this.get('computedTimeAgainst');
+  }.property('computedTimeFor', 'computedTimeAgainst', 'clock.pulse'),
 
-  timeDiff: function() {
-    var timeFor = this.get('model.timeFor');
-    var timeAgainst = this.get('model.timeAgainst');
-    return Math.abs(
-      timeFor - timeAgainst +
-        this.get('timeDiffSinceLast') * (this.get('isScoring') ? 1 : -1)
-    );
-  }.property('model.timeFor', 'model.timeAgainst', 'clock.pulse'),
+  canBreakTruce: function() {
+    return this.get('model.inTruceUntil') < Date.now();
+  }.property('model.inTruceUntil', 'clock.pulse'),
 
-  timeDiffSinceLast: function() {
-    var lastNopeTime = this.get('model.lastNopeTime');
-    var now = Date.now();
-    if (!lastNopeTime) {
-      // Prevent showing ludicrous durations without actually saving anything
-      this.set('model.lastNopeTime', now);
-      lastNopeTime = now;
-    }
-    return now - lastNopeTime - (
-      parseInt(window.localStorage.getItem('serverTimeDiff') || 0, 10)
-    );
-  }.property('model.lastNopeTime', 'clock.pulse')
+  timeRemainingInTruce: function() {
+    return this.get('model.inTruceUntil') - Date.now();
+  }.property('model.inTruceUntil', 'clock.pulse'),
+
+  roundNumber: function() {
+    return (this.get('victories') || 0) + (this.get('defeats') || 0) + 1;
+  }.property('victories', 'defeats'),
+
+  canConcede: function() {
+    return this.get('isScoring') &&
+      this.get('computedTimeFor') - this.get('computedTimeAgainst') > 24 * 60 * 60 * 1000; // 1 day
+  }.property('isScoring', 'clock.pulse', 'computedTimeAgainst', 'computedTimeFor')
 });

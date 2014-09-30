@@ -348,7 +348,7 @@
 									{{name}}
 								</h3>
 								<span class="discrete">
-									{{winningDuration timeFor timeAgainst lastNopeTime isScoring}}
+									{{winningDuration computedTimeFor computedTimeAgainst}}
 								</span>
 							{{/link-to}}
 						</li>
@@ -424,54 +424,86 @@
 
 		<script type="text/x-handlebars" data-template-name="opponentNopes">
 				<section style="text-align:center;">
-					<h2 class="major"><span>VS {{name}}</span></h2>
+					<h2 class="major"><span>VS {{name}} (Round {{roundNumber}})</span></h2>
 					<div style="display:flex; border-radius: 8px;">
 						{{#if isWinning }}
 							<div class="score score-left winning">
 								<img class="avatar" {{bind-attr src="avatar"}} /><br>
-								<b>{{name}}</b> had the last word for<br><b>{{duration timeFor}}</b>
+								<b>{{name}}</b> had the last word for <b>{{duration computedTimeFor clock.pulse}}</b>
 							</div>
 							<div class="score score-right losing">
 								<img class="avatar" {{bind-attr src="myAvatar"}} /><br>
-								<b>You</b> had the last word for<br><b>{{duration timeAgainst}}</b>
+								<b>You</b> had the last word for <b>{{duration computedTimeAgainst clock.pulse}}</b>
 							</div>
 						{{else}}
 							<div class="score score-left losing">
 								<img class="avatar" {{bind-attr src="avatar"}} /><br>
-								<b>{{name}}</b> had the last word for<br><b>{{duration timeFor}}</b>
+								<b>{{name}}</b> had the last word for <b>{{duration computedTimeFor clock.pulse}}</b>
 							</div>
 							<div class="score score-right winning">
 								<img class="avatar" {{bind-attr src="myAvatar"}} /><br>
-								<b>You</b> had the last word for<br><b>{{duration timeAgainst}}</b>
+								<b>You</b> had the last word for <b>{{duration computedTimeAgainst clock.pulse}}</b>
 							</div>
 					{{/if}}
 					</div>
 
 					<div>
-						Currently {{#if isWinning}} losing {{else}} winning {{/if}} by {{duration timeDiff}}
+						Currently {{#if isWinning}} losing {{else}} winning {{/if}} by {{duration timeDiff clock.pulse}}
 					</div>
-					<div>
-						Last nope {{duration timeDiffSinceLast clock.pulse}} ago
-					</div>
+					{{#if inTruce}}{{else}}
+						<div>
+							Last nope {{duration timeDiffSinceLast clock.pulse}} ago
+						</div>
+					{{/if}}
 
-					{{#if isScoring}}
-						{{#if isLoading}}
-							<button class="nopeActions isLoading button button-big" disabled>Sending...</button>
+					{{#if inTruce}}
+						{{#if canBreakTruce}}
+								<button class="nopeActions needsNopeBack button button-big" {{action 'breakTruce' model}}>Break the truce</button>
 						{{else}}
-							<button class="nopeActions needsNopeBack button button-big" {{action 'nope' model}}>Nope.</button>
+						<button class="nopeActions isLoading button button-big" disabled>The truce ends in {{duration timeRemainingInTruce clock.pulse}}</button>
 						{{/if}}
+
 					{{else}}
-						<button type="button" class="nopeActions hasNopedBack button button-big" disabled>
-							Yep. No retort yet.</button>
+						{{#if isScoring}}
+							{{#if isLoading}}
+								<button class="nopeActions isLoading button button-big" disabled>Sending...</button>
+							{{else}}
+								<button class="nopeActions needsNopeBack button button-big" {{action 'nope' model}}>Nope.</button>
+							{{/if}}
+						{{else}}
+							<button type="button" class="nopeActions hasNopedBack button button-big" disabled>
+								Yep. No retort yet.</button>
+						{{/if}}
 					{{/if}}
 
 					<p class="nopesSent">{{nopesCpt}}</p>
 					<div>
 						<legend class="nopesSent">nopes sent</legend>
 					</div>
+
+					{{#if inTruce}}{{else}}
+						<div style="margin-top:15px;">
+							<button type="button" class="InputAddOn-item" {{action 'requestTruce' model}}>Request a 1h truce</button>
+						</div>
+						{{#if canConcede}}
+							<div style="margin-top:15px;">
+								<button type="button" class="InputAddOn-item" {{action 'concede' model}}>Acknowledge your defeat for this round</button>
+							</div>
+						{{else}}
+							<div style="margin-top:15px;" class="discrete">
+								You'll be able to acknowledge a defeat and move to the next round if you're losing by more than 1 day and are being noped.
+							</div>
+						{{/if}}
+					{{/if}}
 					<div style="margin-top:15px;">
 						<button type="button" class="InputAddOn-item" {{action 'ignore' model}}>Ignore {{name}}</button>
 					</div>
+
+					{{#if lastResetTime}}
+						<div style="margin-top:15px;" class="discrete">
+							Last counters reset on {{dateFormat lastResetTime 'MMMM Do, HH:mm'}}
+						</div>
+					{{/if}}
 
 				</section>
 		</script>
@@ -543,6 +575,18 @@
 					Whoever has the advantage longer than the other wins!
 				</p>
 				<h3>
+					Truces.
+				</h3>
+				<p>
+					You can, at any time, propose a <strong>truce</strong> to your opponents. From the time of your proposal, they have an hour to accept. If they do, time counters will be frozen until one of you breaks the truce, which is only possible after an hour passes.
+				</p>
+				<h3>
+					Rounds, victories and defeats.
+				</h3>
+				<p>
+					If you happen to be more than a day behind your opponent's time, you can admit your defeat for this round. This will <strong>reset the counters to zero</strong> giving you a chance to begin another round of "nopes" with new chances of winning! Your total number of victories and defeats is saved, so do your best!
+				</p>
+				<h3>
 					Changing your avatar
 				</h3>
 				<p>
@@ -565,7 +609,7 @@
 				</div>
 
 					<div id="copyright">
-						&copy; Nope. | Base design: <a href="http://html5up.net/">HTML5 UP</a>
+						&copy; Nope. | Base design: <a href="http://html5up.net/" target="_blank">HTML5 UP</a>
 					</div>
 			</section>
 		</script>
