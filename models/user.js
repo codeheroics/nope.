@@ -384,6 +384,7 @@ User.prototype.concedeAgainst = function(email, callback) {
     this.friendsNopes[email].timeDiff = 0;
     this.friendsNopes[email].isNopingMe = false;
     this.friendsNopes[email].lastResetTime = now;
+    this.friendsNopes[email].nopesCpt++;
 
     var opponentFriendsNopesInfosForMe = opponent.friendsNopes[this.email];
     var opponentIsIgnoringMe = opponent.hasIgnored(this.email);
