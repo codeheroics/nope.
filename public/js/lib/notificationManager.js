@@ -7,6 +7,7 @@
 NopeGame.NotificationManager = Ember.Object.extend({
   nopeNotifications: {},
   truceNotifications: {},
+  victoryNotifications: {},
 
   clearNopeNotifications: function(email) {
     if (!this.nopeNotifications[email]) {
@@ -15,6 +16,23 @@ NopeGame.NotificationManager = Ember.Object.extend({
     if (this.nopeNotifications[email].length < 2) return;
     this.nopeNotifications[email].shift().remove();
   },
+
+  clearTruceNotifications: function(email) {
+    if (!this.truceNotifications[email]) {
+      this.truceNotifications[email] = [];
+    }
+    if (this.truceNotifications[email].length < 1) return;
+    this.truceNotifications[email].shift().remove();
+  },
+
+  clearVictoryNotifications: function(email) {
+    if (!this.victoryNotifications[email]) {
+      this.victoryNotifications[email] = [];
+    }
+    if (this.victoryNotifications[email].length < 1) return;
+    this.victoryNotifications[email].shift().remove();
+  },
+
   notifyNoped: function(nopeData) {
     this.clearNopeNotifications(nopeData.email);
     this.nopeNotifications[nopeData.email].push(
@@ -34,14 +52,6 @@ NopeGame.NotificationManager = Ember.Object.extend({
       )
     );
     return Promise.resolve();
-  },
-
-  clearTruceNotifications: function(email) {
-    if (!this.truceNotifications[email]) {
-      this.truceNotifications[email] = [];
-    }
-    if (this.truceNotifications[email].length < 1) return;
-    this.truceNotifications[email].shift().remove();
   },
 
   notifyAcceptedTruce: function(opponent) {
@@ -79,7 +89,7 @@ NopeGame.NotificationManager = Ember.Object.extend({
     this.clearTruceNotifications(email);
     this.truceNotifications[email].push(toastr.info(
       'You have sent a request for a truce to <span style="font-weight:bold;">' +
-        opponent.get('name') + '</span>',
+        opponent.get('name') + '</span>. It can be accepted within an hour.',
       undefined,
       {timeOut: 10000}
     ));
@@ -104,6 +114,35 @@ NopeGame.NotificationManager = Ember.Object.extend({
       opponent.get('name') + '</span>!',
       undefined,
       {timeOut: 10000}
+    ));
+  },
+
+  notifyMyVictory: function(opponent) {
+    var email = opponent.get('email');
+    var name = opponent.get('name');
+    var lastResetTime = opponent.get('lastResetTime');
+    this.clearVictoryNotifications(email);
+    var messageIfNow = '<span style="font-weight:bold;">' + name +
+      '</span> has admitted defeat! The counters are now reseted, continue like this!';
+    var messageIfOld = '<span style="font-weight:bold;">' + name +
+      '</span> admitted defeat ' + moment(lastResetTime).fromNow() + '! The counters were reset, keep going!';
+    this.victoryNotifications[email].push(toastr.success(
+      Date.now() - lastResetTime < 120000 ? messageIfNow : messageIfOld,
+      'Victory!',
+      {timeOut: 15000}
+    ));
+  },
+
+  notifyMyDefeat: function(opponent) {
+    var email = opponent.get('email');
+    var name = opponent.get('name');
+    var lastResetTime = opponent.get('lastResetTime');
+    this.clearVictoryNotifications(email);
+    this.victoryNotifications[email].push(toastr.info(
+      'The counters are now reseted, get back at <span style="font-weight:bold;">' +
+        opponent.get('name') + '</span> during the next one!',
+      'You conceded your loss for this round',
+      {timeOut: 15000}
     ));
   }
 });

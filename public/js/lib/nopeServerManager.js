@@ -83,11 +83,8 @@ NopeGame.NopeServerManager = Ember.Object.extend({
         if (!opponent.isLoaded) return;
 
         if (data.victory) {
-          toastr.success(
-            opponent.get('name') + ' has admitted defeat! The counters are now reseted, continue like this!',
-            'Victory!',
-            {timeOut: 10000}
-          );
+          // next line should be done in the handeNopeResult
+          // NopeGame.notificationManager.notifyMyVictory(opponent);
           opponent.save().then(function() {
             this.handleNopeResult(data.nopeData, data.opponentEmail);
           }.bind(this));
@@ -190,6 +187,8 @@ NopeGame.NopeServerManager = Ember.Object.extend({
       });
     }
 
+    var victoriesBefore = opponent.get('victories') || 0;
+
     opponent.set('name', dataNope.opponentName);
     opponent.set('isScoring', dataNope.isNopingMe);
     opponent.set('timeFor', dataNope.opponentTimeNoping);
@@ -209,6 +208,18 @@ NopeGame.NopeServerManager = Ember.Object.extend({
 
     return opponent.save().then(function() {
       return nopeRecord.save();
+    }).then(function() {
+      // If nothing was logged (re-login), give up notifying >> Do not do it. We'll suppose a lot of false positives are better than nothing.
+      // if (timeForBefore === undefined || timeAgainstBefore === undefined) return Promise.resolve();
+      var victories = dataNope.victories || 0;
+      var isOneTimeAtZero = ! dataNope.opponentTimeNoping || ! dataNope.myTimeNoping;
+      if (victories === victoriesBefore + 1 && isOneTimeAtZero) {
+        // We most probably just got a nope which was a reset.
+        if (victories === victoriesBefore + 1) {
+          NopeGame.notificationManager.notifyMyVictory(opponent);
+        }
+      }
+      return Promise.resolve();
     });
   },
 
@@ -560,11 +571,7 @@ NopeGame.NopeServerManager = Ember.Object.extend({
           return this.handleNopeResult(data.nopeData, opponent.get('email'));
         }.bind(this))
         .then(function() {
-          toastr.info(
-            'The counters are now reseted, get back at ' + opponent.get('name') + ' during the next one!',
-            'You conceded your loss for this round',
-            {timeOut: 10000}
-          );
+          NopeGame.notificationManager.notifyMyDefeat(opponent);
           resolve();
         });
       }.bind(this))
