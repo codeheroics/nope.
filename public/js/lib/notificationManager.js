@@ -123,7 +123,7 @@ NopeGame.NotificationManager = Ember.Object.extend({
     var lastResetTime = opponent.get('lastResetTime');
     this.clearVictoryNotifications(email);
     var messageIfNow = '<span style="font-weight:bold;">' + name +
-      '</span> has admitted defeat! The counters are now reseted, continue like this!';
+      '</span> has admitted defeat! The counters are now reset, continue like this!';
     var messageIfOld = '<span style="font-weight:bold;">' + name +
       '</span> admitted defeat ' + moment(lastResetTime).fromNow() + '! The counters were reset, keep going!';
     this.victoryNotifications[email].push(toastr.success(
@@ -139,7 +139,7 @@ NopeGame.NotificationManager = Ember.Object.extend({
     var lastResetTime = opponent.get('lastResetTime');
     this.clearVictoryNotifications(email);
     this.victoryNotifications[email].push(toastr.info(
-      'The counters are now reseted, get back at <span style="font-weight:bold;">' +
+      'The counters are now reset, get back at <span style="font-weight:bold;">' +
         opponent.get('name') + '</span> during the next one!',
       'You conceded your loss for this round',
       {timeOut: 15000}
