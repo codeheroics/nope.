@@ -401,6 +401,10 @@ User.prototype.concedeAgainst = function(email, callback) {
     opponentFriendsNopesInfosForMe.isNopingMe = true;
     opponentFriendsNopesInfosForMe.lastResetTime = now;
 
+
+    this.earnAchievementsAfterVictoryOrDefeat(this.friendsNopes[email]);
+    opponent.earnAchievementsAfterVictoryOrDefeat(opponentFriendsNopesInfosForMe);
+
     async.series([ // FIXME rollback etc
       opponent.save.bind(opponent),
       this.save.bind(this),
@@ -431,9 +435,6 @@ User.prototype.concedeAgainst = function(email, callback) {
           }
         );
       }
-
-      this.earnAchievementsAfterVictoryOrDefeat(opponent, this.friendsNopes[email]);
-      opponent.earnAchievementsAfterVictoryOrDefeat(this, opponentFriendsNopesInfosForMe);
 
       callback(null, this.friendsNopes[email]);
     }.bind(this));
@@ -479,6 +480,9 @@ User.prototype.requestTruce = function(email, callback) {
       myNopesInfos.truce.myRequest = now;
     }
 
+    this.earnAchievementsAfterTruce(myNopesInfos);
+    opponent.earnAchievementsAfterTruce(opponentNopesInfos);
+
     return async.series([ // FIXME rollback etc
       opponent.save.bind(opponent),
       this.save.bind(this),
@@ -507,10 +511,6 @@ User.prototype.requestTruce = function(email, callback) {
           opponentEmail: this.email
         }
       );
-
-
-      this.earnAchievementsAfterTruce(opponent, myNopesInfos);
-      opponent.earnAchievementsAfterTruce(this, opponentNopesInfos);
 
       callback(null, myNopesInfos);
     }.bind(this));
@@ -555,6 +555,9 @@ User.prototype.breakTruce = function(email, callback) {
     opponentFriendsNopesInfosForMe.truce.brokenTime = now;
     opponentFriendsNopesInfosForMe.truce.brokenByMe = false;
 
+    this.earnAchievementsAfterTruce(myNopeInfosForOpponent);
+    opponent.earnAchievementsAfterTruce(opponentFriendsNopesInfosForMe);
+
     return async.series([ // FIXME rollback etc
       opponent.save.bind(opponent),
       this.save.bind(this),
@@ -570,9 +573,6 @@ User.prototype.breakTruce = function(email, callback) {
           opponentEmail: this.email
         }
       );
-
-      this.earnAchievementsAfterTruce(opponent, myNopeInfosForOpponent);
-      opponent.earnAchievementsAfterTruce(this, opponentFriendsNopesInfosForMe);
 
       callback(null, this.friendsNopes[email]);
     }.bind(this));

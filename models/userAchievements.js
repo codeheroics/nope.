@@ -210,14 +210,14 @@ var achievements = {
     title: 'Peacekeeper',
     description: 'Be in a truce',
     hasEarned: function(user, nopeData) {
-      return !! nopeData.inTruce.startTime;
+      return !! nopeData.truce.startTime;
     }
   },
   30: {
     title: 'Oathbreaker.',
     description: 'Break a truce',
     hasEarned: function(user, nopeData) {
-      return nopeData.inTruce.brokenByMe;
+      return nopeData.truce.brokenByMe;
     }
   },
   31: {
