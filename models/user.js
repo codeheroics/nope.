@@ -661,8 +661,15 @@ User.prototype.sendFriendRequest = function(email, callback) {
           }
         );
       }
-      currentUser.nopeAt(potentialFriend.email, function(err, nopeInfos) {
-        return callback(err, callbackStatus, nopeInfos);
+
+      User.findById(currentUser.email, function(err, updatedUser) {
+        if (err) {
+          winston.error('"Oh crap" while user ' + currentUser.email + ' tried to add ' + email, err);
+          return callback(err);
+        }
+        updatedUser.nopeAt(potentialFriend.email, function(err, nopeInfos) {
+          return callback(err, callbackStatus, nopeInfos);
+        });
       });
     });
   });
