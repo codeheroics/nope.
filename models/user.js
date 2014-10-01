@@ -364,15 +364,16 @@ User.prototype.nopeAtUserIgnoringMe = function(userIgnoring, now, callback) {
 User.prototype.concedeAgainst = function(email, callback) {
   if (!this.hasFriend(email)) return callback(new FriendError(User.FRIEND_STATUSES.NOT_FRIEND));
   if (!this.friendsNopes[email].isNopingMe) return callback(new Error('is not noping me'));
-  if (this.friendsNopes[email].myTimeNoping + 24 * 60 * 60 * 1000 > this.friendsNopes[email].opponentTimeNoping) {
+  var now = Date.now();
+  var timeDiffNotYetEarned = now - this.friendsNopes[email].time;
+  // Comparing adding the not yet earned time for the opponent
+  if (this.friendsNopes[email].myTimeNoping + 24 * 60 * 60 * 1000 > this.friendsNopes[email].opponentTimeNoping + timeDiffNotYetEarned) {
     return callback(new Error('not losing'));
   }
 
   User.findById(email, function(err, opponent) {
     if (err) return callback(err);
     if (!opponent) return callback(new FriendError(User.FRIEND_STATUSES.NOT_FOUND));
-
-    var now = Date.now();
 
     this.defeats = (this.defeats || 0) + 1;
     opponent.victories = (opponent.victories || 0) + 1;
