@@ -180,7 +180,8 @@ User.prototype.setNopingAt = function(userNoped, now, timeDiff) {
     opponentName: userNoped.name,
     victories: oldNope.victories || 0,
     defeats: oldNope.defeats || 0,
-    lastResetTime: oldNope.lastResetTime || null
+    lastResetTime: oldNope.lastResetTime || null,
+    truce: oldNope.truce || {}
   };
 };
 
@@ -203,7 +204,8 @@ User.prototype.setNopedBy = function(userNoping, now, timeDiff) {
     opponentName: userNoping.name,
     victories: oldNope.victories || 0,
     defeats: oldNope.defeats || 0,
-    lastResetTime: oldNope.lastResetTime || null
+    lastResetTime: oldNope.lastResetTime || null,
+    truce: oldNope.truce || {}
   };
 };
 
