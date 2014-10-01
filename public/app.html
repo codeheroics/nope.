@@ -483,11 +483,11 @@
 
 					{{#if inTruce}}{{else}}
 						<div style="margin-top:15px;">
-							<button type="button" class="InputAddOn-item" {{action 'requestTruce' model}}>Request a 1h truce</button>
+							<button type="button" class="InputAddOn-item" {{action 'requestTruce' model}}><i class="fa fa-clock-o"></i> Request a 1h truce</button>
 						</div>
 						{{#if canConcede}}
 							<div style="margin-top:15px;">
-								<button type="button" class="InputAddOn-item" {{action 'concede' model}}>Acknowledge your defeat for this round</button>
+								<button type="button" class="InputAddOn-item" {{action 'concede' model}}><i class="fa fa-flag-o"></i> Acknowledge your defeat for this round</button>
 							</div>
 						{{else}}
 							<div style="margin-top:15px;" class="discrete">
@@ -496,7 +496,7 @@
 						{{/if}}
 					{{/if}}
 					<div style="margin-top:15px;">
-						<button type="button" class="InputAddOn-item" {{action 'ignore' model}}>Ignore {{name}}</button>
+						<button type="button" class="InputAddOn-item" {{action 'ignore' model}}><i class="fa fa-user"></i> Ignore {{name}}</button>
 					</div>
 
 					{{#if lastResetTime}}
