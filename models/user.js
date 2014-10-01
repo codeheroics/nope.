@@ -428,6 +428,9 @@ User.prototype.concedeAgainst = function(email, callback) {
         );
       }
 
+      this.earnAchievementsAfterVictoryOrDefeat(opponent, this.friendsNopes[email]);
+      opponent.earnAchievementsAfterVictoryOrDefeat(this, opponentFriendsNopesInfosForMe);
+
       callback(null, this.friendsNopes[email]);
     }.bind(this));
   }.bind(this));
@@ -501,6 +504,10 @@ User.prototype.requestTruce = function(email, callback) {
         }
       );
 
+
+      this.earnAchievementsAfterTruce(opponent, myNopesInfos);
+      opponent.earnAchievementsAfterTruce(this, opponentNopesInfos);
+
       callback(null, myNopesInfos);
     }.bind(this));
   }.bind(this));
@@ -559,6 +566,9 @@ User.prototype.breakTruce = function(email, callback) {
           opponentEmail: this.email
         }
       );
+
+      this.earnAchievementsAfterTruce(opponent, myNopeInfosForOpponent);
+      opponent.earnAchievementsAfterTruce(this, opponentFriendsNopesInfosForMe);
 
       callback(null, this.friendsNopes[email]);
     }.bind(this));
@@ -766,6 +776,14 @@ User.prototype.earnAchievementsAfterNoping = function(nopeData) {
 
 User.prototype.earnAchievementsAfterNewFriends = function() {
   this.earnAchievements('earnedAfterNewFriends');
+};
+
+User.prototype.earnAchievementsAfterTruce = function(nopeData) {
+  this.earnAchievements('earnedAfterTruce', nopeData);
+};
+
+User.prototype.earnAchievementsAfterVictoryOrDefeat = function(nopeData) {
+  this.earnAchievements('earnedAfterVictoryOrDefeat', nopeData);
 };
 
 function formatNopeDataForPrimus(nopeData, email) {

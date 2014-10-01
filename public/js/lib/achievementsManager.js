@@ -93,13 +93,65 @@ NopeGame.AchievementsManager = Ember.Object.extend({
     },
     22: {
       title: 'Lucky bastard',
-      description: '??????',
+      description: 'Be lucky (1 chance out of 1 000 on every of your actions)',
+    },
+    23: {
+      title: 'Devil\'s luck',
+      description: 'Be lucky (1 chance out of 10 000 on every of your actions)',
+    },
+    24: {
+      title: 'Lottery winner',
+      description: 'Be lucky (1 chance out of 100 000 on every of your actions)',
+    },
+    25: {
+      title: 'I was just getting warmed up',
+      description: 'Accept your defeat for the first time',
+    },
+    26: {
+      title: 'Graceful loser',
+      description: 'Accept your defeat for the tenth time',
+    },
+    27: {
+      title: 'V.I.C.T.O.R.Y.',
+      description: 'Earn your first victory',
+    },
+    28: {
+      title: 'NOPE. ALL. MY. OPPONENTS.',
+      description: 'Earn 10 victories',
+    },
+    29: {
+      title: 'Peacekeeper',
+      description: 'Be in a truce',
+    },
+    30: {
+      title: 'Oathbreaker',
+      description: 'Break a truce',
+    },
+    31: {
+      title: '404 nope found',
+      description: 'Answer "nope" in 404 seconds'
+    },
+    32: {
+      title: '404 nope found 2',
+      description: 'Answer "nope" in 404 minutes'
+    },
+    33: {
+      title: 'Elite',
+      description: 'Answer "nope" in 1337 seconds'
+    },
+    34: {
+      title: 'h4x0r',
+      description: 'Answer "nope" in 1337 minutes'
     }
   },
 
   // Kinda ugly but ooooooh well
   achievementsOrder: [
-    19,0,1,2,3,4,5,20,21,6,7,8,9,10,11,12,13,14,15,16,17,18,22
+    19,0,1,2,3,4,5,20,21,6,7,8,9,
+    10,11,12,13,14,15,31,32,33,34, // Time
+    16,17,18, // Social
+    25,26,27,28,29,30,
+    22,23,24
   ],
 
   init: function() {
