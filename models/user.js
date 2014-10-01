@@ -375,8 +375,8 @@ User.prototype.concedeAgainst = function(email, callback) {
     if (err) return callback(err);
     if (!opponent) return callback(new FriendError(User.FRIEND_STATUSES.NOT_FOUND));
 
-    this.defeats = (this.defeats || 0) + 1;
-    opponent.victories = (opponent.victories || 0) + 1;
+    this.defeats++;
+    opponent.victories++;
 
     this.friendsNopes[email].defeats = (this.friendsNopes[email].defeats || 0) + 1;
     this.friendsNopes[email].myTimeNoping = 0;
@@ -412,6 +412,8 @@ User.prototype.concedeAgainst = function(email, callback) {
         this.email,
         {
           victory: false,
+          totalDefeats: this.defeats,
+          totalVictories: this.victories,
           nopeData: this.friendsNopes[email],
           opponentEmail: email
         }
@@ -422,7 +424,8 @@ User.prototype.concedeAgainst = function(email, callback) {
           email,
           {
             victory: true,
-            totalVictories: this.victories,
+            totalVictories: opponent.victories,
+            totalDefeats: opponent.defeats,
             nopeData: opponent.friendsNopes[this.email],
             opponentEmail: this.email
           }

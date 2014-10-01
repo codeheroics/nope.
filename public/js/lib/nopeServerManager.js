@@ -279,6 +279,8 @@ NopeGame.NopeServerManager = Ember.Object.extend({
           localStorage.setItem('avatar', avatar);
           user.set('timeNoping', data.timeNoping);
           user.set('totalNopes', data.totalNopes);
+          user.set('victories', data.victories);
+          user.set('defeats', data.defeats);
           NopeGame.achievementsManager.update(data.achievements);
 
           user.save()
@@ -572,7 +574,9 @@ NopeGame.NopeServerManager = Ember.Object.extend({
         }.bind(this))
         .then(function() {
           NopeGame.notificationManager.notifyMyDefeat(opponent);
-          resolve();
+          var user = NopeGame.User.find(1);
+          user.set('defeats', user.get('defeats') + 1);
+          user.save(resolve);
         });
       }.bind(this))
       .fail(function(xhr) {
