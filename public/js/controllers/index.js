@@ -18,7 +18,7 @@ NopeGame.IndexController = Ember.ArrayController.extend({
     var opponents = this.get('model');
     var friends = opponents.filterBy('status', 'friend');
     var scoringOpponents = _.uniq(
-      friends.filterBy('isScoring', true).sortBy('name'),
+      friends.filterBy('isScoring', true).filterBy('inTruce', false).sortBy('name'),
       true,
       function(el) { return el.get('email'); }
     );
