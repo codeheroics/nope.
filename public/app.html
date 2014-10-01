@@ -339,10 +339,14 @@
 						<li>
 							{{#link-to 'opponentNopes' id}}
 								<h3 style="display: inline;">
-									{{#if isScoring}}
-										<i class="fa fa-hand-o-right"></i>
+									{{#if inTruce}}
+										<i class="fa fa-clock-o"></i>
 									{{else}}
-										<i class="fa fa-check"></i>
+										{{#if isScoring}}
+											<i class="fa fa-hand-o-right"></i>
+										{{else}}
+											<i class="fa fa-check"></i>
+										{{/if}}
 									{{/if}}
 									<img width="20" height="20" style="border-radius: 10px;" {{bind-attr src="avatar"}} />
 									{{name}}
