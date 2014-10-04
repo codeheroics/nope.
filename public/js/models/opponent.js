@@ -24,7 +24,10 @@ NopeGame.Opponent = Ember.Model.extend({
     var isScoring = this.get('isScoring');
     var inTruceFrom = this.get('inTruceFrom') || 0;
     var inTruce = this.get('inTruce');
-    var truceLength = (inTruce ? Date.now() : truceBrokenTime) - inTruceFrom;
+    var truceLength = 0;
+    if (inTruce) {
+      truceLength = Date.now() - inTruceFrom;
+    }
 
     var lastNopeTime = this.get('lastNopeTime');
     var now = Date.now();
@@ -34,11 +37,9 @@ NopeGame.Opponent = Ember.Model.extend({
       lastNopeTime = now;
     }
 
-    var trucelengthNeedsRemoval = inTruce || (truceBrokenTime && truceBrokenTime > lastNopeTime);
-
     return now - lastNopeTime - (
       parseInt(window.localStorage.getItem('serverTimeDiff') || 0, 10)
-    ) - (trucelengthNeedsRemoval ? truceLength : 0);
+    ) - (inTruce ? truceLength : 0);
 
   }.property('lastNopeTime', 'truceBrokenTime', 'isScoring', 'inTruceFrom', 'inTruce').volatile(),
 

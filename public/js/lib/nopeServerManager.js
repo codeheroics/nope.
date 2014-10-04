@@ -111,6 +111,7 @@ NopeGame.NopeServerManager = Ember.Object.extend({
         if (!opponent.isLoaded) return;
 
         opponent.set('truceBrokenTime', data.brokenTruceTime);
+        opponent.set('lastNopeTime', data.nopeData.time);
         return opponent.save().then(function() {
           NopeGame.notificationManager.notifyTruceBrokenByOpponent(opponent);
         }.bind(this));
@@ -683,6 +684,7 @@ NopeGame.NopeServerManager = Ember.Object.extend({
       )
       .done(function(data) {
         opponent.set('truceBrokenTime', data.nopeData.truce.brokenTime);
+        opponent.set('lastNopeTime', data.nopeData.time);
 
         opponent.save().then(function() {
           NopeGame.notificationManager.notifyTruceBrokenByMe(opponent);

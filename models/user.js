@@ -389,6 +389,7 @@ User.prototype.concedeAgainst = function(email, callback) {
     this.friendsNopes[email].lastResetTime = now;
     this.friendsNopes[email].nopesCpt++;
     this.friendsNopes[email].lastResetDecidedByMe = true;
+    delete this.friendsNopes[email].truce;
 
     var opponentFriendsNopesInfosForMe = opponent.friendsNopes[this.email];
     var opponentIsIgnoringMe = opponent.hasIgnored(this.email);
@@ -404,6 +405,7 @@ User.prototype.concedeAgainst = function(email, callback) {
     opponentFriendsNopesInfosForMe.isNopingMe = true;
     opponentFriendsNopesInfosForMe.lastResetTime = now;
     opponentFriendsNopesInfosForMe.lastResetDecidedByMe = false;
+    delete opponentFriendsNopesInfosForMe.truce;
 
     this.earnAchievementsAfterVictoryOrDefeat(this.friendsNopes[email]);
     opponent.earnAchievementsAfterVictoryOrDefeat(opponentFriendsNopesInfosForMe);
@@ -469,6 +471,7 @@ User.prototype.declareVictoryAgainst = function(email, callback) {
     this.friendsNopes[email].lastResetTime = now;
     this.friendsNopes[email].nopesCpt++;
     this.friendsNopes[email].lastResetDecidedByMe = true;
+    delete this.friendsNopes[email].truce;
 
     var opponentFriendsNopesInfosForMe = opponent.friendsNopes[this.email];
     var opponentIsIgnoringMe = opponent.hasIgnored(this.email);
@@ -484,7 +487,7 @@ User.prototype.declareVictoryAgainst = function(email, callback) {
     opponentFriendsNopesInfosForMe.isNopingMe = true;
     opponentFriendsNopesInfosForMe.lastResetTime = now;
     opponentFriendsNopesInfosForMe.lastResetDecidedByMe = false;
-
+    delete opponentFriendsNopesInfosForMe.truce;
 
     this.earnAchievementsAfterVictoryOrDefeat(this.friendsNopes[email]);
     opponent.earnAchievementsAfterVictoryOrDefeat(opponentFriendsNopesInfosForMe);
@@ -652,7 +655,8 @@ User.prototype.breakTruce = function(email, callback) {
         email,
         {
           brokenTruceTime: now,
-          opponentEmail: this.email
+          opponentEmail: this.email,
+          nopeData: formatNopeDataForPrimus(opponentFriendsNopesInfosForMe, this.email)
         }
       );
 
