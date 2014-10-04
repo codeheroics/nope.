@@ -483,6 +483,7 @@
 					<p class="nopesSent">{{nopesCpt}}</p>
 					<div>
 						<legend class="nopesSent">nopes sent</legend>
+						<legend class="nopesSent">{{victories}} victories, {{defeats}} defeats</legend>
 					</div>
 
 					{{#if inTruce}}{{else}}
@@ -507,6 +508,7 @@
 							</div>
 						{{/if}}
 					{{/if}}
+
 					<div style="margin-top:15px;">
 						<button type="button" class="InputAddOn-item" {{action 'ignore' model}}><i class="fa fa-user"></i> Ignore {{name}}</button>
 					</div>
@@ -552,7 +554,6 @@
 							<p class="nopesSent">{{totalNopes}}</p>
 							<div>
 								<legend class="nopesSent">nopes sent</legend>
-								<legend class="nopesSent">{{duration timeNoping}}</legend>
 								<legend class="nopesSent">{{victories}} victories, {{defeats}} defeats</legend>
 							</div>
 						</section>
