@@ -158,8 +158,9 @@ User.prototype.hasPending = function(email) {
 User.prototype.inTruce = function(email) {
   if (!this.friendsNopes[email]) return false;
   if (!this.friendsNopes[email].truce) return false;
-  if (this.friendsNopes[email].truce.startTime > Date.now() - anHourTime) return true;
-  return this.friendsNopes[email].time > this.friendsNopes[email].truce.startTime - anHourTime;
+
+  // If there is a start time, there is a truce (it is removed when breaking it)
+  return !! this.friendsNopes[email].truce.startTime;
 };
 
 /**
@@ -608,7 +609,7 @@ User.prototype.breakTruce = function(email, callback) {
   if (!this.hasFriend(email)) return callback(new FriendError(User.FRIEND_STATUSES.NOT_FRIEND));
   if (!this.friendsNopes[email].truce) return callback(null, this.friendsNopes[email]);
   if (!this.friendsNopes[email].truce.startTime) return callback(null, this.friendsNopes[email]);
-  if (this.friendsNopes[email].truce.startTime > now - anHourTime) {
+  if (this.inTruce(email)) {
     // Truce is not over
     return callback(new FriendError(User.FRIEND_STATUSES.IN_TRUCE));
   }
