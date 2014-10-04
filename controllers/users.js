@@ -53,6 +53,14 @@ module.exports = function(app) {
       });
     }
 
+    if (req.query.win !== undefined) {
+      return req.user.declareVictoryAgainst(email, function(err, nopeInfos) {
+        if (err) return next(err);
+
+        res.jsonp({nopeData: nopeInfos});
+      });
+    }
+
     if (req.query.requestTruce !== undefined) {
       return req.user.requestTruce(email, function(err, nopeInfos) {
         if (err) return next(err);

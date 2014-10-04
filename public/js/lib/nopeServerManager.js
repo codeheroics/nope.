@@ -76,22 +76,18 @@ NopeGame.NopeServerManager = Ember.Object.extend({
         return;
       }
 
-      var opponent;
-
-      if (data.victory !== undefined) {
-        opponent = NopeGame.Opponent.find(data.opponentEmail);
-        if (!opponent.isLoaded) return;
-
-        if (data.victory) {
-          // next line should be done in the handeNopeResult
-          // NopeGame.notificationManager.notifyMyVictory(opponent);
-          opponent.save().then(function() {
-            this.handleNopeResult(data.nopeData, data.opponentEmail);
-          }.bind(this));
-        }
-        NopeGame.User.find(1).set('victories', data.totalVictories).save();
+      if (data.reset !== undefined) {
+        this.handleNopeResult(data.nopeData, data.opponentEmail)
+        .then(function() {
+          if (data.victory) {
+            return this.incrUserVictories();
+          }
+          this.incrUserDefeats();
+        }.bind(this));
         return;
       }
+
+      var opponent;
 
       if (data.inTruce !== undefined) {
         opponent = NopeGame.Opponent.find(data.opponentEmail);
@@ -188,6 +184,10 @@ NopeGame.NopeServerManager = Ember.Object.extend({
     }
 
     var victoriesBefore = opponent.get('victories') || 0;
+    var defeatsBefore = opponent.get('defeats') || 0;
+
+    // Previously, (before october) there was no "lastResetDecidedByMe" --> undefined means true.
+    var lastResetDecidedByMe = dataNope.lastResetDecidedByMe || (dataNope.lastResetDecidedByMe === undefined);
 
     opponent.set('name', dataNope.opponentName);
     opponent.set('isScoring', dataNope.isNopingMe);
@@ -203,6 +203,7 @@ NopeGame.NopeServerManager = Ember.Object.extend({
     opponent.set('victories', dataNope.victories || 0);
     opponent.set('defeats', dataNope.defeats || 0);
     opponent.set('lastResetTime', dataNope.lastResetTime || null);
+    opponent.set('lastResetDecidedByMe', lastResetDecidedByMe);
     var nopes = opponent.get('nopes').pushObject(nopeRecord);
     nopeRecord.set('opponent', opponent);
 
@@ -212,14 +213,20 @@ NopeGame.NopeServerManager = Ember.Object.extend({
       // If nothing was logged (re-login), give up notifying >> Do not do it. We'll suppose a lot of false positives are better than nothing.
       // if (timeForBefore === undefined || timeAgainstBefore === undefined) return Promise.resolve();
       var victories = dataNope.victories || 0;
-      var isOneTimeAtZero = ! dataNope.opponentTimeNoping || ! dataNope.myTimeNoping;
-      if (victories === victoriesBefore + 1 && isOneTimeAtZero) {
-        // We most probably just got a nope which was a reset.
-        if (victories === victoriesBefore + 1) {
-          NopeGame.notificationManager.notifyMyVictory(opponent);
-        }
+      var defeats = dataNope.defeats || 0;
+      // I must be notified here if the other one did a reset and I haven't answered yet
+      // (if I decided of the reset, I must be notified after handling the data)
+      var mustBeNotified = !lastResetDecidedByMe && opponent.get('computedTimeAgainst') === 0;
+      if (!mustBeNotified) return Promise.resolve();
+      var funcName;
+      if (victories > victoriesBefore) {
+        funcName = lastResetDecidedByMe ? 'notifyMyDeclaredVictory' : 'notifyOpponentAdmittedDefeat';
+      } else if (defeats > defeatsBefore) {
+        funcName = lastResetDecidedByMe ? 'notifyMyAdmittedDefeat' : 'notifyOpponentDeclaredVictory';
+      } else {
+        return Promise.resolve(); // Should not happen
       }
-      return Promise.resolve();
+      return NopeGame.notificationManager[funcName](opponent);
     });
   },
 
@@ -569,21 +576,47 @@ NopeGame.NopeServerManager = Ember.Object.extend({
         }
       )
       .done(function(data) {
-        opponent.save().then(function() {
-          return this.handleNopeResult(data.nopeData, opponent.get('email'));
-        }.bind(this))
-        .then(function() {
-          NopeGame.notificationManager.notifyMyDefeat(opponent);
-          var user = NopeGame.User.find(1);
-          user.set('defeats', user.get('defeats') + 1);
-          user.save(resolve);
-        });
+        return this.handleNopeResult(data.nopeData, opponent.get('email'))
+        .then(this.incrUserDefeats)
+        .then(NopeGame.notificationManager.notifyMyAdmittedDefeat.bind(NopeGame.notificationManager, opponent))
+        .then(resolve);
       }.bind(this))
       .fail(function(xhr) {
         if (!xhr.status) {
           toastr.error('Unable to connect to the internet while trying to concede', undefined, {timeOut: 5000});
         } else if (xhr.status >= 500) {
           toastr.error('Sorry, there was a server error while trying to concede', undefined, {timeOut: 5000});
+        }
+        reject();
+      });
+    }.bind(this));
+  },
+
+  declareVictory: function(opponent) {
+    return new Promise(function(resolve, reject) {
+      $.ajax(
+        {
+          dataType: 'jsonp',
+          data: { friendEmail: opponent.get('email') },
+          jsonp: CALLBACK_NAME,
+          method: 'PATCH',
+          headers: {
+            'x-access-token': window.localStorage.getItem('token')
+          },
+          url: USERS_ROUTE + '?win'
+        }
+      )
+      .done(function(data) {
+        return this.handleNopeResult(data.nopeData, opponent.get('email'))
+        .then(this.incrUserVictories)
+        .then(NopeGame.notificationManager.notifyMyDeclaredVictory.bind(NopeGame.notificationManager, opponent))
+        .then(resolve);
+      }.bind(this))
+      .fail(function(xhr) {
+        if (!xhr.status) {
+          toastr.error('Unable to connect to the internet while trying to declare victory', undefined, {timeOut: 5000});
+        } else if (xhr.status >= 500) {
+          toastr.error('Sorry, there was a server error while trying to declare victory', undefined, {timeOut: 5000});
         }
         reject();
       });
@@ -664,5 +697,18 @@ NopeGame.NopeServerManager = Ember.Object.extend({
         reject();
       });
     }.bind(this));
+  },
+
+  incrUserVictories: function() {
+    var user = NopeGame.User.find(1);
+    return user.set('victories', user.get('victories') + 1).save();
+  },
+
+  incrUserDefeats: function() {
+    var user = NopeGame.User.find(1);
+    return user.set('defeats', user.get('defeats') + 1).save();
+
   }
+
+
 });

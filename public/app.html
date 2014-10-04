@@ -174,7 +174,7 @@
 								{{#link-to 'opponents'}}You need to invite friends to be your opponents{{/link-to}}!
 							</span>
 							<div class="special">
-								<i class="fa fa-frown-o"></i>
+								<i class="fa fa-meh-o"></i>
 							</div>
 						{{/if}}
 					{{/if}}
@@ -343,7 +343,7 @@
 										<i class="fa fa-clock-o"></i>
 									{{else}}
 										{{#if isScoring}}
-											<i class="fa fa-hand-o-right"></i>
+											<i class="fa fa-warning"></i>
 										{{else}}
 											<i class="fa fa-check"></i>
 										{{/if}}
@@ -489,13 +489,21 @@
 						<div style="margin-top:15px;">
 							<button type="button" class="InputAddOn-item" {{action 'requestTruce' model}}><i class="fa fa-clock-o"></i> Request a 1h truce</button>
 						</div>
-						{{#if canConcede}}
+						{{#if canEndRound}}
 							<div style="margin-top:15px;">
-								<button type="button" class="InputAddOn-item" {{action 'concede' model}}><i class="fa fa-flag-o"></i> Acknowledge your defeat for this round</button>
+								{{#if canConcede}}
+									<button type="button" class="InputAddOn-item" {{action 'concede' model}}><i class="fa fa-flag-o"></i> Acknowledge your defeat for this round</button>
+								  {{else}}
+								  <button type="button" class="InputAddOn-item" {{action 'declareVictory' model}}><i class="fa fa-thumbs-up"></i> Declare your victory for this round</button>
+								{{/if}}
 							</div>
 						{{else}}
 							<div style="margin-top:15px;" class="discrete">
-								You'll be able to acknowledge a defeat and move to the next round if you're losing by 1 day or more and are being noped.
+								{{#if isWinning}}
+									You'll be able to acknowledge your defeat, reset the counters and move to the next round if you lose by 1 day or more, and are being noped.
+									{{else}}
+									You'll be able to declare your victory, reset the counters and move to the next round if you win by 2 days or more, and are being noped.
+								{{/if}}
 							</div>
 						{{/if}}
 					{{/if}}

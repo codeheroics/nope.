@@ -117,7 +117,7 @@ NopeGame.NotificationManager = Ember.Object.extend({
     ));
   },
 
-  notifyMyVictory: function(opponent) {
+  notifyOpponentAdmittedDefeat: function(opponent) {
     var email = opponent.get('email');
     var name = opponent.get('name');
     var lastResetTime = opponent.get('lastResetTime');
@@ -133,7 +133,7 @@ NopeGame.NotificationManager = Ember.Object.extend({
     ));
   },
 
-  notifyMyDefeat: function(opponent) {
+  notifyMyAdmittedDefeat: function(opponent) {
     var email = opponent.get('email');
     var name = opponent.get('name');
     var lastResetTime = opponent.get('lastResetTime');
@@ -144,5 +144,36 @@ NopeGame.NotificationManager = Ember.Object.extend({
       'You conceded your loss for this round',
       {timeOut: 15000}
     ));
+  },
+
+  notifyOpponentDeclaredVictory: function(opponent) {
+    var email = opponent.get('email');
+    var name = opponent.get('name');
+    var lastResetTime = opponent.get('lastResetTime');
+    this.clearVictoryNotifications(email);
+    var messageIfNow = '<span style="font-weight:bold;">' + name +
+      '</span> won the last round! The counters are now reset, it\'s time for a counterattack!';
+    var messageIfOld = '<span style="font-weight:bold;">' + name +
+      '</span> won the last round ' + moment(lastResetTime).fromNow() + '! The counters were reset, it\'s time for a counterattack!';
+    this.victoryNotifications[email].push(toastr.info(
+      Date.now() - lastResetTime < 120000 ? messageIfNow : messageIfOld,
+      'You have lost a round',
+      {timeOut: 15000}
+    ));
+  },
+
+  notifyMyDeclaredVictory: function(opponent) {
+    var email = opponent.get('email');
+    var name = opponent.get('name');
+    var lastResetTime = opponent.get('lastResetTime');
+    this.clearVictoryNotifications(email);
+    this.victoryNotifications[email].push(toastr.info(
+      'You\'ve won this round against <span style="font-weight:bold;">' +
+        opponent.get('name') + '</span>! Continue like this!',
+      'Victory!',
+      {timeOut: 15000}
+    ));
   }
+
+
 });

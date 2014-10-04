@@ -22,6 +22,10 @@ NopeGame.OpponentNopesController = Ember.ObjectController.extend({
       NopeGame.serverManager.concedeRound(opponent);
     },
 
+    declareVictory: function(opponent) {
+      NopeGame.serverManager.declareVictory(opponent);
+    },
+
     requestTruce: function(opponent) {
       NopeGame.serverManager.requestTruce(opponent);
     },
@@ -56,5 +60,16 @@ NopeGame.OpponentNopesController = Ember.ObjectController.extend({
   canConcede: function() {
     return this.get('isScoring') &&
       this.get('computedTimeFor') - this.get('computedTimeAgainst') > 24 * 60 * 60 * 1000; // 1 day
-  }.property('isScoring', 'clock.pulse', 'computedTimeAgainst', 'computedTimeFor')
+  }.property('isScoring', 'clock.pulse', 'computedTimeAgainst', 'computedTimeFor'),
+
+
+  canWin: function() {
+    return this.get('isScoring') &&
+      this.get('computedTimeAgainst') - this.get('computedTimeFor') > 48 * 60 * 60 * 1000; // 2 days
+  }.property('isScoring', 'clock.pulse', 'computedTimeAgainst', 'computedTimeFor'),
+
+
+  canEndRound: function() {
+    return this.get('canConcede') || this.get('canWin');
+  }.property('clock.pulse', 'canConcede', 'canWin')
 });

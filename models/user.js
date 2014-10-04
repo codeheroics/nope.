@@ -388,6 +388,7 @@ User.prototype.concedeAgainst = function(email, callback) {
     this.friendsNopes[email].isNopingMe = false;
     this.friendsNopes[email].lastResetTime = now;
     this.friendsNopes[email].nopesCpt++;
+    this.friendsNopes[email].lastResetDecidedByMe = true;
 
     var opponentFriendsNopesInfosForMe = opponent.friendsNopes[this.email];
     var opponentIsIgnoringMe = opponent.hasIgnored(this.email);
@@ -402,6 +403,87 @@ User.prototype.concedeAgainst = function(email, callback) {
     opponentFriendsNopesInfosForMe.timeDiff = 0;
     opponentFriendsNopesInfosForMe.isNopingMe = true;
     opponentFriendsNopesInfosForMe.lastResetTime = now;
+    opponentFriendsNopesInfosForMe.lastResetDecidedByMe = false;
+
+    this.earnAchievementsAfterVictoryOrDefeat(this.friendsNopes[email]);
+    opponent.earnAchievementsAfterVictoryOrDefeat(opponentFriendsNopesInfosForMe);
+
+    async.series([ // FIXME rollback etc
+      opponent.save.bind(opponent),
+      this.save.bind(this),
+    ], function(err) {
+      if (err) return callback(err);
+      // FIXME handle CAS error
+
+      redisClient.publish(
+        this.email,
+        {
+          reset: true,
+          victory: false,
+          nopeData: this.friendsNopes[email],
+          opponentEmail: email
+        }
+      );
+
+      if (!opponentIsIgnoringMe) {
+        redisClient.publish(
+          email,
+          {
+            reset: true,
+            victory: true,
+            nopeData: opponent.friendsNopes[this.email],
+            opponentEmail: this.email
+          }
+        );
+      }
+
+      callback(null, this.friendsNopes[email]);
+    }.bind(this));
+  }.bind(this));
+};
+
+// TODO refactor with concedeAgainst to get a single method to reset counters et all
+User.prototype.declareVictoryAgainst = function(email, callback) {
+  if (!this.hasFriend(email)) return callback(new FriendError(User.FRIEND_STATUSES.NOT_FRIEND));
+  if (!this.friendsNopes[email].isNopingMe) return callback(new Error('is not noping me'));
+  var now = Date.now();
+  var timeDiffNotYetEarned = now - this.friendsNopes[email].time;
+  // Comparing adding the not yet earned time for the opponent
+  if (this.friendsNopes[email].myTimeNoping - 48 * 60 * 60 * 1000 < this.friendsNopes[email].opponentTimeNoping + timeDiffNotYetEarned) {
+    return callback(new Error('not winning'));
+  }
+
+  User.findById(email, function(err, opponent) {
+    if (err) return callback(err);
+    if (!opponent) return callback(new FriendError(User.FRIEND_STATUSES.NOT_FOUND));
+
+    this.defeats++;
+    opponent.victories++;
+
+    this.friendsNopes[email].victories = (this.friendsNopes[email].victories || 0) + 1;
+    this.friendsNopes[email].myTimeNoping = 0;
+    this.friendsNopes[email].opponentTimeNoping = 0;
+    this.friendsNopes[email].time = now;
+    this.friendsNopes[email].timeDiff = 0;
+    this.friendsNopes[email].isNopingMe = false;
+    this.friendsNopes[email].lastResetTime = now;
+    this.friendsNopes[email].nopesCpt++;
+    this.friendsNopes[email].lastResetDecidedByMe = true;
+
+    var opponentFriendsNopesInfosForMe = opponent.friendsNopes[this.email];
+    var opponentIsIgnoringMe = opponent.hasIgnored(this.email);
+    if (opponentIsIgnoringMe) {
+      opponentFriendsNopesInfosForMe = opponent.getIgnoredUserNopeInfos(this.email);
+    }
+
+    opponentFriendsNopesInfosForMe.defeats = (opponentFriendsNopesInfosForMe.defeats || 0) + 1;
+    opponentFriendsNopesInfosForMe.myTimeNoping = 0;
+    opponentFriendsNopesInfosForMe.opponentTimeNoping = 0;
+    opponentFriendsNopesInfosForMe.time = now;
+    opponentFriendsNopesInfosForMe.timeDiff = 0;
+    opponentFriendsNopesInfosForMe.isNopingMe = true;
+    opponentFriendsNopesInfosForMe.lastResetTime = now;
+    opponentFriendsNopesInfosForMe.lastResetDecidedByMe = false;
 
 
     this.earnAchievementsAfterVictoryOrDefeat(this.friendsNopes[email]);
@@ -417,9 +499,8 @@ User.prototype.concedeAgainst = function(email, callback) {
       redisClient.publish(
         this.email,
         {
-          victory: false,
-          totalDefeats: this.defeats,
-          totalVictories: this.victories,
+          reset: true,
+          victory: true,
           nopeData: this.friendsNopes[email],
           opponentEmail: email
         }
@@ -429,9 +510,8 @@ User.prototype.concedeAgainst = function(email, callback) {
         redisClient.publish(
           email,
           {
-            victory: true,
-            totalVictories: opponent.victories,
-            totalDefeats: opponent.defeats,
+            reset: true,
+            victory: false,
             nopeData: opponent.friendsNopes[this.email],
             opponentEmail: this.email
           }
