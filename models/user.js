@@ -605,11 +605,13 @@ User.prototype.requestTruce = function(email, callback) {
 
 User.prototype.breakTruce = function(email, callback) {
   var now = Date.now();
+  var anHourAgoTime = now - anHourTime;
 
   if (!this.hasFriend(email)) return callback(new FriendError(User.FRIEND_STATUSES.NOT_FRIEND));
   if (!this.friendsNopes[email].truce) return callback(null, this.friendsNopes[email]);
   if (!this.friendsNopes[email].truce.startTime) return callback(null, this.friendsNopes[email]);
-  if (this.inTruce(email)) {
+
+  if (this.friendsNopes[email].truce.startTime > anHourAgoTime) {
     // Truce is not over
     return callback(new FriendError(User.FRIEND_STATUSES.IN_TRUCE));
   }
