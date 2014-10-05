@@ -31,6 +31,7 @@ require('./controllers/nopes')(app);
 require('./controllers/users')(app);
 
 app.use(function(err, req, res, next){
+  console.log(err);
   res.send(500, {message: 'Server error'});
 });
 
