@@ -5,9 +5,25 @@
 // should handle all or most of the app's notifications
 // (they should not be toastr.whatever everywhere)
 NopeGame.NotificationManager = Ember.Object.extend({
+  loadingNotifications: [],
+
   nopeNotifications: {},
   truceNotifications: {},
   victoryNotifications: {},
+
+  showLoading: function() {
+    this.clearLoading();
+    this.loadingNotifications.push(toastr.warning(
+      'Loading... <i class="fa fa-spin fa-spinner"></i> ',
+      'Waiting for connection...',
+      {timeOut: 0, extendedTimeOut: 0, tapToDismiss: false}
+    ));
+  },
+
+  clearLoading: function() {
+    var oldNotif = this.loadingNotifications.shift();
+    if (oldNotif) toastr.clear(oldNotif);
+  },
 
   clearNopeNotifications: function(email) {
     if (!this.nopeNotifications[email]) {

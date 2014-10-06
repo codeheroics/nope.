@@ -4,8 +4,13 @@
 // (nopeManager for example)
 
 NopeGame.NopeServerManager = Ember.Object.extend({
+  setLoading: function(bool) {
+    NopeGame.notificationManager[bool ? 'showLoading' : 'clearLoading']();
+  },
+
   init: function() {
-    return this.getAllNopes().then(this.initPrimus.bind(this));
+    this.setLoading(true);
+    this.initPrimus();
   },
 
   initPrimus: function() {
@@ -15,15 +20,21 @@ NopeGame.NopeServerManager = Ember.Object.extend({
         strategy : ['online', 'disconnect'],
         reconnect: {
           maxDelay: 600000, // Number: The max delay for a reconnect retry.
-          minDelay: 15000, // Number: The minimum delay before we reconnect.
+          minDelay: 5000, // Number: The minimum delay before we reconnect.
           retries: 100000 // Number: How many times should we attempt to reconnect.
         }
       }
     );
 
     // If we were deconnected and reconnect, we need to get the data we missed
-    this.primus.on('reconnected', function() {
-      this.getAllNopes();
+    this.primus.on('open', function() {
+      this.getAllNopes().then(function() {
+        this.setLoading(false);
+      }.bind(this));
+    }.bind(this));
+
+    this.primus.on('reconnecting', function() {
+      this.setLoading(true);
     }.bind(this));
 
     // For convenience we use the private event `outgoing::url` to append the

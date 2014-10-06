@@ -25,9 +25,9 @@ NopeGame.Router.map(function() {
 
 function createManagers() {
   if (NopeGame.serverManager) return;
+  NopeGame.notificationManager = NopeGame.NotificationManager.create();
   NopeGame.serverManager = NopeGame.NopeServerManager.create();
   NopeGame.achievementsManager = NopeGame.AchievementsManager.create();
-  NopeGame.notificationManager = NopeGame.NotificationManager.create();
 }
 
 
