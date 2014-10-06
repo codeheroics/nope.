@@ -460,8 +460,8 @@ User.prototype.declareVictoryAgainst = function(email, callback) {
     if (err) return callback(err);
     if (!opponent) return callback(new FriendError(User.FRIEND_STATUSES.NOT_FOUND));
 
-    this.defeats++;
-    opponent.victories++;
+    this.victories++;
+    opponent.defeats++;
 
     this.friendsNopes[email].victories = (this.friendsNopes[email].victories || 0) + 1;
     this.friendsNopes[email].myTimeNoping = 0;
