@@ -179,19 +179,19 @@ var achievements = {
     }
   },
   25: {
-    title: 'I was just getting warmed up',
-    description: 'Accept your defeat for the first time',
-    hasEarned: function(user) {
-      return user.defeats > 0;
-    }
-  },
-  26: {
     title: 'Graceful loser',
-    description: 'Accept your defeat for the tenth time',
-    hasEarned: function(user) {
-      return user.defeats >= 10;
+    description: 'Accept your defeat for the first time',
+    hasEarned: function(user, nopeData, isVictory) {
+      return ! isVictory && nopeData.lastResetDecidedByMe;
     }
   },
+  // 26: {
+  //   title: 'Graceful loser',
+  //   description: 'Accept your defeat for the tenth time',
+  //   hasEarned: function(user) {
+  //     return user.defeats >= 10;
+  //   }
+  // },
   27: {
     title: 'V.I.C.T.O.R.Y.',
     description: 'Earn your first victory',
@@ -256,7 +256,7 @@ var achievements = {
 
 var achievableByNopingIds = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 19, 20, 21, 22, 23, 24, 31, 32, 33, 34];
 var achievableByNewFriendsIds = [16, 17, 18, 22, 23, 24];
-var achievableByVictoryDefeat = [25, 26, 27, 28];
+var achievableByVictoryDefeat = [25, 27, 28];
 var achievableByTruce = [29, 30];
 
 function hasEarnedTotalNopes(nopesToObtain, user) {
@@ -290,10 +290,10 @@ module.exports = {
     });
   },
 
-  earnedAfterVictoryOrDefeat: function(user, nopeData) {
+  earnedAfterVictoryOrDefeat: function(user, nopeData, isVictory) {
     return achievableByVictoryDefeat.filter(function(achievementId) {
       if (user.achievements[achievementId]) return false; // Already earned
-      return achievements[achievementId].hasEarned(user);
+      return achievements[achievementId].hasEarned(user, nopeData, isVictory);
     });
   },
 };

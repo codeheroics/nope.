@@ -104,13 +104,13 @@ NopeGame.AchievementsManager = Ember.Object.extend({
       description: 'Be lucky (1 chance out of 100 000 on every of your actions)',
     },
     25: {
-      title: 'I was just getting warmed up',
-      description: 'Accept your defeat for the first time',
-    },
-    26: {
       title: 'Graceful loser',
-      description: 'Accept your defeat for the tenth time',
+      description: 'Accept a defeat',
     },
+    // 26: {
+    //   title: 'Graceful loser',
+    //   description: 'Accept your defeat for the tenth time',
+    // },
     27: {
       title: 'V.I.C.T.O.R.Y.',
       description: 'Earn your first victory',

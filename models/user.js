@@ -408,8 +408,8 @@ User.prototype.concedeAgainst = function(email, callback) {
     opponentFriendsNopesInfosForMe.lastResetDecidedByMe = false;
     delete opponentFriendsNopesInfosForMe.truce;
 
-    this.earnAchievementsAfterVictoryOrDefeat(this.friendsNopes[email]);
-    opponent.earnAchievementsAfterVictoryOrDefeat(opponentFriendsNopesInfosForMe);
+    this.earnAchievementsAfterVictoryOrDefeat(this.friendsNopes[email], false);
+    opponent.earnAchievementsAfterVictoryOrDefeat(opponentFriendsNopesInfosForMe, true);
 
     async.series([ // FIXME rollback etc
       opponent.save.bind(opponent),
@@ -490,8 +490,8 @@ User.prototype.declareVictoryAgainst = function(email, callback) {
     opponentFriendsNopesInfosForMe.lastResetDecidedByMe = false;
     delete opponentFriendsNopesInfosForMe.truce;
 
-    this.earnAchievementsAfterVictoryOrDefeat(this.friendsNopes[email]);
-    opponent.earnAchievementsAfterVictoryOrDefeat(opponentFriendsNopesInfosForMe);
+    this.earnAchievementsAfterVictoryOrDefeat(this.friendsNopes[email], true);
+    opponent.earnAchievementsAfterVictoryOrDefeat(opponentFriendsNopesInfosForMe, false);
 
     async.series([ // FIXME rollback etc
       opponent.save.bind(opponent),
