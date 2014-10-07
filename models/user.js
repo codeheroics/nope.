@@ -534,6 +534,7 @@ User.prototype.requestTruce = function(email, callback) {
   var now = Date.now();
   var anHourAgoTime = now  - anHourTime;
   var anHourFromNowTime = now  + anHourTime;
+  var fiveMinutesAgoTime = now  - 5 * 60 * 1000;
   if (this.friendsNopes[email].truce &&
     this.friendsNopes[email].truce.startTime &&
     this.friendsNopes[email].truce.startTime > now - anHourAgoTime) {
@@ -553,7 +554,7 @@ User.prototype.requestTruce = function(email, callback) {
     if (!myNopesInfos.truce) myNopesInfos.truce = {};
     if (!opponentNopesInfos.truce) opponentNopesInfos.truce = {};
 
-    if (myNopesInfos.truce.opponentRequest && myNopesInfos.truce.opponentRequest > anHourAgoTime) {
+    if (myNopesInfos.truce.opponentRequest && myNopesInfos.truce.opponentRequest > fiveMinutesAgoTime) {
       // accept truce since there was a request less than an hour ago
       isAcceptingRequest = true;
       delete myNopesInfos.truce.opponentRequest;
