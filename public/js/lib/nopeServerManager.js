@@ -108,10 +108,10 @@ NopeGame.NopeServerManager = Ember.Object.extend({
           opponent.set('inTruceUntil', data.nopeData.truce.startTime + 60 * 60 * 1000);
           opponent.set('lastNopeTime', data.nopeData.time);
           opponent.save();
-          if (!data.initiatedByMe) {
-            NopeGame.notificationManager.notifyAcceptedTruce(opponent);
-          }
+          // Doesn't matter if done twice, it will instantly be replaced
+          NopeGame.notificationManager.notifyAcceptedTruce(opponent);
         } else {
+          if (data.initiatedByMe) return; // Of course, if we sent it, we did not receive it.
           NopeGame.notificationManager.notifyReceivedTruceRequest(opponent);
         }
         return;

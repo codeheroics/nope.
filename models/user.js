@@ -577,6 +577,7 @@ User.prototype.requestTruce = function(email, callback) {
       if (err) return callback(err);
 
       // Useless to know that I just asked for a truce
+      // *but* useful to know I accepted a truce
       if (isAcceptingRequest) {
         redisClient.publish(
           this.email,
