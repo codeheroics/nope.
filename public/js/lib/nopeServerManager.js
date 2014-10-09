@@ -4,8 +4,18 @@
 // (nopeManager for example)
 
 NopeGame.NopeServerManager = Ember.Object.extend({
-  setLoading: function(bool) {
-    NopeGame.notificationManager[bool ? 'showLoading' : 'clearLoading']();
+  loadingUpdateInterval: 0,
+  setLoading: function(bool, timeout) {
+    clearTimeout(this.loadingUpdateInterval);
+    if (!bool) { // Disable loading
+      NopeGame.notificationManager.clearLoading();
+    } else { // enable loading
+      NopeGame.notificationManager.showLoading(timeout);
+      if (timeout && timeout <= 0) return;
+      if (timeout) setTimeout(function() {
+        this.setLoading(bool, timeout - 1000);
+      }.bind(this), 1000);
+    }
   },
 
   init: function() {
@@ -33,8 +43,8 @@ NopeGame.NopeServerManager = Ember.Object.extend({
       }.bind(this));
     }.bind(this));
 
-    this.primus.on('reconnecting', function() {
-      this.setLoading(true);
+    this.primus.on('reconnecting', function(opts) {
+      this.setLoading(true, opts.timeout);
     }.bind(this));
 
     // For convenience we use the private event `outgoing::url` to append the

@@ -11,11 +11,17 @@ NopeGame.NotificationManager = Ember.Object.extend({
   truceNotifications: {},
   victoryNotifications: {},
 
-  showLoading: function() {
-    this.clearLoading();
+  showLoading: function(timeout) {
+    timeout = !timeout || timeout <= 0 ? 0 : Math.floor(timeout / 1000);
+    var html = timeout ? 'Reconnecting in ' + timeout + 's' :
+      'Loading... <i class="fa fa-spin fa-spinner"></i> ';
+
+    var oldNotif = this.loadingNotifications[0];
+    if (oldNotif) return oldNotif.html(html);
+
     this.loadingNotifications.push(toastr.warning(
-      'Loading... <i class="fa fa-spin fa-spinner"></i> ',
-      'Waiting for connection...',
+      html,
+      null,
       {timeOut: 0, extendedTimeOut: 0, tapToDismiss: false}
     ));
   },
