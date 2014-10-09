@@ -20,16 +20,16 @@ NopeGame.Opponent = Ember.Model.extend({
 
   // time diff since last nope
   timeDiffSinceLast:  function() {
-    var truceBrokenTime = this.get('truceBrokenTime') || 0;
+    var truceBrokenTime = this.get('computedTruceBrokenTime') || 0;
     var isScoring = this.get('isScoring');
-    var inTruceFrom = this.get('inTruceFrom') || 0;
+    var inTruceFrom = this.get('computedInTruceFrom') || 0;
     var inTruce = this.get('inTruce');
     var truceLength = 0;
     if (inTruce) {
       truceLength = Date.now() - inTruceFrom;
     }
 
-    var lastNopeTime = this.get('lastNopeTime');
+    var lastNopeTime = this.get('computedLastNopeTime');
     var now = Date.now();
     if (!lastNopeTime) {
       // Prevent showing ludicrous durations without actually saving anything
@@ -37,16 +37,12 @@ NopeGame.Opponent = Ember.Model.extend({
       lastNopeTime = now;
     }
 
-    return now - lastNopeTime - (
-      parseInt(window.localStorage.getItem('serverTimeDiff') || 0, 10)
-    ) - (inTruce ? truceLength : 0);
+    return now - lastNopeTime - (inTruce ? truceLength : 0);
 
-  }.property('lastNopeTime', 'truceBrokenTime', 'isScoring', 'inTruceFrom', 'inTruce').volatile(),
+  }.property('computedLastNopeTime', 'computedTruceBrokenTime', 'isScoring', 'computedInTruceFrom', 'inTruce').volatile(),
 
   // total time diff against opponent
   timeDiff: function() {
-    var timeFor = this.get('model.timeFor');
-    var timeAgainst = this.get('model.timeAgainst');
     return Math.abs(
       this.get('computedTimeFor') - this.get('computedTimeAgainst')
     );
@@ -54,21 +50,37 @@ NopeGame.Opponent = Ember.Model.extend({
 
   nopes:          Ember.hasMany('NopeGame.Nope', { key: 'nopesIds' }),
   nopesCpt:       Ember.attr(Number),
-  lastNopeTime:   Ember.attr(Number),
   isScoring:      Ember.attr(), // boolean
   status:         Ember.attr(), // string : "friend", "pending", "blocked"
   victories:      Ember.attr(Number),
   defeats:        Ember.attr(Number),
-  lastResetTime:  Ember.attr(Number),
+  inTruce:        function() { // if we're in truce (truce not ended or no nope since)
+    return (this.get('computedTruceBrokenTime') || 0) < (this.get('computedInTruceUntil') || 0);
+  }.property('computedInTruceUntil', 'computedTruceBrokenTime'),
+  nopedSinceTruce:function () {
+    return this.get('computedTruceBrokenTime') < this.get('computedLastNopeTime');
+  }.property('computedTruceBrokenTime', 'computedLastNopeTime').volatile(),
+  lastResetTime:  Ember.attr(Number), // This one is present as an indication, does not need to be computed
+
+  // Those are all time which need to be adapted according to the current device time
+  lastNopeTime:   Ember.attr(Number),
   inTruceFrom:    Ember.attr(), // In truce until *time*
   inTruceUntil:   Ember.attr(), // In truce until *time*
   truceBrokenTime:Ember.attr(),
-  inTruce:        function() { // if we're in truce (truce not ended or no nope since)
-    return (this.get('truceBrokenTime') || 0) < (this.get('inTruceUntil') || 0);
-  }.property('inTruceUntil', 'truceBrokenTime'),
-  nopedSinceTruce:function () {
-    return this.get('truceBrokenTime') < this.get('lastNopeTime');
-  }.property('truceBrokenTime', 'lastNopeTime')
+
+  // All these computed times have the same objective : take in account the time diff with the server
+  computedLastNopeTime: function() {
+    return this.get('lastNopeTime')  - (localStorage.getItem('serverTimeDiff') || 0);
+  }.property('lastNopeTime'),
+  computedInTruceFrom: function() {
+    return this.get('inTruceFrom')  - (localStorage.getItem('serverTimeDiff') || 0);
+  }.property('inTruceFrom'),
+  computedInTruceUntil: function() {
+    return this.get('inTruceUntil')  - (localStorage.getItem('serverTimeDiff') || 0);
+  }.property('inTruceUntil'),
+  computedTruceBrokenTime: function() {
+    return this.get('truceBrokenTime')  - (localStorage.getItem('serverTimeDiff') || 0);
+  }.property('truceBrokenTime')
 });
 
 NopeGame.Opponent.reopenClass({

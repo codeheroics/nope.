@@ -140,7 +140,7 @@ NopeGame.NopeServerManager = Ember.Object.extend({
 
       // time difference between us and the server
       if (data.time !== undefined) {
-        window.localStorage.setItem('serverTimeDiff', (Date.now() - data.time) || 0);
+        window.localStorage.setItem('serverTimeDiff', parseInt((Date.now() - data.time) || 0, 10));
         return;
       }
     }.bind(this));

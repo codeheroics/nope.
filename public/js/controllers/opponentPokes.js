@@ -46,12 +46,12 @@ NopeGame.OpponentNopesController = Ember.ObjectController.extend({
   }.property('computedTimeFor', 'computedTimeAgainst', 'clock.pulse'),
 
   canBreakTruce: function() {
-    return this.get('model.inTruceUntil') < Date.now();
-  }.property('model.inTruceUntil', 'clock.pulse'),
+    return this.get('model.computedInTruceUntil') < Date.now();
+  }.property('model.computedInTruceUntil', 'clock.pulse'),
 
   timeRemainingInTruce: function() {
-    return this.get('model.inTruceUntil') - Date.now();
-  }.property('model.inTruceUntil', 'clock.pulse'),
+    return this.get('model.computedInTruceUntil') - Date.now();
+  }.property('model.computedInTruceUntil', 'clock.pulse'),
 
   roundNumber: function() {
     return (this.get('victories') || 0) + (this.get('defeats') || 0) + 1;
@@ -61,7 +61,6 @@ NopeGame.OpponentNopesController = Ember.ObjectController.extend({
     return this.get('isScoring') &&
       this.get('computedTimeFor') - this.get('computedTimeAgainst') > 24 * 60 * 60 * 1000; // 1 day
   }.property('isScoring', 'clock.pulse', 'computedTimeAgainst', 'computedTimeFor'),
-
 
   canWin: function() {
     return this.get('isScoring') &&

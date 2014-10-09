@@ -187,7 +187,7 @@
 								<li>
 									{{#link-to 'opponentNopes' id}}
 										<img width="20" height="20" style="border-radius: 10px;" {{bind-attr src="avatar"}} />
-										{{name}} {{relativeDateFormat lastNopeTime clock.pulse}}
+										{{name}} {{relativeDateFormat computedLastNopeTime clock.pulse}}
 										<i class="fa fa-mail-forward solo"></i>
 									{{/link-to}}
 								</li>
@@ -535,7 +535,7 @@
 									{{/link-to}}
 								</h3>
 								<div class="discrete">
-									<i class="fa fa-clock-o"></i>{{relativeDateFormat date}}
+									<i class="fa fa-clock-o"></i>{{relativeDateFormat computedTime}}
 									<i class="fa fa-comments"></i>
 									{{#if isReceived}}You{{else}}{{opponent.name}}{{/if}} had the last word for {{duration timeDiff clock.pulse}}
 								</div>
