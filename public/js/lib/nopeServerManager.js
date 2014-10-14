@@ -155,7 +155,6 @@ NopeGame.NopeServerManager = Ember.Object.extend({
     return new Promise(function(resolve, reject) {
       $.ajax(
         {
-          dataType: 'jsonp',
           data: { friendEmail: opponentEmail },
           jsonp: CALLBACK_NAME,
           headers: {
@@ -283,7 +282,6 @@ NopeGame.NopeServerManager = Ember.Object.extend({
     return new Promise(function(resolve, reject) {
       $.ajax(
         {
-          dataType: 'jsonp',
           jsonp: CALLBACK_NAME,
           headers: {
             'x-access-token': window.localStorage.getItem('token')
@@ -411,7 +409,6 @@ NopeGame.NopeServerManager = Ember.Object.extend({
     return new Promise(function(resolve, reject) {
       $.ajax(
         {
-          dataType: 'jsonp',
           jsonp: CALLBACK_NAME,
           headers: {
             'x-access-token': window.localStorage.getItem('token')
@@ -453,7 +450,6 @@ NopeGame.NopeServerManager = Ember.Object.extend({
 
       $.ajax(
         {
-          dataType: 'jsonp',
           data: { friendEmail: email },
           jsonp: CALLBACK_NAME,
           method: 'POST',
@@ -516,7 +512,6 @@ NopeGame.NopeServerManager = Ember.Object.extend({
 
       $.ajax(
         {
-          dataType: 'jsonp',
           data: { friendEmail: email },
           jsonp: CALLBACK_NAME,
           method: 'DELETE',
@@ -553,7 +548,6 @@ NopeGame.NopeServerManager = Ember.Object.extend({
 
       $.ajax(
         {
-          dataType: 'jsonp',
           data: { friendEmail: email },
           jsonp: CALLBACK_NAME,
           method: 'PATCH',
@@ -587,7 +581,6 @@ NopeGame.NopeServerManager = Ember.Object.extend({
     return new Promise(function(resolve, reject) {
       $.ajax(
         {
-          dataType: 'jsonp',
           data: { friendEmail: opponent.get('email') },
           jsonp: CALLBACK_NAME,
           method: 'PATCH',
@@ -618,7 +611,6 @@ NopeGame.NopeServerManager = Ember.Object.extend({
     return new Promise(function(resolve, reject) {
       $.ajax(
         {
-          dataType: 'jsonp',
           data: { friendEmail: opponent.get('email') },
           jsonp: CALLBACK_NAME,
           method: 'PATCH',
@@ -649,7 +641,6 @@ NopeGame.NopeServerManager = Ember.Object.extend({
     return new Promise(function(resolve, reject) {
       $.ajax(
         {
-          dataType: 'jsonp',
           data: { friendEmail: opponent.get('email') },
           jsonp: CALLBACK_NAME,
           method: 'PATCH',
@@ -693,7 +684,6 @@ NopeGame.NopeServerManager = Ember.Object.extend({
     return new Promise(function(resolve, reject) {
       $.ajax(
         {
-          dataType: 'jsonp',
           data: { friendEmail: opponent.get('email') },
           jsonp: CALLBACK_NAME,
           method: 'PATCH',

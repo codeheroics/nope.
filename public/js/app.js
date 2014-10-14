@@ -22,6 +22,8 @@ var IGNORED_USERS_KEY = 'ignoredUsers';
 
 var NOPES_HISTORY_LENGTH = 25;
 
+$.support.cors = true;
+
 toastr.options = {
   showDuration: 300,
   hideDuration: 300,
@@ -41,7 +43,6 @@ var CustomAuthenticator = Ember.SimpleAuth.Authenticators.Base.extend({
 
       $.ajax(
         {
-          dataType: 'jsonp',
           method: 'get',
           jsonp: CALLBACK_NAME,
           url: LOGIN_ROUTE
@@ -56,7 +57,6 @@ var CustomAuthenticator = Ember.SimpleAuth.Authenticators.Base.extend({
     return new Ember.RSVP.Promise(function(resolve, reject) {
       $.ajax(
         {
-          dataType: 'jsonp',
           method: 'POST',
           jsonp: CALLBACK_NAME,
           url: LOGIN_ROUTE,
