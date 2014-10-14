@@ -4,6 +4,7 @@ var app = express();
 
 var config = require('config');
 var bodyParser = require('body-parser');
+var cors = require('cors');
 
 var winston = require('winston');
 winston.add(winston.transports.File, { filename: './log/api.log' });
@@ -11,6 +12,7 @@ if (process.env.NODE_ENV === 'production') winston.remove(winston.transports.Con
 
 app.use(bodyParser.urlencoded({ extended: false })); // Forms
 app.use(bodyParser.json());
+app.use(cors());
 // app.use(bodyParser.json({ type: 'application/vnd.api+json' }))
 
 app.use(express.static(__dirname + '/public_dist'));
@@ -21,12 +23,6 @@ app.use(passport.initialize());
 
 app.set('jwtTokenSecret', config.jwtTokenSecret);
 app.set('jsonp callback name', 'nopecb');
-
-app.all('*', function(req, res, next) {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-  next();
- });
 
 // Routes & controller logic
 app.get('/', function(req, res, next) {
