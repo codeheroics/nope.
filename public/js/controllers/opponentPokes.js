@@ -54,8 +54,8 @@ NopeGame.OpponentNopesController = Ember.ObjectController.extend({
   }.property('model.computedInTruceUntil', 'clock.pulse'),
 
   roundNumber: function() {
-    return (this.get('victories') || 0) + (this.get('defeats') || 0) + 1;
-  }.property('victories', 'defeats'),
+    return (this.get('model.victories') || 0) + (this.get('model.defeats') || 0) + 1;
+  }.property('model.victories', 'model.defeats'),
 
   canConcede: function() {
     return this.get('isScoring') &&

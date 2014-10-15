@@ -460,6 +460,12 @@ html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockq
 		text-align: center;
 	}
 
+	.battleResults {
+		display:flex;
+		display:-webkit-box;
+		border-radius: 8px;
+	}
+
 	.nopeActions {
 		margin-top: 0.5em;
 		padding: 1.5em;
@@ -486,7 +492,7 @@ html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockq
 		margin: 0.5em 0 0.35em 0;
 	}
 
-	legend.nopesSent {
+	div.nopesSentLegend {
 		margin:auto;
 		font-size: 2em;
 	}
@@ -526,6 +532,7 @@ html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockq
 
 	.InputAddOn-field {
 		flex: 1;
+		-webkit-flex: 1;
 	}
 	.InputAddOn-field:not(:first-child) {
 		border-left: 0;

@@ -429,7 +429,7 @@
 		<script type="text/x-handlebars" data-template-name="opponentNopes">
 				<section style="text-align:center;">
 					<h2 class="major"><span>VS {{name}} (Round {{roundNumber}})</span></h2>
-					<div style="display:flex; border-radius: 8px;">
+					<div class="battleResults">
 						{{#if isWinning }}
 							<div class="score score-left winning">
 								<img class="avatar" {{bind-attr src="avatar"}} /><br>
@@ -481,10 +481,8 @@
 					{{/if}}
 
 					<p class="nopesSent">{{nopesCpt}}</p>
-					<div>
-						<legend class="nopesSent">nopes sent</legend>
-						<legend class="nopesSent">{{victories}} victories, {{defeats}} defeats</legend>
-					</div>
+					<div class="nopesSentLegend">nopes sent</div>
+					<div class="nopesSentLegend">{{victories}} victories, {{defeats}} defeats</div>
 
 					{{#if inTruce}}{{else}}
 						<div style="margin-top:15px;">
@@ -552,10 +550,8 @@
 							<div class="image image-centered image-user"><img {{bind-attr src="avatar"}} /></div>
 							<h3>{{name}} ({{email}})</h3>
 							<p class="nopesSent">{{totalNopes}}</p>
-							<div>
-								<legend class="nopesSent">nopes sent</legend>
-								<legend class="nopesSent">{{victories}} victories, {{defeats}} defeats</legend>
-							</div>
+							<div class="nopesSentLegend">nopes sent</div>
+							<div class="nopesSentLegend">{{victories}} victories, {{defeats}} defeats</div>
 						</section>
 						<section>
 						<h2 class="major"><span>My Achievements</span></h2>
