@@ -697,12 +697,7 @@ User.prototype.sendFriendRequest = function(email, callback) {
     if (err) return callback(err);
 
     if (!potentialFriend) {
-      var mailedPotentialUser = {
-        opponentName: email, // No name to push if the user does not already exist
-        email: email
-      };
-      // User not existing --> invite
-      currentUser.invitedUsers.push(mailedPotentialUser);
+      var mailedPotentialUser = this.inviteUser(email);
       return currentUser.save(function(err) {
         if (err) return callback(err);
         mail.sendInvitationMail(email, currentUser, function(err) {
@@ -713,33 +708,20 @@ User.prototype.sendFriendRequest = function(email, callback) {
     }
      // Do not tell a user he's been ignored
     if (potentialFriend.hasIgnored(currentUser.email)) return callback(null, User.FRIEND_STATUSES.PENDING);
-
+    if (potentialFriend.hasFriend(currentUser.email) || potentialFriend.hasIgnored(currentUser.email)) {
+      // The users already knew each other,
+      return callback(null, User.FRIEND_STATUSES.FRIEND);
+    }
     // TODO Thing about separating all that in 2 methods (sendFriendRequest, acceptFriendRequest)
 
     var callbackStatus;
 
-    if (potentialFriend.hasFriend(currentUser.email) || potentialFriend.hasIgnored(currentUser.email)) {
-      // The users already knew each other,
-      callbackStatus = User.FRIEND_STATUSES.FRIEND; // Opponent will be noped & notified
-    } else if (potentialFriend.hasInvited(currentUser.email)) {
-      // Become friends !
-      potentialFriend.removeFromInvitedUsers(currentUser.email);
-      currentUser.removeFromPendingUsers(potentialFriend.email);
-      potentialFriend.friendsNopes[currentUser.email] = {}; // Sets them as friends
-      currentUser.friendsNopes[potentialFriend.email] = {}; // Sets them as friends
+    if (potentialFriend.hasInvited(currentUser.email)) {
+      currentUser.becomeFriends(potentialFriend);
       callbackStatus = User.FRIEND_STATUSES.FRIEND; // Opponent will be noped & notified, OK.
-      currentUser.earnAchievementsAfterNewFriends();
-      potentialFriend.earnAchievementsAfterNewFriends();
     } else {
       // Send friend request
-      currentUser.invitedUsers.push({
-        email: potentialFriend.email,
-        opponentName: potentialFriend.name
-      });
-      potentialFriend.pendingUsers.push({
-        email: currentUser.email,
-        opponentName: currentUser.name
-      });
+      currentUser.setFriendRequest(potentialFriend);
       callbackStatus = User.FRIEND_STATUSES.PENDING;
     }
 
@@ -780,6 +762,112 @@ User.prototype.sendFriendRequest = function(email, callback) {
       });
     });
   });
+};
+
+User.prototype.inviteUser = function(user) {
+  var invitedUserObject = {};
+  if (typeof user === 'string') {
+    invitedUserObject = {
+      email: user,
+      opponentName: user
+    };
+    // Only an email, probably because the user does not exist yet
+  } else {
+    invitedUserObject = {
+      email: user.email,
+      opponentName: user.name
+    };
+  }
+
+  this.invitedUsers.push(invitedUserObject);
+  return invitedUserObject;
+};
+
+User.prototype.setFriendRequest = function(potentialFriend) {
+  this.inviteUser(potentialFriend);
+  potentialFriend.pendingUsers.push({
+    email: this.email,
+    opponentName: this.name
+  });
+};
+
+
+User.prototype.becomeFriends = function(newFriend) {
+  // Become friends !
+  newFriend.removeFromInvitedUsers(this.email);
+  this.removeFromPendingUsers(newFriend.email);
+  newFriend.friendsNopes[this.email] = {}; // Sets them as friends
+  this.friendsNopes[newFriend.email] = {}; // Sets them as friends
+  this.earnAchievementsAfterNewFriends();
+  newFriend.earnAchievementsAfterNewFriends();
+};
+
+
+User.prototype.batchInvite = function(emails, callback) {
+  var alreadyInvitedArray = [];
+  var alreadyFriendsArray = [];
+  var notFriendsWithArray = [];
+
+  // Both those arrays are separated in case I decide to update the batch process later
+  // but for now they are concatenated after being filled
+  var pendingFirstNopeArray = [];
+  var notExistingArray = [];
+
+
+  emails.forEach(function(email) {
+    email = email.toLowerCase().trim();
+    if (this.hasInvited(email)) {
+      return alreadyInvitedArray.push(email);
+    }
+    if (this.hasIgnored(email) || this.hasFriend(email)) {
+      return alreadyFriendsArray.push(email);
+    }
+    if (this.hasPending(email)) {
+      return pendingFirstNopeArray.push(email);
+    }
+    notFriendsWithArray.push(email);
+  }, this);
+
+  async.forEach(notFriendsWithArray, function(email, cbForEach) {
+    User.findById(email, function(err, potentialFriend) {
+      if (err) return cbForEach(err);
+
+      if (!potentialFriend) {
+        notExistingArray.push(email);
+      }
+      else {
+        if (potentialFriend.hasInvited(email)) {
+          pendingFirstNopeArray.push(potentialFriend);
+        } else {
+          notFriendsWithArray.push(potentialFriend);
+        }
+      }
+      cbForEach();
+    });
+  }, function(err) {
+    if (err) return callback(err);
+
+    notExistingArray.forEach(function(email) {
+      mail.sendInvitationMail(email, this, function(err) { winston.error('Error while inviting ' + email + ' with ' + this.email, err); } );
+      this.inviteUser(email);
+    }, this);
+
+    async.series([
+      function(cbSeries) { this.save(cbSeries); }.bind(this),
+      function inviteNotFriends(cbSeries) {
+        async.forEachSeries(notFriendsWithArray.concat(pendingFirstNopeArray), function(user) {
+          User.findById(this.email, function(updatedCurrentUser) { // Update the user, then sendFriendRequest
+            updatedCurrentUser.sendFriendRequest(user.email, cbSeries);
+          });
+        });
+      }
+    ], function(err) {
+      if (err) return winston.error('Error while batch importing for ' + this.email, err, emails);
+
+      callback();
+    }.bind(this));
+
+  }.bind(this));
 };
 
 User.prototype._removeFromUsers = function(arrayName, email) {

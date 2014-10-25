@@ -18,6 +18,8 @@ module.exports = function(app) {
 
   // Send a friend request
   app.post('/users', isLoggedIn, function(req, res, next) {
+    if (req.query.batch) return handleBatchImport(req, res, next);
+
     var email = req.body.friendEmail && req.body.friendEmail.toLowerCase().trim();
     if (!validator.isEmail(email)) return res.jsonp(400, {message: 'Invalid E-mail'});
     req.user.sendFriendRequest(email, function(err, status, data) {
@@ -96,4 +98,11 @@ module.exports = function(app) {
       res.jsonp(200);
     });
   });
+
+  function handleBatchExport(req, res, next) {
+    req.user.batchInvite(req.body.friendEmail, function(err) {
+      if (err) res.jsonp(500, {});
+      res.jsonp(200, {});
+    });
+  }
 };
