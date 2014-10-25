@@ -322,8 +322,10 @@ NopeGame.NopeServerManager = Ember.Object.extend({
   updateFriendsInfos: function(data) {
     var localPendingUsers = NopeGame.Opponent.findQuery({status: 'pending'});
     var localIgnoredUsers = NopeGame.Opponent.findQuery({status: 'ignored'});
+    var localInvitedUsers = NopeGame.Opponent.findQuery({status: 'invited'});
     var serverPendingUsers = data.pendingUsers;
     var serverIgnoredUsers = data.ignoredUsers;
+    var serverInvitedUsers = data.invitedUsers;
 
     var getEmails = function(array) {
       return array.map(function(el) {
@@ -352,18 +354,24 @@ NopeGame.NopeServerManager = Ember.Object.extend({
 
     var localPendingUsersMails = getEmailsFromEmberObjects(localPendingUsers);
     var localIgnoredUsersMails = getEmailsFromEmberObjects(localIgnoredUsers);
+    var localInvitedUsersMails = getEmailsFromEmberObjects(localInvitedUsers);
     var serverPendingUsersMails = getEmails(serverPendingUsers);
     var serverIgnoredUsersMails = getEmails(serverIgnoredUsers);
+    var serverInvitedUsersMails = getEmails(serverInvitedUsers);
     var newPendingUsers = diffByEmail(serverPendingUsers, localPendingUsersMails);
     var newIgnoredUsers = diffByEmail(serverIgnoredUsers, localIgnoredUsersMails);
+    var newInvitedUsers = diffByEmail(serverInvitedUsers, localInvitedUsersMails);
     var removedPendingUsers = diffByEmailFromEmberObjects(localPendingUsers, serverPendingUsersMails);
     var removedIgnoredUsers = diffByEmailFromEmberObjects(localIgnoredUsers, serverIgnoredUsersMails);
+    var removedInvitedUsers = diffByEmailFromEmberObjects(localInvitedUsers, serverInvitedUsersMails);
 
     return Promise.all([
       Promise.all(this.removePendingOrIgnoredUsers(removedIgnoredUsers, 'ignored')),
       Promise.all(this.removePendingOrIgnoredUsers(removedPendingUsers, 'pending')),
+      Promise.all(this.removePendingOrIgnoredUsers(removedInvitedUsers, 'invited')),
       Promise.all(this.createUsers(newIgnoredUsers, 'ignored')),
       Promise.all(this.createUsers(newPendingUsers, 'pending')),
+      Promise.all(this.createUsers(newInvitedUsers, 'invited')),
     ]);
   },
 
@@ -469,12 +477,21 @@ NopeGame.NopeServerManager = Ember.Object.extend({
             .then(resolve);
           }
 
-          self.createUser(object.invitedUser, 'invited')
-          .then(function(invitedUser) {
+          // We don't necessarily have an object.invitedUser (if the user is already pending for example)
+          var promise = Promise.resolve();
+          if (object.invitedUser) {
+            self.createUser(object.invitedUser, 'invited');
+          }
 
+          promise.then(function(invitedUser) {
+            var name = existingOpponent.get('name') || email;
+            if (invitedUser) {
+              name = invitedUser.get('name');
+              email = invitedUser.get('email');
+            }
             toastr.info(
-              'Sent a request to <span style="font-weight:bold;">' + invitedUser.get('name') +
-              '</span> (' + invitedUser.get('email') + ')',
+              'Sent a request to <span style="font-weight:bold;">' + name +
+              '</span> ' + (name !== email ? '(' + email + ')' : ''),
               undefined,
               { timeOut: 5000 }
             );

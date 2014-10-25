@@ -1,15 +1,17 @@
 'use strict';
 
-var couchbase   = require('couchbase');
-var async       = require('async');
-var validator   = require('validator');
-var winston     = require('winston');
-var sanitizer   = require('sanitizer');
-var _           = require('lodash');
-var config      = require('config');
+var couchbase        = require('couchbase');
+var async            = require('async');
+var validator        = require('validator');
+var winston          = require('winston');
+var sanitizer        = require('sanitizer');
+var _                = require('lodash');
+var config           = require('config');
 
-var db          = require('../lib/couchbase');
-var redisClient = require('../lib/redisClient');
+var db               = require('../lib/couchbase');
+var redisClient      = require('../lib/redisClient');
+var mail             = require('../lib/mail');
+
 var userAchievements = require('./userAchievements');
 
 var anHourTime = 60 * 60 * 1000;
@@ -137,22 +139,22 @@ User.prototype.hasFriend = function(email) {
   return this.friendsNopes[email] ? true : false;
 };
 
-User.prototype.hasIgnored = function(email) {
-  return this.ignoredUsers.some(function(ignoredUser) {
-    return ignoredUser.email === email;
+User.prototype.has = function(property, email) {
+  return this[property].some(function(user) {
+    return user.email === email;
   });
+};
+
+User.prototype.hasIgnored = function(email) {
+  return this.has('ignoredUsers', email);
 };
 
 User.prototype.hasInvited = function(email) {
-  return this.invitedUsers.some(function(invitedUser) {
-    return invitedUser.email === email;
-  });
+  return this.has('invitedUsers', email);
 };
 
 User.prototype.hasPending = function(email) {
-  return this.pendingUsers.some(function(pendingUser) {
-    return pendingUser.email === email;
-  });
+  return this.has('pendingUsers', email);
 };
 
 User.prototype.inTruce = function(email) {
@@ -694,7 +696,21 @@ User.prototype.sendFriendRequest = function(email, callback) {
   User.findById(email, function(err, potentialFriend) {
     if (err) return callback(err);
 
-    if (!potentialFriend) return callback(new FriendError(User.FRIEND_STATUSES.NOT_FOUND)); // No user // FIXME probably send mail here
+    if (!potentialFriend) {
+      var mailedPotentialUser = {
+        opponentName: email, // No name to push if the user does not already exist
+        email: email
+      };
+      // User not existing --> invite
+      currentUser.invitedUsers.push(mailedPotentialUser);
+      return currentUser.save(function(err) {
+        if (err) return callback(err);
+        mail.sendInvitationMail(email, currentUser, function(err) {
+          if (err) return winston.error('Error while sending mail to ' + email + ' from ' + currentUser.email, err);
+        });
+        return callback(null, User.FRIEND_STATUSES.PENDING, mailedPotentialUser);
+      });
+    }
      // Do not tell a user he's been ignored
     if (potentialFriend.hasIgnored(currentUser.email)) return callback(null, User.FRIEND_STATUSES.PENDING);
 
