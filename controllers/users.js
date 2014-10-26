@@ -18,7 +18,7 @@ module.exports = function(app) {
 
   // Send a friend request
   app.post('/users', isLoggedIn, function(req, res, next) {
-    if (req.query.batch) return handleBatchImport(req, res, next);
+    if (req.query.batch !== undefined) return handleBatchImport(req, res, next);
 
     var email = req.body.friendEmail && req.body.friendEmail.toLowerCase().trim();
     if (!validator.isEmail(email)) return res.jsonp(400, {message: 'Invalid E-mail'});
@@ -99,8 +99,13 @@ module.exports = function(app) {
     });
   });
 
-  function handleBatchExport(req, res, next) {
-    req.user.batchInvite(req.body.friendEmail, function(err) {
+  function handleBatchImport(req, res, next) {
+    var friendEmails = req.body['friendEmail[]'];
+    if (!friendEmails) return res.jsonp(400, {});
+    if (typeof(friendEmails) === 'string') {
+      friendEmails = [friendEmails];
+    }
+    req.user.batchInvite(friendEmails, function(err) {
       if (err) res.jsonp(500, {});
       res.jsonp(200, {});
     });

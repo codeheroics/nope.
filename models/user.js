@@ -806,29 +806,28 @@ User.prototype.becomeFriends = function(newFriend) {
 User.prototype.batchInvite = function(emails, callback) {
   var alreadyInvitedArray = [];
   var alreadyFriendsArray = [];
-  var notFriendsWithArray = [];
+  var filteredEmails = [];
 
   // Both those arrays are separated in case I decide to update the batch process later
   // but for now they are concatenated after being filled
   var pendingFirstNopeArray = [];
   var notExistingArray = [];
-
+  var notFriendsWithArray = [];
 
   emails.forEach(function(email) {
     email = email.toLowerCase().trim();
+    if (!validator.isEmail(email)) return;
+    if (email === this.email) return;
     if (this.hasInvited(email)) {
       return alreadyInvitedArray.push(email);
     }
     if (this.hasIgnored(email) || this.hasFriend(email)) {
       return alreadyFriendsArray.push(email);
     }
-    if (this.hasPending(email)) {
-      return pendingFirstNopeArray.push(email);
-    }
-    notFriendsWithArray.push(email);
+    filteredEmails.push(email);
   }, this);
 
-  async.forEach(notFriendsWithArray, function(email, cbForEach) {
+  async.forEach(filteredEmails, function(email, cbForEach) {
     User.findById(email, function(err, potentialFriend) {
       if (err) return cbForEach(err);
 
@@ -848,21 +847,36 @@ User.prototype.batchInvite = function(emails, callback) {
     if (err) return callback(err);
 
     notExistingArray.forEach(function(email) {
-      mail.sendInvitationMail(email, this, function(err) { winston.error('Error while inviting ' + email + ' with ' + this.email, err); } );
+      mail.sendInvitationMail(
+        email,
+        this,
+        function(err) {
+          winston.error('Error while inviting ' + email + ' with ' + this.email, err);
+        }.bind(this)
+      );
       this.inviteUser(email);
     }, this);
+
+    // Could be useful to separate those.
+    var needFriendRequests = notFriendsWithArray.concat(pendingFirstNopeArray);
+    if (!needFriendRequests.length) return callback();
 
     async.series([
       function(cbSeries) { this.save(cbSeries); }.bind(this),
       function inviteNotFriends(cbSeries) {
-        async.forEachSeries(notFriendsWithArray.concat(pendingFirstNopeArray), function(user) {
-          User.findById(this.email, function(updatedCurrentUser) { // Update the user, then sendFriendRequest
-            updatedCurrentUser.sendFriendRequest(user.email, cbSeries);
+        async.forEachSeries(needFriendRequests, function(user, cbForEachSeries) {
+          User.findById(this.email, function(err, updatedCurrentUser) { // Update the user, then sendFriendRequest
+            if (err) return cbForEachSeries(err);
+            if (!updatedCurrentUser) return cbForEachSeries(new Error('wtf'));
+            updatedCurrentUser.sendFriendRequest(user.email, cbForEachSeries);
           });
-        });
-      }
+        }.bind(this), cbSeries);
+      }.bind(this)
     ], function(err) {
-      if (err) return winston.error('Error while batch importing for ' + this.email, err, emails);
+      if (err) {
+        winston.error('Error while batch importing for ' + this.email, err, emails);
+        callback(err);
+      }
 
       callback();
     }.bind(this));
