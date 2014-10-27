@@ -697,7 +697,7 @@ User.prototype.sendFriendRequest = function(email, callback) {
     if (err) return callback(err);
 
     if (!potentialFriend) {
-      var mailedPotentialUser = this.inviteUser(email);
+      var mailedPotentialUser = currentUser.inviteUser(email);
       return currentUser.save(function(err) {
         if (err) return callback(err);
         mail.sendInvitationMail(email, currentUser, function(err) {
