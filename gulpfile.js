@@ -37,6 +37,9 @@ gulp.task('build', ['buildHTML', 'buildJS', 'buildCSS']);
 gulp.task('buildProd', ['buildHTML', 'buildProdJS', 'buildCSS']);
 
 gulp.task('buildHTML', function() {
+  gulp.src(DEV_PUBLIC + '/index.html')
+    .pipe(gulp.dest(DIST_PUBLIC));
+
   gulp.src(DEV_PUBLIC + '/app.html')
     .pipe(useref())
     .pipe(minifyHTML({ conditionals: true })) // IE conditionals remain
