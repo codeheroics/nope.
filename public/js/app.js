@@ -83,7 +83,11 @@ var CustomAuthenticator = Ember.SimpleAuth.Authenticators.Base.extend({
               toastr.error('Please try again in a few minutes', 'Identification error', {timeOut: 10000});
             }
           } else {
-            toastr.error('Please try again in a few minutes', 'Server error', {timeOut: 10000});
+            if (navigator.onLine) {
+              toastr.error('Please try again in a few minutes', 'Server error', {timeOut: 10000});
+            } else {
+              toastr.error('Please try again', 'Internet connection error', {timeOut: 10000});
+            }
           }
           reject();
         });

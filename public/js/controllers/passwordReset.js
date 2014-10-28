@@ -26,8 +26,12 @@ NopeGame.PasswordResetController = Ember.ObjectController.extend({
         } else if (xhr.status === 404) {
           toastr.error('Invalid: The account has been deleted', 'Error', {timeOut: 10000});
         }
-        else { // FIXME detect not connected
-          toastr.error('Please try again in a few minutes', 'Server error', {timeOut: 10000});
+        else {
+          if (navigator.onLine) {
+            toastr.error('Please try again in a few minutes', 'Server error', {timeOut: 10000});
+          } else {
+            toastr.error('Please try again', 'Internet connection error', {timeOut: 10000});
+          }
         }
       });
     }
