@@ -38,6 +38,10 @@ NopeGame.ApplicationRoute = Ember.Route.extend(
       sessionAuthenticationSucceeded: function(transition, queryParams) {
         createManagers();
         this._super(transition, queryParams);
+      },
+      sessionInvalidationSucceeded: function() {
+        toastr.warning('You have been logged out');
+        this.transitionTo('login');
       }
     }
   }
