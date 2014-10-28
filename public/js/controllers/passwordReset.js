@@ -7,7 +7,6 @@ NopeGame.PasswordResetController = Ember.ObjectController.extend({
       }
       $.ajax(
         {
-          dataType: 'jsonp',
           data: {
             password: data.password1,
             token: data.resetToken

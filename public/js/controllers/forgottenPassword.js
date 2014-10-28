@@ -4,7 +4,6 @@ NopeGame.ForgottenPasswordController = Ember.ObjectController.extend({
     sendPasswordResetRequest: function(data) {
       $.ajax(
         {
-          dataType: 'jsonp',
           data: { email: data.email },
           jsonp: CALLBACK_NAME,
           method: 'POST',

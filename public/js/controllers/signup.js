@@ -7,7 +7,6 @@ NopeGame.SignupController = Ember.ObjectController.extend({
 
       $.ajax(
         {
-          dataType: 'jsonp',
           data: {
             email: formData.email,
             name: formData.name,
