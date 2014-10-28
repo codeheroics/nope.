@@ -1,6 +1,6 @@
 'use strict';
 NopeGame.HistoryController = Ember.ArrayController.extend({
-  sortProperties: ['date'],
+  sortProperties: ['time'],
   sortAscending: false,
   nopes: function() {
     return this.toArray().slice(0, NOPES_HISTORY_LENGTH);
