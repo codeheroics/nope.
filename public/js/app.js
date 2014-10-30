@@ -195,34 +195,6 @@ function generateGravatar(email) {
   });
 })();
 
-// Setup visibility changes
-(function() {
-  var hidden, visibilityChange, state;
-  if (typeof document.hidden !== 'undefined') {
-    hidden = 'hidden';
-    visibilityChange = 'visibilitychange';
-    state = 'visibilityState';
-  } else if (typeof document.mozHidden !== 'undefined') {
-    hidden = 'mozHidden';
-    visibilityChange = 'mozvisibilitychange';
-    state = 'mozVisibilityState';
-  } else if (typeof document.msHidden !== 'undefined') {
-    hidden = 'msHidden';
-    visibilityChange = 'msvisibilitychange';
-    state = 'msVisibilityState';
-  } else if (typeof document.webkitHidden !== 'undefined') {
-    hidden = 'webkitHidden';
-    visibilityChange = 'webkitvisibilitychange';
-    state = 'webkitVisibilityState';
-  }
-  document.addEventListener(visibilityChange, function(event) {
-    if (document[hidden]) return;
-    if (!NopeGame || !NopeGame.serverManager) return;
-    if (!NopeGame.serverManager.isLoading || !NopeGame.serverManager.isInit) return;
-    NopeGame.serverManager.reconnectPrimus();
-  });
-})();
-
 $(function() {
   FastClick.attach(document.body);
 });
