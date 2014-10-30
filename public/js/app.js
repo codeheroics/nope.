@@ -217,10 +217,8 @@ function generateGravatar(email) {
   }
   document.addEventListener(visibilityChange, function(event) {
     if (document[hidden]) return;
-    toastr.info('became visible');
     if (!NopeGame || !NopeGame.serverManager) return;
     if (!NopeGame.serverManager.isLoading || !NopeGame.serverManager.isInit) return;
-    toastr.info('gonna try end then open');
     NopeGame.serverManager.reconnectPrimus();
   });
 })();
