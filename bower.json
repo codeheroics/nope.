@@ -30,7 +30,8 @@
     "font-awesome": "~4.1.0",
     "js-md5": "~1.1.0",
     "validator-js": "~3.18.1",
-    "lodash": "~2.4.1"
+    "lodash": "~2.4.1",
+    "fastclick": "~1.0.3"
   },
   "resolutions": {
     "ember": "~1.5.1",

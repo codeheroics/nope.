@@ -28,7 +28,35 @@
     "dojo": false,
 
     // Custom predefined globals.
-    "predef": ["NopeGame", "Ember", "console", "Promise", "alert", "moment", "toastr", "validator", "_"],
+    "predef": [
+        "NopeGame",
+        "Ember",
+        "console",
+        "Promise",
+        "alert",
+        "moment",
+        "toastr",
+        "validator",
+        "md5",
+        "_",
+        "FastClick",
+        "USERS_ROUTE",
+        "SELF_ROUTE",
+        "NOPES_ROUTE",
+        "LOGIN_ROUTE",
+        "SIGNUP_ROUTE",
+        "FORGOTTEN_PASSWORD_ROUTE",
+        "PASSWORD_RESET_ROUTE",
+        "SERVER_URL",
+        "REALTIME_SERVER_URL",
+        "PRIMUS_ROUTE",
+        "CALLBACK_NAME",
+        "GRAVATAR_BASE",
+        "DEFAULT_AVATAR",
+        "PENDING_USERS_KEY",
+        "IGNORED_USERS_KEY",
+        "NOPES_HISTORY_LENGTH"
+    ],
 
     // Development
 
