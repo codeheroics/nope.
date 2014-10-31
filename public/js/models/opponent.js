@@ -68,19 +68,23 @@ NopeGame.Opponent = Ember.Model.extend({
   inTruceUntil:   Ember.attr(), // In truce until *time*
   truceBrokenTime:Ember.attr(),
 
+  serverTimeDiff: function() {
+    return parseInt(localStorage.getItem('serverTimeDiff') || 0, 10);
+  }.property().volatile(),
+
   // All these computed times have the same objective : take in account the time diff with the server
   computedLastNopeTime: function() {
-    return this.get('lastNopeTime')  - (localStorage.getItem('serverTimeDiff') || 0);
-  }.property('lastNopeTime'),
+    return this.get('lastNopeTime')  + this.get('serverTimeDiff');
+  }.property('lastNopeTime', 'serverTimeDiff').volatile(),
   computedInTruceFrom: function() {
-    return this.get('inTruceFrom')  - (localStorage.getItem('serverTimeDiff') || 0);
-  }.property('inTruceFrom'),
+    return this.get('inTruceFrom')  + this.get('serverTimeDiff');
+  }.property('inTruceFrom', 'serverTimeDiff').volatile(),
   computedInTruceUntil: function() {
-    return this.get('inTruceUntil')  - (localStorage.getItem('serverTimeDiff') || 0);
-  }.property('inTruceUntil'),
+    return this.get('inTruceUntil')  + this.get('serverTimeDiff');
+  }.property('inTruceUntil', 'serverTimeDiff').volatile(),
   computedTruceBrokenTime: function() {
-    return this.get('truceBrokenTime')  - (localStorage.getItem('serverTimeDiff') || 0);
-  }.property('truceBrokenTime')
+    return this.get('truceBrokenTime')  + this.get('serverTimeDiff');
+  }.property('truceBrokenTime', 'serverTimeDiff').volatile()
 });
 
 NopeGame.Opponent.reopenClass({
