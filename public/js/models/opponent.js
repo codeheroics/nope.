@@ -75,16 +75,16 @@ NopeGame.Opponent = Ember.Model.extend({
   // All these computed times have the same objective : take in account the time diff with the server
   computedLastNopeTime: function() {
     return this.get('lastNopeTime')  + this.get('serverTimeDiff');
-  }.property('lastNopeTime', 'serverTimeDiff').volatile(),
+  }.property('lastNopeTime', 'serverTimeDiff'),
   computedInTruceFrom: function() {
     return this.get('inTruceFrom')  + this.get('serverTimeDiff');
-  }.property('inTruceFrom', 'serverTimeDiff').volatile(),
+  }.property('inTruceFrom', 'serverTimeDiff'),
   computedInTruceUntil: function() {
     return this.get('inTruceUntil')  + this.get('serverTimeDiff');
-  }.property('inTruceUntil', 'serverTimeDiff').volatile(),
+  }.property('inTruceUntil', 'serverTimeDiff'),
   computedTruceBrokenTime: function() {
     return this.get('truceBrokenTime')  + this.get('serverTimeDiff');
-  }.property('truceBrokenTime', 'serverTimeDiff').volatile()
+  }.property('truceBrokenTime', 'serverTimeDiff')
 });
 
 NopeGame.Opponent.reopenClass({
