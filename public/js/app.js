@@ -168,7 +168,7 @@ function generateGravatar(email) {
 
   var durationHelper = function(milliseconds) {
     milliseconds = Math.abs(milliseconds);
-    var units = ['years', 'days', 'hours', 'minutes', 'seconds'];
+    var units = ['years', 'months', 'days', 'hours', 'minutes', 'seconds'];
 
     return units.reduce(function(previousValue, unit) {
       var unitValue = moment.duration(milliseconds)[unit]();

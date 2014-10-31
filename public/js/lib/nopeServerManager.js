@@ -467,6 +467,7 @@ NopeGame.NopeServerManager = Ember.Object.extend({
     }
 
     return new Promise(function(resolve, reject) {
+      toastr.info('Adding ' + email + ' to your friends...');
 
       $.ajax(
         {
@@ -519,13 +520,14 @@ NopeGame.NopeServerManager = Ember.Object.extend({
               toastr.error('Sorry, there was an error with the server when trying to add ' + email);
             } else {
               if (xhr.responseJSON.status === 'Self') {
-                return toastr.error('Sorry. You can not be your own friend.', 'Nope.', {timeOut: 5000});
+                toastr.error('Sorry. You can not be your own friend.', 'Nope.', {timeOut: 5000});
+              } else {
+                toastr.info(
+                  '<a href="mailto:' + email + '?subject=Nope.wtf&body=Join%20www.nope.wtf!">Invite them to Nope! <i class="fa fa-envelope"></i></a>',
+                  email + ' is not a member!',
+                  { timeOut: 15000 }
+                );
               }
-              toastr.info(
-                '<a href="mailto:' + email + '?subject=Nope.wtf&body=Join%20www.nope.wtf!">Invite them to Nope! <i class="fa fa-envelope"></i></a>',
-                email + ' is not a member!',
-                { timeOut: 15000 }
-              );
             }
           }
           reject();
