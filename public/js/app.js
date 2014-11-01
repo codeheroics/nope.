@@ -42,6 +42,8 @@ function generateGravatar(email) {
         var storedToken = window.localStorage.getItem('token');
         if (!storedToken) return reject();
 
+        if (!navigator.onLine) return resolve(); // No connection
+
         $.ajax(
           {
             method: 'get',
@@ -50,7 +52,10 @@ function generateGravatar(email) {
           }
         )
           .done(resolve)
-          .fail(reject);
+          .fail(function(xhr) {
+            if (!xhr.responseJSON) return resolve(); // Probably no connection
+            reject();
+          });
       });
     },
     authenticate: function(options) {
