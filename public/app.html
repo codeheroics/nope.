@@ -337,8 +337,8 @@
 				{{/if}}
 				<ul class="columns">
 					{{#each friendOpponents}}
-						<li>
-							{{#link-to 'opponentNopes' id}}
+						{{#link-to 'opponentNopes' id}}
+							<li>
 								<h3 style="display: inline;">
 									{{#if inTruce}}
 										<i class="fa fa-clock-o"></i>
@@ -355,12 +355,9 @@
 								<span class="discrete">
 									{{winningDuration computedTimeFor computedTimeAgainst}}
 								</span>
-							{{/link-to}}
-						</li>
+							</li>
+						{{/link-to}}
 					{{/each}}
-					{{#if singleOpponent}}
-					  <li style="visibility:hidden;"></li><!-- FIXME Quickfix for columns problem -->
-					{{/if}}
 				</ul>
 			</section>
 			<section style="text-align:center;">
@@ -385,7 +382,6 @@
 								{{name}}
 							</h3>
 						</li>
-					<li style="visibility:hidden;"></li><!-- FIXME Quickfix for columns problem -->
 					{{/each}}
 				</ul>
 			</section>
@@ -408,7 +404,6 @@
 								{{name}}
 							</h3>
 						</li>
-					<li style="visibility:hidden;"></li><!-- FIXME Quickfix for columns problem -->
 					{{/each}}
 				</ul>
 			</section>

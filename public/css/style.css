@@ -201,78 +201,13 @@ html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockq
 		-webkit-columns: 2;
 	}
 
-		ul.columns > li
+		ul.columns li
 		{
 			border-bottom: solid 2px #e7eae8;
 			padding-top: 2.35em;
 			padding-bottom: 2.35em;
+			-webkit-column-break-inside: avoid;
 		}
-
-		ul.columns > li:first-child
-		{
-			border-top: 0;
-			padding-top: 0;
-			margin-top: 0;
-		}
-
-	ul.contact
-	{
-	}
-
-		ul.contact li
-		{
-			position: relative;
-			display: inline-block;
-			margin: 0 0.25em 0 0.25em;
-			top: 0;
-			-moz-transition: top .15s ease-in-out;
-			-webkit-transition: top .15s ease-in-out;
-			-o-transition: top .15s ease-in-out;
-			-ms-transition: top .15s ease-in-out;
-			transition: top .15s ease-in-out;
-		}
-
-			ul.contact li a
-			{
-				display: block;
-				position: relative;
-				width: 48px;
-				height: 48px;
-				border-radius: 6px;
-				outline: 0;
-				-moz-transition: background-color .2s ease-in-out;
-				-webkit-transition: background-color .2s ease-in-out;
-				-o-transition: background-color .2s ease-in-out;
-				-ms-transition: background-color .2s ease-in-out;
-				transition: background-color .2s ease-in-out;
-				background: #c1cac5;
-				text-align: center;
-			}
-
-				ul.contact li a:before
-				{
-					color: #f2f5f3;
-					font-size: 32px;
-					line-height: 48px;
-				}
-
-			ul.contact li:hover a.fa-facebook		{ background-color: #3C5A98; }
-			ul.contact li:hover a.fa-twitter		{ background-color: #2DAAE4; }
-			ul.contact li:hover a.fa-rss			{ background-color: #F2600B; }
-			ul.contact li:hover a.fa-dribbble		{ background-color: #C4376B; }
-			ul.contact li:hover a.fa-linkedin		{ background-color: #006599; }
-			ul.contact li:hover a.fa-tumblr			{ background-color: #31516A; }
-			ul.contact li:hover a.fa-google-plus	{ background-color: #DA2713; }
-
-			ul.contact li:hover
-			{
-				top: -5px;
-			}
-
-			ul.contact li:active
-			{
-				top: 0;
-			}
 
 	div.special
 	{

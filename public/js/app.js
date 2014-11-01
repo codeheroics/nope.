@@ -96,10 +96,10 @@ function generateGravatar(email) {
     },
     invalidate: function() {
       return new Ember.RSVP.Promise(function(resolve) {
-        window.localStorage.clear();
         if (NopeGame.serverManager) {
           NopeGame.serverManager.endPrimus();
         }
+        window.localStorage.clear();
         resolve();
       });
     }
