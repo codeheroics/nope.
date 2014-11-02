@@ -299,7 +299,8 @@ NopeGame.NopeServerManager = Ember.Object.extend({
           headers: {
             'x-access-token': window.localStorage.getItem('token')
           },
-          url: SELF_ROUTE
+          url: SELF_ROUTE,
+          cache: false
         }
       )
         .done(function(data) {
@@ -434,7 +435,8 @@ NopeGame.NopeServerManager = Ember.Object.extend({
           headers: {
             'x-access-token': window.localStorage.getItem('token')
           },
-          url: NOPES_ROUTE
+          url: NOPES_ROUTE,
+          cache: false
         }
       )
       .done(function(dataNopes) {
