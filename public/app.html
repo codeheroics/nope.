@@ -353,8 +353,6 @@
 									{{friendOpponent.name}}
 								</h3>
 								<span class="discrete">
-									Hey
-									{{durations}}
 									{{winningDuration friendOpponent.computedTimeFor friendOpponent.computedTimeAgainst clock.pulse}}
 								</span>
 							</li>
@@ -450,7 +448,7 @@
 					</div>
 
 					<div>
-						Currently, you {{#if isWinning}} lose {{else}} win {{/if}} by {{duration timeDiff clock.pulse}}
+						You're currently {{#if isWinning}} losing {{else}} winning {{/if}} by {{duration timeDiff clock.pulse}}
 					</div>
 					{{#if inTruce}}{{else}}
 						<div>
