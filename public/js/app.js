@@ -54,6 +54,7 @@ function generateGravatar(email) {
           .done(resolve)
           .fail(function(xhr) {
             if (!xhr.responseJSON) return resolve(); // Probably no connection
+            if (xhr.status === 304) return resolve(); // Sometimes, with firefox
             reject();
           });
       });
