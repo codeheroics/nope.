@@ -28,8 +28,7 @@ NopeGame.SignupController = Ember.ObjectController.extend({
       .fail(function(jqXHR) {
         toastr.error(
           jqXHR.status === 403 ? 'E-mail already used' : jqXHR.status === 0 ? 'Internet connection error' : 'Server error',
-          'Error during signup',
-          { timeOut: 5000 }
+          'Error during signup'
         );
         // Error with signup : either email already taken, or server error
       });

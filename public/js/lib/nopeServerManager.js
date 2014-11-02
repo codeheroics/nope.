@@ -462,7 +462,7 @@ NopeGame.NopeServerManager = Ember.Object.extend({
 
     var existingOpponent = NopeGame.Opponent.find(email);
     if (existingOpponent.isLoaded && existingOpponent.get('status') !== 'pending') {
-      toastr.warning('You already have this user as ' + existingOpponent.get('status'), undefined, {timeOut: 5000});
+      toastr.warning('You already have this user as ' + existingOpponent.get('status'));
       return Promise.reject();
     }
 
@@ -504,9 +504,7 @@ NopeGame.NopeServerManager = Ember.Object.extend({
             }
             toastr.info(
               'Sent a request to <span style="font-weight:bold;">' + name +
-              '</span> ' + (name !== email ? '(' + email + ')' : ''),
-              undefined,
-              { timeOut: 5000 }
+              '</span> ' + (name !== email ? '(' + email + ')' : '')
             );
             resolve();
           });
@@ -517,16 +515,12 @@ NopeGame.NopeServerManager = Ember.Object.extend({
             toastr.error('Could not reach the Internet :(');
           } else {
             if (xhr.status !== 403) {
-              toastr.error('Sorry, there was an error with the server when trying to add ' + email);
+              toastr.error('There was an error with the server when trying to add ' + email, 'Sorry');
             } else {
               if (xhr.responseJSON.status === 'Self') {
-                toastr.error('Sorry. You can not be your own friend.', 'Nope.', {timeOut: 5000});
+                toastr.error('You can not be your own friend.', 'Sorry', {timeOut: 5000});
               } else {
-                toastr.info(
-                  '<a href="mailto:' + email + '?subject=Nope.wtf&body=Join%20www.nope.wtf!">Invite them to Nope! <i class="fa fa-envelope"></i></a>',
-                  email + ' is not a member!',
-                  { timeOut: 15000 }
-                );
+                toastr.error('Unknown error', 'Sorry');
               }
             }
           }
@@ -558,7 +552,7 @@ NopeGame.NopeServerManager = Ember.Object.extend({
           ignoredOpponent.set('status', 'ignored');
           ignoredOpponent.save().then(function() {
             toastr.info('You are now ignoring <span style="font-weight:bold;">' + ignoredOpponent.get('name') +
-             '</span>.');
+              '</span>.');
             resolve();
           });
         })
@@ -629,9 +623,9 @@ NopeGame.NopeServerManager = Ember.Object.extend({
       }.bind(this))
       .fail(function(xhr) {
         if (!xhr.status) {
-          toastr.error('Unable to connect to the internet while trying to concede', undefined, {timeOut: 5000});
+          toastr.error('Unable to connect to the internet while trying to concede');
         } else if (xhr.status >= 500) {
-          toastr.error('Sorry, there was a server error while trying to concede', undefined, {timeOut: 5000});
+          toastr.error('Sorry, there was a server error while trying to concede');
         }
         reject();
       });
@@ -659,9 +653,9 @@ NopeGame.NopeServerManager = Ember.Object.extend({
       }.bind(this))
       .fail(function(xhr) {
         if (!xhr.status) {
-          toastr.error('Unable to connect to the internet while trying to declare victory', undefined, {timeOut: 5000});
+          toastr.error('Unable to connect to the internet while trying to declare victory');
         } else if (xhr.status >= 500) {
-          toastr.error('Sorry, there was a server error while trying to declare victory', undefined, {timeOut: 5000});
+          toastr.error('Sorry, there was a server error while trying to declare victory');
         }
         reject();
       });
@@ -702,9 +696,9 @@ NopeGame.NopeServerManager = Ember.Object.extend({
       }.bind(this))
       .fail(function(xhr) {
         if (!xhr.status) {
-          toastr.error('Unable to connect to the internet', undefined, {timeOut: 5000});
+          toastr.error('Unable to connect to the internet');
         } else if (xhr.status >= 500) {
-          toastr.error('Sorry, there was a server error', undefined, {timeOut: 5000});
+          toastr.error('Sorry, there was a server error');
         }
         reject();
       });
@@ -734,9 +728,9 @@ NopeGame.NopeServerManager = Ember.Object.extend({
       }.bind(this))
       .fail(function(xhr) {
         if (!xhr.status) {
-          toastr.error('Unable to connect to the internet', undefined, {timeOut: 5000});
+          toastr.error('Unable to connect to the internet', undefined);
         } else if (xhr.status >= 500) {
-          toastr.error('Sorry, there was a server error', undefined, {timeOut: 5000});
+          toastr.error('Sorry, there was a server error', undefined);
         }
         reject();
       });
@@ -751,8 +745,5 @@ NopeGame.NopeServerManager = Ember.Object.extend({
   incrUserDefeats: function() {
     var user = NopeGame.User.find(1);
     return user.set('defeats', user.get('defeats') + 1).save();
-
   }
-
-
 });

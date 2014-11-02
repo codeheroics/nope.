@@ -26,7 +26,7 @@ $.support.cors = true;
 toastr.options = {
   showDuration: 300,
   hideDuration: 300,
-  timeOut: 2000,
+  timeOut: 5000,
   positionClass: 'toast-bottom-right',
 };
 
@@ -89,7 +89,7 @@ function generateGravatar(email) {
                 toastr.error('Please try again in a few minutes', 'Identification error', {timeOut: 10000});
               }
             } else {
-              if (navigator.onLine) {
+              if (xhr.responseJSON >= 500) {
                 toastr.error('Please try again in a few minutes', 'Server error', {timeOut: 10000});
               } else {
                 toastr.error('Please try again', 'Internet connection error', {timeOut: 10000});
