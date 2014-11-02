@@ -42,22 +42,24 @@ function generateGravatar(email) {
         var storedToken = window.localStorage.getItem('token');
         if (!storedToken) return reject();
 
-        if (!navigator.onLine) return resolve(); // No connection
+        resolve(); // Resolve first, then request, and invalidate if not good
 
         $.ajax(
           {
             method: 'get',
             jsonp: CALLBACK_NAME,
-            url: LOGIN_ROUTE
+            url: LOGIN_ROUTE,
+            timeout: 10000
           }
         )
-          .done(resolve)
-          .fail(function(xhr) {
-            if (!xhr.responseJSON) return resolve(); // Probably no connection
-            if (xhr.status === 304) return resolve(); // Sometimes, with firefox
-            reject();
-          });
-      });
+        .fail(function(xhr) {
+          if (!xhr.responseJSON) return; // Probably no connection
+           // Seems possible to have 304 in errors.
+           // errors 500+ should not disable login either
+          if (xhr.status === 304 || xhr.status >= 500) return;
+          this.invalidate();
+        }.bind(this));
+      }.bind(this));
     },
     authenticate: function(options) {
       window.localStorage.clear();
@@ -101,6 +103,7 @@ function generateGravatar(email) {
       });
     },
     invalidate: function() {
+      toastr.error('Lost the connection, redirecting to login...');
       return new Ember.RSVP.Promise(function(resolve) {
         if (NopeGame.serverManager) {
           NopeGame.serverManager.endPrimus();

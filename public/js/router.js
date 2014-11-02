@@ -58,8 +58,6 @@ NopeGame.AuthenticatedRouteMixin = Ember.Mixin.create(
         NopeGame.User.find();
         NopeGame.Opponent.find();
         NopeGame.Nope.find();
-
-        NopeGame.serverManager.updateSelfInfos();
       }
     }
   }

@@ -6,7 +6,6 @@
 NopeGame.NopeServerManager = Ember.Object.extend({
   loadingUpdateInterval: 0,
   isLoading: true,
-  isInit: false,
   setLoading: function(bool, timeout) {
     this.isLoading = bool;
     clearTimeout(this.loadingUpdateInterval);
@@ -24,7 +23,6 @@ NopeGame.NopeServerManager = Ember.Object.extend({
   init: function() {
     this.setLoading(true);
     this.initPrimus();
-    this.isInit = true;
   },
 
   initPrimus: function() {
@@ -43,7 +41,10 @@ NopeGame.NopeServerManager = Ember.Object.extend({
 
     // If we were deconnected and reconnect, we need to get the data we missed
     this.primus.on('open', function() {
-      this.getAllNopes().then(function() {
+      Promise.all([
+        this.getAllNopes(),
+        this.updateSelfInfos()
+      ]).then(function() {
         this.setLoading(false);
       }.bind(this));
     }.bind(this));
