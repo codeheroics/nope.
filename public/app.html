@@ -184,11 +184,11 @@
 					{{#if opponentsNopingMe}}
 						<h4>Last nopes received:</h4>
 						<ul>
-							{{#each opponentsNopingMe}}
+							{{#each opponent in opponentsNopingMe}}
 								<li>
-									{{#link-to 'opponentNopes' id}}
-										<img width="20" height="20" style="border-radius: 10px;" {{bind-attr src="avatar"}} />
-										{{name}} {{relativeDateFormat computedLastNopeTime clock.pulse}}
+									{{#link-to 'opponentNopes' opponent.id}}
+										<img width="20" height="20" style="border-radius: 10px;" {{bind-attr src="opponent.avatar"}} />
+										{{opponent.name}} {{relativeDateFormat opponent.computedLastNopeTime clock.pulse}}
 										<i class="fa fa-mail-forward solo"></i>
 									{{/link-to}}
 								</li>
@@ -336,24 +336,26 @@
 						</div>
 				{{/if}}
 				<ul class="columns">
-					{{#each friendOpponents}}
-						{{#link-to 'opponentNopes' id}}
+					{{#each friendOpponent in friendOpponents}}
+						{{#link-to 'opponentNopes' friendOpponent.id}}
 							<li>
 								<h3 style="display: inline;">
-									{{#if inTruce}}
+									{{#if friendOpponent.inTruce}}
 										<i class="fa fa-clock-o"></i>
 									{{else}}
-										{{#if isScoring}}
+										{{#if friendOpponent.isScoring}}
 											<i class="fa fa-hand-o-right"></i>
 										{{else}}
 											<i class="fa fa-check"></i>
 										{{/if}}
 									{{/if}}
-									<img width="20" height="20" style="border-radius: 10px;" {{bind-attr src="avatar"}} />
-									{{name}}
+									<img width="20" height="20" style="border-radius: 10px;" {{bind-attr src="friendOpponent.avatar"}} />
+									{{friendOpponent.name}}
 								</h3>
 								<span class="discrete">
-									{{winningDuration computedTimeFor computedTimeAgainst}}
+									Hey
+									{{durations}}
+									{{winningDuration friendOpponent.computedTimeFor friendOpponent.computedTimeAgainst clock.pulse}}
 								</span>
 							</li>
 						{{/link-to}}

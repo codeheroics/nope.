@@ -67,7 +67,6 @@ NopeGame.OpponentNopesController = Ember.ObjectController.extend({
       this.get('computedTimeAgainst') - this.get('computedTimeFor') > 48 * 60 * 60 * 1000; // 2 days
   }.property('isScoring', 'clock.pulse', 'computedTimeAgainst', 'computedTimeFor'),
 
-
   canEndRound: function() {
     return this.get('canConcede') || this.get('canWin');
   }.property('clock.pulse', 'canConcede', 'canWin')

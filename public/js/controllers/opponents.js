@@ -25,5 +25,5 @@ NopeGame.OpponentsController = Ember.ArrayController.extend({
       true,
       function(el) { return el.get('email'); }
     );
-  }.property('model.@each.status', 'clock.pulse')
+  }.property('model.@each.status')
 });

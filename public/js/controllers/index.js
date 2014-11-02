@@ -23,7 +23,7 @@ NopeGame.IndexController = Ember.ArrayController.extend({
       function(el) { return el.get('email'); }
     );
     return scoringOpponents.length > 0 ? scoringOpponents : null;
-  }.property('model.@each.isScoring', 'clock.pulse'),
+  }.property('model.@each.isScoring'),
 
   pendingOpponents: function() {
     var opponents = this.get('model');
