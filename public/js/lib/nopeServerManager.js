@@ -470,8 +470,6 @@ NopeGame.NopeServerManager = Ember.Object.extend({
     }
 
     return new Promise(function(resolve, reject) {
-      toastr.info('Adding ' + email + ' to your friends...');
-
       $.ajax(
         {
           data: { friendEmail: email },

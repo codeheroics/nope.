@@ -185,12 +185,16 @@
 						<h4>Last nopes received:</h4>
 						<ul>
 							{{#each opponent in opponentsNopingMe}}
-								<li>
-									{{#link-to 'opponentNopes' opponent.id}}
-										<img width="20" height="20" style="border-radius: 10px;" {{bind-attr src="opponent.avatar"}} />
-										{{opponent.name}} {{relativeDateFormat opponent.computedLastNopeTime clock.pulse}}
-										<i class="fa fa-mail-forward solo"></i>
-									{{/link-to}}
+								<li class="indexRow">
+										{{#link-to 'opponentNopes' opponent.id}}
+											<img width="40" height="40" {{bind-attr src="opponent.avatar"}} />
+										{{/link-to}}
+										{{#link-to 'opponentNopes' opponent.id}}
+											{{opponent.name}} - {{relativeDateFormat opponent.computedLastNopeTime clock.pulse}}
+										{{/link-to}}
+										{{#link-to 'opponentNopes' opponent.id}}
+											<i class="fa fa-mail-forward solo"></i>
+										{{/link-to}}
 								</li>
 							{{/each}}
 						</ul>
@@ -201,8 +205,13 @@
 						<h3>They want to send you nopes!</h3>
 						<ul>
 							{{#each pendingOpponents}}
-								<li>
-									{{name}} - {{email}} -
+								<li class="indexRow">
+									<div>
+										<img width="40" height="40" {{bind-attr src="avatar"}} />
+									</div>
+									<div>
+									{{name}} - {{email}}
+									</div>
 									<a href="#" {{action 'addOpponent' email}}>Send the first nope</a> /
 									<a href="#" {{action 'ignoreOpponent' email}}>Ignore</a>
 								</li>
@@ -322,7 +331,7 @@
 					<ul class="columns">
 						{{#each pendingOpponents}}
 							<li>
-								<img width="20" height="20" style="border-radius: 10px;" {{bind-attr src="avatar"}} /> {{name}} - {{email}} -
+								<img width="20" height="20" {{bind-attr src="avatar"}} /> {{name}} - {{email}} -
 								<a href="#" {{action 'addOpponent' email}}>Send the first nope</a> /
 								<a href="#" {{action 'ignoreOpponent' email}}>Ignore</a>
 							</li>
@@ -349,7 +358,7 @@
 											<i class="fa fa-check"></i>
 										{{/if}}
 									{{/if}}
-									<img width="20" height="20" style="border-radius: 10px;" {{bind-attr src="friendOpponent.avatar"}} />
+									<img width="20" height="20" {{bind-attr src="friendOpponent.avatar"}} />
 									{{friendOpponent.name}}
 								</h3>
 								<span class="discrete">
@@ -378,7 +387,7 @@
 						<li>
 							<button style="float:right;" class="InputAddOn-item" type="button" {{action 'unIgnoreOpponent' this}}>Unignore</button>
 							<h3>
-								<img width="20" height="20" style="border-radius: 10px;" {{bind-attr src="avatar"}} />
+								<img width="20" height="20" {{bind-attr src="avatar"}} />
 								{{name}}
 							</h3>
 						</li>
@@ -400,7 +409,7 @@
 					{{#each invitedOpponents}}
 						<li>
 							<h3>
-								<img width="20" height="20" style="border-radius: 10px;" {{bind-attr src="avatar"}} />
+								<img width="20" height="20" {{bind-attr src="avatar"}} />
 								{{name}}
 							</h3>
 						</li>

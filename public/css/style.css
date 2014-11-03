@@ -18,6 +18,10 @@ html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockq
 	vertical-align: baseline;
 }
 
+img {
+	border-radius: 50%;
+}
+
 
 /*********************************************************************************/
 /* Basic                                                                         */
@@ -192,6 +196,21 @@ html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockq
 		border-bottom: solid 2px #e7eae8;
 		padding-top: 2.35em;
 		padding-bottom: 2.35em;
+	}
+
+	li.indexRow {
+		margin: 1em;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	li.indexRow > a, li.indexRow > div {
+		max-width: 50%;
+		padding-right: 0.5em;
+		padding-left: 0.5em;
+		font-size: 110%;
+		display: flex;
 	}
 
 	ul.columns
