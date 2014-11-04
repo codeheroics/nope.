@@ -250,15 +250,15 @@ NopeGame.NopeServerManager = Ember.Object.extend({
       var defeats = dataNope.defeats || 0;
       // I must be notified here if the other one did a reset and I haven't answered yet
       // (if I decided of the reset, I must be notified after handling the data)
-      var mustBeNotified = !lastResetDecidedByMe && opponent.get('computedTimeAgainst') === 0;
-      if (!mustBeNotified) return Promise.resolve();
+      if (lastResetDecidedByMe) return Promise.resolve();
       var funcName;
-      if (victories > victoriesBefore) {
-        funcName = lastResetDecidedByMe ? 'notifyMyDeclaredVictory' : 'notifyOpponentAdmittedDefeat';
-      } else if (defeats > defeatsBefore) {
-        funcName = lastResetDecidedByMe ? 'notifyMyAdmittedDefeat' : 'notifyOpponentDeclaredVictory';
-      } else {
-        return Promise.resolve(); // Should not happen
+      // Different checks in case I decide to give bonus time when declaring defeat
+      if (victories > victoriesBefore && opponent.get('computedTimeAgainst') === 0) { // I won, I haven't answered yet so I am not scoring
+        funcName = 'notifyOpponentAdmittedDefeat';
+      } else if (defeats > defeatsBefore && opponent.get('timeFor') === 0) { // I lost, I haven't answered yet so opponent hasn't scored
+        funcName = 'notifyOpponentDeclaredVictory';
+      } else { // Nothing to notify
+        return Promise.resolve();
       }
       return NopeGame.notificationManager[funcName](opponent);
     });
