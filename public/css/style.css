@@ -206,7 +206,7 @@ img {
 	}
 
 	li.indexRow > a, li.indexRow > div {
-		max-width: 50%;
+		max-width: 80%;
 		padding-right: 0.5em;
 		padding-left: 0.5em;
 		font-size: 110%;

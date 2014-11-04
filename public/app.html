@@ -210,9 +210,9 @@
 										<img width="40" height="40" {{bind-attr src="avatar"}} />
 									</div>
 									<div>
-									{{name}} - {{email}}
+									{{name}} ({{email}})
 									</div>
-									<a href="#" {{action 'addOpponent' email}}>Send the first nope</a> /
+									<a href="#" {{action 'addOpponent' email}}>Send the first nope</a>
 									<a href="#" {{action 'ignoreOpponent' email}}>Ignore</a>
 								</li>
 							{{/each}}
