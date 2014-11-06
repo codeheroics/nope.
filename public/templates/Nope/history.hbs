@@ -1,0 +1,20 @@
+<section>
+  <h2 class="major"><span>History of Nopes.</span></h2>
+  <ul class="style2">
+    {{#each nopes}}
+      <li>
+        <h3>
+          {{#link-to 'opponentNopes' opponent}}
+            {{#if isReceived}}Nope received from {{opponent.name}}
+            {{else}}Nope sent to {{opponent.name}}{{/if}}
+          {{/link-to}}
+        </h3>
+        <div class="discrete">
+          <i class="fa fa-clock-o"></i>{{relativeDateFormat computedTime}}
+          <i class="fa fa-comments"></i>
+          {{#if isReceived}}You{{else}}{{opponent.name}}{{/if}} had the last word for {{duration timeDiff clock.pulse}}
+        </div>
+      </li>
+    {{/each}}
+  </ul>
+</section>

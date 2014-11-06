@@ -14,6 +14,10 @@ var useref = require('gulp-useref');
 var merge = require('merge-stream');
 var gulpif = require('gulp-if');
 
+var handlebars = require('gulp-handlebars');
+var wrap = require('gulp-wrap');
+var declare = require('gulp-declare');
+
 var DEV_PUBLIC = './public';
 var DIST_PUBLIC = './public_dist';
 
@@ -33,8 +37,8 @@ gulp.task('watch', function() {
   gulp.watch('public/**/*.html', ['buildHTML']);
 });
 
-gulp.task('build', ['buildHTML', 'buildJS', 'buildCSS']);
-gulp.task('buildProd', ['buildHTML', 'buildProdJS', 'buildCSS']);
+gulp.task('build', ['buildHTML', 'buildJS', 'buildCSS', 'buildTemplates']);
+gulp.task('buildProd', ['buildHTML', 'buildProdJS', 'buildCSS', 'buildTemplates']);
 
 gulp.task('buildHTML', function() {
   gulp.src(DEV_PUBLIC + '/index.html')
@@ -91,6 +95,20 @@ gulp.task('buildCSS', function() {
     .pipe(gulp.dest(cssDir + '/images'));
 
   return merge(css, ieCss, fonts, images);
+});
+
+gulp.task('buildTemplates', function(){
+  gulp.src('public/templates/**/*.hbs')
+    .pipe(handlebars({
+      handlebars: require('ember-handlebars')
+    }))
+    .pipe(wrap('Ember.Handlebars.template(<%= contents %>)'))
+    .pipe(declare({
+      namespace: 'Ember.TEMPLATES',
+      noRedeclare: true, // Avoid duplicate declarations
+    }))
+    .pipe(concat('templates.js'))
+    .pipe(gulp.dest(DIST_PUBLIC));
 });
 
 function buildJSFromSources(isProdBuild) {

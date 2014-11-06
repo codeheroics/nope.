@@ -1,0 +1,18 @@
+<section>
+  <h2 class="major"><span>Invited users</span></h2>
+  {{#if invitedOpponents}}
+    They need to add you before you can send them nopes!
+  {{else}}
+    Nope. You are not waiting for anyone to answer to your invitation.
+  {{/if}}
+  <ul class="columns">
+    {{#each invitedOpponents}}
+      <li>
+        <h3>
+          <img width="20" height="20" {{bind-attr src="avatar"}} />
+          {{name}}
+        </h3>
+      </li>
+    {{/each}}
+  </ul>
+</section>

@@ -1,0 +1,24 @@
+<h2 style="text-align:center;">Nope is a tug of war social game.</h2>
+<div style="text-align: center;">Invite your friends, and send them "nopes" until you get the last word!</div>
+
+<form {{action 'authenticate' on='submit'}} class="flex-form">
+  <h1><span class="fa fa-sign-in"></span> Login</h1>
+
+  <div class="InputAddOn">
+    <span class="InputAddOn-item"><i class="fa fa-envelope"></i> E-mail</span>
+    {{input type='email' placeholder='Enter your E-mail' value=identification class="InputAddOn-field"}}
+  </div>
+
+  <div class="InputAddOn">
+    <span class="InputAddOn-item"><i class="fa fa-key"></i> Password</span>
+    {{input placeholder='Enter your password' type='password' value=password class="InputAddOn-field"}}
+  </div>
+
+  <button type="submit" class="InputAddOn-item">Login</button>
+  <br>
+  {{#link-to 'forgottenPassword'}}Forgotten your password?{{/link-to}}
+</form>
+
+<hr>
+
+<p>Need an account? {{#link-to 'signup'}}Signup{{/link-to}}!</p>

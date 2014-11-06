@@ -1,0 +1,50 @@
+<section>
+  <div style="display:none;">{{clock.pulse}}</div>
+  {{#if pendingOpponents}}
+    <h2 class="major"><span>Waiting for an answer</span></h2>
+    <ul class="columns">
+      {{#each pendingOpponents}}
+        <li>
+          <img width="20" height="20" {{bind-attr src="avatar"}} /> {{name}} - {{email}} -
+          <a href="#" {{action 'addOpponent' email}}>Send the first nope</a> /
+          <a href="#" {{action 'ignoreOpponent' email}}>Ignore</a>
+        </li>
+      {{/each}}
+    </ul>
+  {{/if}}
+  <h2 class="major"><span>Friends</span></h2>
+  {{#if friendOpponents.length}}{{else}}
+    <div style="text-align:center;">
+      No friends yet, add some!
+      </div>
+  {{/if}}
+  <ul class="columns">
+    {{#each friendOpponent in friendOpponents}}
+      {{#link-to 'opponentNopes' friendOpponent.id}}
+        <li>
+          <h3 style="display: inline;">
+            {{#if friendOpponent.inTruce}}
+              <i class="fa fa-clock-o"></i>
+            {{else}}
+              {{#if friendOpponent.isScoring}}
+                <i class="fa fa-hand-o-right"></i>
+              {{else}}
+                <i class="fa fa-check"></i>
+              {{/if}}
+            {{/if}}
+            <img width="20" height="20" {{bind-attr src="friendOpponent.avatar"}} />
+            {{friendOpponent.name}}
+          </h3>
+          <span class="discrete">
+            {{winningDuration friendOpponent.computedTimeFor friendOpponent.computedTimeAgainst clock.pulse}}
+          </span>
+        </li>
+      {{/link-to}}
+    {{/each}}
+  </ul>
+</section>
+<section style="text-align:center;">
+  <div>{{#link-to 'newOpponent' class="addUser button button-big"}}Add a friend{{/link-to}}</div>
+  <div>{{#link-to 'invitedOpponents'}}See invited opponents{{/link-to}}</div>
+  <div>{{#link-to 'ignoredOpponents'}}See ignored opponents{{/link-to}}</div>
+</section>
