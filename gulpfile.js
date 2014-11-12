@@ -35,6 +35,7 @@ gulp.task('watch', function() {
   gulp.watch('public/**/*.css', ['buildCSS']);
   gulp.watch('public/**/*.js', ['buildJS']);
   gulp.watch('public/**/*.html', ['buildHTML']);
+  gulp.watch('public/**/*.hbs', ['buildTemplates']);
 });
 
 gulp.task('build', ['buildHTML', 'buildJS', 'buildCSS', 'buildTemplates']);

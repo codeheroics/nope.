@@ -520,3 +520,7 @@ img {
 	.toast .InputAddOn-field, .toast .InputAddOn-item {
 		border: #dad5cf;
 	}
+
+	.share-links {
+		font-size: 4em;
+	}
