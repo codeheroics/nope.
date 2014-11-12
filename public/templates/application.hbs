@@ -1,0 +1,60 @@
+<header id="header">
+  <div class="logo">
+    <div>
+      <h1>Nope.</h1>
+      <span class="byline">You will (probably) not get the last word.</span>
+    </div>
+  </div>
+</header>
+
+<div id="titleBar"><span class="title" data-action="copyHTML" data-args="logo">Nope.</span></div>
+
+<nav id="nav">
+  <ul>
+    {{#if session.isAuthenticated}}
+      <li>{{#link-to "index" }}Home{{/link-to}}</li>
+      <li>{{#link-to "opponents"}}Friends{{/link-to}}</li>
+      <li>{{#link-to "history"}}History{{/link-to}}</li>
+      <li>{{#link-to "profile"}}Profile{{/link-to}}</li>
+      <li>{{#link-to "help"}}Help{{/link-to}}</li>
+      <li>{{#link-to "share"}}Share{{/link-to}}</li>
+      <li><a href="#" {{ action 'invalidateSession' }}>Logout</a></li>
+    {{else}}
+      <li>{{#link-to 'login'}}Login{{/link-to}}</li>
+      <li>{{#link-to 'signup'}}Signup{{/link-to}}</li>
+    {{/if}}
+  </ul>
+</nav>
+<nav class="bt-menu" id="bt-menu">
+  <a href="#" class="bt-menu-trigger"><span></span></a>
+  <ul class="bt-menu">
+    {{#if session.isAuthenticated}}
+      <li>{{#link-to "index" class="fa fa-home"}}<br>Home{{/link-to}}</li>
+      <li>{{#link-to "opponents" class="fa fa-group"}}<br>Friends{{/link-to}}</li>
+      <li>{{#link-to "history" class="fa fa-history"}}<br>History{{/link-to}}</li>
+    </ul>
+    <ul class="bt-menu right">
+      <li>{{#link-to "profile" class="fa fa-user"}}<br>Profile{{/link-to}}</li>
+      <li>{{#link-to "help" class="fa fa-question"}}<br>Help{{/link-to}}</li>
+      <li>{{#link-to "share" class="fa fa-share"}}<br>Share{{/link-to}}</li>
+      <li><a href="#" {{ action 'invalidateSession'}} class="fa fa-power-off"><br>Logout</a></li>
+    {{else}}
+      <li>{{#link-to 'login' class="fa fa-arrow-circle-right"}}<br>Login{{/link-to}}</li>
+      <li>{{#link-to 'signup' class="fa fa-arrow-circle-right"}}<br>Signup{{/link-to}}</li>
+    {{/if}}
+  </ul>
+</nav>
+
+<div id="main-wrapper">
+  <div id="main" class="container">
+    <div class="row">
+      <div>
+        <div class="content">
+          {{outlet}}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer id="footer">Nope is a beta software. Should you run into any issues, please <a href="mailto:contact@nope.wtf?subject=Nope issues">contact us</a></footer>

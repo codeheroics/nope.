@@ -1,0 +1,28 @@
+<section>
+  <h2 class="major"><span>My Profile</span></h2>
+    <section style="text-align: center;">
+      <div class="image image-centered image-user"><img {{bind-attr src="avatar"}} /></div>
+      <h3>{{name}} ({{email}})</h3>
+      <p class="nopesSent">{{totalNopes}}</p>
+      <div class="nopesSentLegend">nopes sent</div>
+      <div class="nopesSentLegend">{{victories}} victories, {{defeats}} defeats</div>
+    </section>
+    <section>
+    <h2 class="major"><span>My Achievements</span></h2>
+    <ul class="achievements">
+    {{#each achievements}}
+      {{#if unlocked}}
+        <li class="success">
+          <i class="fa fa-unlock"></i>
+          <strong>{{title}}</strong> - {{description}}
+        </li>
+        {{else}}
+        <li class="unachieved">
+          <i class="fa fa-lock"></i>
+          <strong>{{title}}</strong> - {{description}}
+        </li>
+        {{/if}}
+      </li>
+    {{/each}}
+    </section>
+</section>

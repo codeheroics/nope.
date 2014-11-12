@@ -1,0 +1,24 @@
+<h1><span class="fa fa-sign-in"></span> Signup</h1>
+
+<form {{action 'signup' this on='submit'}} class="flex-form">
+  <div class="InputAddOn">
+    <span class="InputAddOn-item"><i class="fa fa-user"> Name</i></span>
+    {{input type='text' placeholder='Enter an username' class="InputAddOn-field" value=name}}
+  </div>
+
+  <div class="InputAddOn">
+    <span class="InputAddOn-item"><i class="fa fa-envelope"> E-mail</i></span>
+    {{input type='email' placeholder='Enter your E-mail' class="InputAddOn-field" value=email}}
+  </div>
+
+  <div class="InputAddOn">
+    <span class="InputAddOn-item"><i class="fa fa-key"> Password</i></span>
+    {{input placeholder='Enter your password' type='password' value=password class="InputAddOn-field"}}
+  </div>
+
+  <button type="submit" class="InputAddOn-item">Signup</button>
+</form>
+
+<hr>
+
+<p>Already have an account? {{#link-to 'login'}}Login{{/link-to}}</p>
