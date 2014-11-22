@@ -1002,8 +1002,8 @@ User.prototype.earnAchievementsAfterTruce = function(nopeData) {
   this.earnAchievements('earnedAfterTruce', nopeData);
 };
 
-User.prototype.earnAchievementsAfterVictoryOrDefeat = function(nopeData) {
-  this.earnAchievements('earnedAfterVictoryOrDefeat', nopeData);
+User.prototype.earnAchievementsAfterVictoryOrDefeat = function(nopeData, isVictory) {
+  this.earnAchievements('earnedAfterVictoryOrDefeat', nopeData, isVictory);
 };
 
 function formatNopeDataForPrimus(nopeData, email) {
