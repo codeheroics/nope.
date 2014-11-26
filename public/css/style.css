@@ -408,10 +408,11 @@ img {
 		background-color: #e7746f;
 	}
 
-	.addUser {
+	.button-big {
 		width: 100%;
 		display: block;
 		text-align: center;
+		border: 0;
 	}
 
 	.battleResults {
