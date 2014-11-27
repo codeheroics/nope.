@@ -200,9 +200,8 @@ img {
 
 	li.indexRow {
 		margin: 1em;
-		display: flex;
-		align-items: center;
-		justify-content: center;
+		display: table;
+		margin: auto;
 	}
 
 	li.indexRow > a, li.indexRow > div {
@@ -210,7 +209,9 @@ img {
 		padding-right: 0.25em;
 		padding-left: 0.25em;
 		font-size: 110%;
-		display: flex;
+		display: table-cell;
+		text-align: center;
+		vertical-align: middle;
 	}
 
 	ul.columns
@@ -481,13 +482,14 @@ img {
 	}
 
 	.InputAddOn {
+		display: -webkit-flex;
 		display: flex;
 		margin-bottom: 1em;
 	}
 
 	.InputAddOn-field {
-		flex: 1;
 		-webkit-flex: 1;
+		flex: 1;
 	}
 	.InputAddOn-field:not(:first-child) {
 		border-left: 0;
