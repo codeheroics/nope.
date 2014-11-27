@@ -527,3 +527,8 @@ img {
 	.share-links {
 		font-size: 4em;
 	}
+
+	p.first-login-links {
+		font-size: 150%;
+		text-align: center;
+	}

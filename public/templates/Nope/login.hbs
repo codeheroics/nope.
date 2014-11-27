@@ -2,7 +2,7 @@
 <div style="text-align: center;">Invite your friends, and send them "nopes" until you get the last word!</div>
 
 <form {{action 'authenticate' on='submit'}} class="flex-form">
-  <h1><span class="fa fa-sign-in"></span> Login</h1>
+  <h2><span class="fa fa-sign-in"></span> Login</h2>
 
   <div class="InputAddOn">
     <span class="InputAddOn-item"><i class="fa fa-envelope"></i> E-mail</span>
@@ -21,4 +21,4 @@
 
 <hr>
 
-<p>Need an account? {{#link-to 'signup'}}Signup{{/link-to}}!</p>
+<p class="first-login-links">No account? {{#link-to 'signup'}}Signup{{/link-to}}!</p>
