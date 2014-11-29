@@ -29,18 +29,18 @@
   <a href="#" class="bt-menu-trigger"><span></span></a>
   <ul class="bt-menu">
     {{#if session.isAuthenticated}}
-      <li>{{#link-to "index" class="fa fa-home"}}<br>Home{{/link-to}}</li>
-      <li>{{#link-to "opponents" class="fa fa-group"}}<br>Friends{{/link-to}}</li>
-      <li>{{#link-to "history" class="fa fa-history"}}<br>History{{/link-to}}</li>
+      <li>{{#link-to "index"}}<i class="fa fa-home"></i><br>Home{{/link-to}}</li>
+      <li>{{#link-to "opponents"}}<i class="fa fa-group"></i><br>Friends{{/link-to}}</li>
+      <li>{{#link-to "history"}}<i class="fa fa-history"></i><br>History{{/link-to}}</li>
     </ul>
     <ul class="bt-menu right">
-      <li>{{#link-to "profile" class="fa fa-user"}}<br>Profile{{/link-to}}</li>
-      <li>{{#link-to "help" class="fa fa-question"}}<br>Help{{/link-to}}</li>
-      <li>{{#link-to "share" class="fa fa-share"}}<br>Share{{/link-to}}</li>
-      <li><a href="#" {{ action 'invalidateSession'}} class="fa fa-power-off"><br>Logout</a></li>
+      <li>{{#link-to "profile"}}<i class="fa fa-user"></i><br>Profile{{/link-to}}</li>
+      <li>{{#link-to "help"}}<i class="fa fa-question"></i><br>Help{{/link-to}}</li>
+      <li>{{#link-to "share"}}<i class="fa fa-share"></i><br>Share{{/link-to}}</li>
+      <li><a href="#" {{ action 'invalidateSession'}}><i class="fa fa-power-off"></i><br>Logout</a></li>
     {{else}}
-      <li>{{#link-to 'login' class="fa fa-arrow-circle-right"}}<br>Login{{/link-to}}</li>
-      <li>{{#link-to 'signup' class="fa fa-arrow-circle-right"}}<br>Signup{{/link-to}}</li>
+      <li>{{#link-to 'login'}}<i class="fa fa-arrow-circle-right"></i><br>Login{{/link-to}}</li>
+      <li>{{#link-to 'signup'}}<i class="fa fa-arrow-circle-right"></i><br>Signup{{/link-to}}</li>
     {{/if}}
   </ul>
   <div class="bt-border bt-border-left"></div>
