@@ -42,7 +42,7 @@
   z-index: 30000;
 }
 
-.bt-menu-trigger span {
+.bt-menu-trigger i {
   position: absolute;
   top: 50%;
   left: 0;
@@ -59,14 +59,15 @@
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+  cursor: pointer;
 }
 
-.bt-menu-open .bt-menu-trigger span {
+.bt-menu-open .bt-menu-trigger i {
   background-color: transparent;
 }
 
-.bt-menu-trigger span:before,
-.bt-menu-trigger span:after {
+.bt-menu-trigger i:before,
+.bt-menu-trigger i:after {
   position: absolute;
   left: 0;
   width: 100%;
@@ -76,22 +77,22 @@
   transition: transform 0.20s;
 }
 
-.bt-menu-trigger span:before {
+.bt-menu-trigger i:before {
   -webkit-transform: translateY(-250%);
   transform: translateY(-250%);
 }
 
-.bt-menu-trigger span:after {
+.bt-menu-trigger i:after {
   -webkit-transform: translateY(250%);
   transform: translateY(250%);
 }
 
-.bt-menu-open .bt-menu-trigger span:before {
+.bt-menu-open .bt-menu-trigger i:before {
   -webkit-transform: translateY(0) rotate(45deg);
   transform: translateY(0) rotate(45deg);
 }
 
-.bt-menu-open .bt-menu-trigger span:after {
+.bt-menu-open .bt-menu-trigger i:after {
   -webkit-transform: translateY(0) rotate(-45deg);
   transform: translateY(0) rotate(-45deg);
 }
