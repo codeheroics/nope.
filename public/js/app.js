@@ -112,7 +112,6 @@ function generateGravatar(email) {
           NopeGame.serverManager.endPrimus();
         }
         window.localStorage.clear();
-        window.location = './index.html'; // FIXME Gotta do better (reinit the app). But not now.
         resolve();
       });
     }
