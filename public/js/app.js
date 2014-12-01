@@ -63,6 +63,7 @@ function generateGravatar(email) {
     },
     authenticate: function(options) {
       window.localStorage.clear();
+      var loginToastr = toastr.info('Loading...', null, {timeOut: 0, extendedTimeOut: 0, tapToDismiss: false});
       return new Ember.RSVP.Promise(function(resolve, reject) {
         $.ajax(
           {
@@ -76,10 +77,12 @@ function generateGravatar(email) {
           }
         )
           .done(function(data) {
+            toastr.clear(loginToastr);
             window.localStorage.setItem('token', data);
             resolve();
           })
           .fail(function(xhr) {
+            toastr.clear(loginToastr);
             if (xhr.status === 401) {
               toastr.error('Please try again.', 'Incorrect password', {timeOut: 5000});
             } else if (xhr.status === 403) {
