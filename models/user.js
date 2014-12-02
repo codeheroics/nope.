@@ -970,12 +970,13 @@ User.prototype.unIgnoreUser = function(email, callback) {
 
 /**
  * Note : nothing is saved here
- * @param  {[type]} userAchievementsFunction [description]
- * @param  {[type]} nopeData                 Optional
+ * @param  {Function} userAchievementsFunction [description]
+ * @param  {Object} nopeData                 Optional
+ * @param  {*}      optionalParam            an optional parameter (ex: isVictory)
  * @return {[type]}                          [description]
  */
-User.prototype.earnAchievements = function(userAchievementsFn, nopeData) {
-  var achievedIds = userAchievements[userAchievementsFn](this, nopeData);
+User.prototype.earnAchievements = function(userAchievementsFn, nopeData, optionalParam) {
+  var achievedIds = userAchievements[userAchievementsFn](this, nopeData, optionalParam);
   if (!achievedIds.length) return;
 
   achievedIds.forEach(function(achievedId) {
