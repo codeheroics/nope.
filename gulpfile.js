@@ -38,8 +38,13 @@ gulp.task('watch', function() {
   gulp.watch('public/**/*.hbs', ['buildTemplates']);
 });
 
-gulp.task('build', ['buildHTML', 'buildJS', 'buildCSS', 'buildTemplates']);
-gulp.task('buildProd', ['buildHTML', 'buildProdJS', 'buildCSS', 'buildTemplates']);
+gulp.task('build', ['buildHTML', 'buildJS', 'buildCSS', 'buildTemplates', 'buildIcons']);
+gulp.task('buildProd', ['buildHTML', 'buildProdJS', 'buildCSS', 'buildTemplates', 'buildIcons']);
+
+gulp.task('buildIcons', function() {
+  gulp.src(DEV_PUBLIC + '/favicon.ico').pipe(gulp.dest(DIST_PUBLIC));
+  gulp.src(DEV_PUBLIC + '/icons/**/*').pipe(gulp.dest(DIST_PUBLIC + '/icons'));
+});
 
 gulp.task('buildHTML', function() {
   gulp.src(DEV_PUBLIC + '/index.html')
