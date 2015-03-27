@@ -4,19 +4,13 @@
 // (nopeManager for example)
 
 NopeGame.NopeServerManager = Ember.Object.extend({
-  loadingUpdateInterval: 0,
   isLoading: true,
   setLoading: function(bool, timeout) {
     this.isLoading = bool;
-    clearTimeout(this.loadingUpdateInterval);
     if (!bool) { // Disable loading
       NopeGame.notificationManager.clearLoading();
     } else { // enable loading
       NopeGame.notificationManager.showLoading(timeout);
-      if (timeout && timeout <= 0) return;
-      if (timeout) this.loadingUpdateInterval = setTimeout(function() {
-        this.setLoading(bool, timeout - 1000);
-      }.bind(this), 1000);
     }
   },
 
@@ -32,9 +26,10 @@ NopeGame.NopeServerManager = Ember.Object.extend({
          // Using timeout is unadvised but to get here, you must be logged
         strategy : ['online', 'disconnect', 'timeout'],
         reconnect: {
-          maxDelay: 600000, // Number: The max delay for a reconnect retry.
-          minDelay: 5000, // Number: The minimum delay before we reconnect.
-          retries: 100000 // Number: How many times should we attempt to reconnect.
+          'reconnect timeout': 10000,
+          max: 10000, // Number: The max delay for a reconnect retry.
+          min: 1000, // Number: The minimum delay before we reconnect.
+          retries: Infinity // Number: How many times should we attempt to reconnect.
         }
       }
     );
@@ -49,7 +44,7 @@ NopeGame.NopeServerManager = Ember.Object.extend({
       }.bind(this));
     }.bind(this));
 
-    this.primus.on('reconnecting', function(opts) {
+    this.primus.on('reconnect scheduled', function(opts) {
       this.setLoading(true, opts.timeout);
     }.bind(this));
 
@@ -155,13 +150,6 @@ NopeGame.NopeServerManager = Ember.Object.extend({
   endPrimus: function() {
     if (!this.primus) return;
     this.primus.end();
-  },
-
-  reconnectPrimus: function() {
-    if (!this.primus) return;
-    this.primus.end();
-    this.setLoading(true);
-    this.primus.open();
   },
 
   nopeAt: function(opponentEmail) {

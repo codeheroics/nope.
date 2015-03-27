@@ -5,39 +5,30 @@
 // should handle all or most of the app's notifications
 // (they should not be toastr.whatever everywhere)
 NopeGame.NotificationManager = Ember.Object.extend({
-  loadingNotifications: [],
+  loadingNotification: null,
 
   nopeNotifications: {},
   truceNotifications: {},
   victoryNotifications: {},
 
   showLoading: function(timeout) {
-    timeout = !timeout || timeout <= 0 ? 0 : Math.floor(timeout / 1000);
-    var reconnectingInMsg = 'Lost connection, reconnecting in ' + timeout + 's<br>' +
-      '<button type="button" class="InputAddOn-item reconnect">Reconnect now</button>';
-
-    var html = timeout ? reconnectingInMsg :
-      'Reconnecting... <i class="fa fa-spin fa-spinner"></i>';
-
-    var oldNotif = this.loadingNotifications[0];
-    if (oldNotif) return oldNotif.html(html);
-
-    var loadingNotifToastr = toastr.warning(
-      html,
+    if (this.loadingNotification) return;
+    this.loadingNotification = toastr.info(
+      'You are being reconnected <i class="fa fa-spin fa-spinner"></i>',
       null,
-      {timeOut: 0, extendedTimeOut: 0, tapToDismiss: false}
+      {
+        timeOut: 0,
+        extendedTimeOut: 0,
+        tapToDismiss: false
+      }
     );
-
-    loadingNotifToastr.delegate('.reconnect', 'click', function () {
-      NopeGame.serverManager.reconnectPrimus();
-    }.bind(this));
-
-    this.loadingNotifications.push(loadingNotifToastr);
   },
 
   clearLoading: function() {
-    var oldNotif = this.loadingNotifications.shift();
-    if (oldNotif) toastr.clear(oldNotif);
+    if (!this.loadingNotification) return;
+
+    toastr.clear(this.loadingNotification);
+    delete this.loadingNotification;
   },
 
   clearNopeNotifications: function(email) {
