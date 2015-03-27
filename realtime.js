@@ -3,14 +3,14 @@ var express    = require('express');
 var bodyParser = require('body-parser');
 var async      = require('async');
 var config     = require('config');
+var winston    = require('winston');
 var User       = require('./models/user');
 
-var winston    = require('winston');
+try { require('fs').mkdirSync('./log'); } catch (e) {} // if ./log doesn't exist.
 winston.add(winston.transports.File, { filename: './log/realtime.log' });
 if (process.env.NODE_ENV === 'production') winston.remove(winston.transports.Console);
 
-var app        = express();
-
+var app = express();
 app.use(bodyParser.json());
 
 var server = require('http').createServer(app);
