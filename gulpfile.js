@@ -31,7 +31,7 @@ gulp.task('clean', function (cb) {
   rimraf(DIST_PUBLIC, cb);
 });
 
-gulp.task('watch', function() {
+gulp.task('watch', ['build'], function() {
   gulp.watch('public/**/*.css', ['buildCSS']);
   gulp.watch('public/**/*.js', ['buildJS']);
   gulp.watch('public/**/*.html', ['buildHTML']);
