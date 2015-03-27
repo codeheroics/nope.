@@ -3,3 +3,4 @@ node_modules
 public_dist
 log
 certificate
+config/runtime.json
