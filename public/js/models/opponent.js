@@ -3,6 +3,9 @@ NopeGame.Opponent = Ember.Model.extend({
   id:             Ember.attr(), // string
   email:          Ember.attr(), // string
   name:           Ember.attr(), // string
+  nameLowerCase:  function() {
+    return this.get('name').toLowerCase();
+  }.property('name'),
   avatar:         Ember.attr(), // string
   timeFor:        Ember.attr(Number), // { defaultValue: 0 }),
   timeAgainst:    Ember.attr(Number), // { defaultValue: 0 }),

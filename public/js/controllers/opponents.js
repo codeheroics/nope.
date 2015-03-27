@@ -21,7 +21,7 @@ NopeGame.OpponentsController = Ember.ArrayController.extend({
   friendOpponents: function() {
     var opponents = this.get('model');
     return _.uniq( // FIXME this is a crutch to avoid duplicates, but still better than nothing
-      opponents.filterBy('status', 'friend').sortBy('name'),
+      opponents.filterBy('status', 'friend').sortBy('nameLowerCase'),
       true,
       function(el) { return el.get('email'); }
     );
