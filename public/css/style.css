@@ -167,21 +167,6 @@ img {
 		transition: background-color .2s ease-in-out;
 	}
 
-		.button:hover
-		{
-			background: #ebe3b2;
-		}
-
-		.button-alt
-		{
-			background: #c1cac5;
-		}
-
-			.button-alt:hover
-			{
-				background: #ccd5d0;
-			}
-
 	ul.style1
 	{
 		list-style: disc;
@@ -413,7 +398,6 @@ img {
 		width: 100%;
 		display: block;
 		text-align: center;
-		border: 0;
 	}
 
 	.battleResults {
