@@ -36,6 +36,8 @@ NopeGame.NopeServerManager = Ember.Object.extend({
 
     // If we were deconnected and reconnect, we need to get the data we missed
     this.primus.on('open', function() {
+      this.setLatency();
+
       Promise.all([
         this.getAllNopes(),
         this.updateSelfInfos()
@@ -152,6 +154,10 @@ NopeGame.NopeServerManager = Ember.Object.extend({
     this.primus.end();
   },
 
+  setLatency: function(manualLatency) {
+    window.localStorage.setItem('serverTimeDiff', manualLatency ? manualLatency : this.primus.latency);
+  },
+
   nopeAt: function(opponentEmail) {
     return new Promise(function(resolve, reject) {
       $.ajax(
@@ -189,7 +195,14 @@ NopeGame.NopeServerManager = Ember.Object.extend({
 
     var nope = NopeGame.Nope.find(nopeId);
 
-    if (nope.isLoaded) return Promise.resolve(nope); // exit
+    if (nope.isLoaded) return Promise.resolve(nope); // exit (already handled)
+
+    // Set maual latency in case we have a time in the future with the current latency
+    var now = Date.now();
+    if (now - this.primus.latency - dataNope.time < 0) {
+      this.setLatency(now - this.primus.latency - dataNope.time);
+    }
+
     var nopeRecord = NopeGame.Nope.create({
       id: nopeId,
       isReceived: dataNope.isNopingMe,

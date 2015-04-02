@@ -38,12 +38,7 @@ primus.use('redis', PrimusRedisRooms);
 primus.authorize(require('./lib/utils/middlewares')(app).checkWebSocketLogin);
 
 primus.on('connection', function connection(spark) {
-  var email = spark.request.user.email;
-  spark.join(email);
-
-  // We write to the user the current time so he knows the difference
-  // between him and the server
-  spark.write({time: Date.now()});
+  spark.join(spark.request.user.email);
 });
 
 primus.on('error', function handleError(err) {
