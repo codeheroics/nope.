@@ -23,7 +23,7 @@
     "jquery": "~2.1.1",
     "ember": "~1.5.1",
     "handlebars": "~1.3.0",
-    "ember-model": "~0.0.11",
+    "ember-model": "~0.0.14",
     "ember-model-localstorage-adapter": "git://github.com/hugo-agbonon/ember-model-localstorage-adapter.git",
     "moment": "~2.7.0",
     "toastr": "~2.1.1",
