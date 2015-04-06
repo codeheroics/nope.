@@ -15,7 +15,7 @@ NopeGame.NopeServerManager = Ember.Object.extend({
   },
 
   init: function() {
-    this.setLoading(true);
+    NopeGame.notificationManager.showInitialLoading();
     this.initPrimus();
   },
 
