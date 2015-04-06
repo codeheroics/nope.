@@ -161,10 +161,10 @@ NopeGame.NopeServerManager = Ember.Object.extend({
       $.ajax(
         {
           data: { friendEmail: opponentEmail },
-          jsonp: CALLBACK_NAME,
           headers: {
             'x-access-token': window.localStorage.getItem('token')
           },
+          dataType: 'json',
           method: 'POST',
           url: NOPES_ROUTE
         }
@@ -295,6 +295,7 @@ NopeGame.NopeServerManager = Ember.Object.extend({
       $.ajax(
         {
           jsonp: CALLBACK_NAME,
+          dataType: 'json',
           headers: {
             'x-access-token': window.localStorage.getItem('token')
           },
@@ -431,6 +432,7 @@ NopeGame.NopeServerManager = Ember.Object.extend({
       $.ajax(
         {
           jsonp: CALLBACK_NAME,
+          dataType: 'json',
           headers: {
             'x-access-token': window.localStorage.getItem('token')
           },
@@ -472,8 +474,8 @@ NopeGame.NopeServerManager = Ember.Object.extend({
       $.ajax(
         {
           data: { friendEmail: email },
-          jsonp: CALLBACK_NAME,
           method: 'POST',
+          dataType: 'json',
           headers: {
             'x-access-token': window.localStorage.getItem('token')
           },
@@ -538,8 +540,8 @@ NopeGame.NopeServerManager = Ember.Object.extend({
       $.ajax(
         {
           data: { friendEmail: email },
-          jsonp: CALLBACK_NAME,
           method: 'DELETE',
+          dataType: 'json',
           headers: {
             'x-access-token': window.localStorage.getItem('token')
           },
@@ -574,8 +576,8 @@ NopeGame.NopeServerManager = Ember.Object.extend({
       $.ajax(
         {
           data: { friendEmail: email },
-          jsonp: CALLBACK_NAME,
           method: 'PATCH',
+          dataType: 'json',
           headers: {
             'x-access-token': window.localStorage.getItem('token')
           },
@@ -607,8 +609,8 @@ NopeGame.NopeServerManager = Ember.Object.extend({
       $.ajax(
         {
           data: { friendEmail: opponent.get('email') },
-          jsonp: CALLBACK_NAME,
           method: 'PATCH',
+          dataType: 'json',
           headers: {
             'x-access-token': window.localStorage.getItem('token')
           },
@@ -637,8 +639,8 @@ NopeGame.NopeServerManager = Ember.Object.extend({
       $.ajax(
         {
           data: { friendEmail: opponent.get('email') },
-          jsonp: CALLBACK_NAME,
           method: 'PATCH',
+          dataType: 'json',
           headers: {
             'x-access-token': window.localStorage.getItem('token')
           },
@@ -667,8 +669,8 @@ NopeGame.NopeServerManager = Ember.Object.extend({
       $.ajax(
         {
           data: { friendEmail: opponent.get('email') },
-          jsonp: CALLBACK_NAME,
           method: 'PATCH',
+          dataType: 'json',
           headers: {
             'x-access-token': window.localStorage.getItem('token')
           },
@@ -710,8 +712,8 @@ NopeGame.NopeServerManager = Ember.Object.extend({
       $.ajax(
         {
           data: { friendEmail: opponent.get('email') },
-          jsonp: CALLBACK_NAME,
           method: 'PATCH',
+          dataType: 'json',
           headers: {
             'x-access-token': window.localStorage.getItem('token')
           },

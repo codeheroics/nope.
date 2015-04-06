@@ -46,7 +46,7 @@ function generateGravatar(email) {
 
         $.ajax(
           {
-            method: 'get',
+            method: 'GET',
             jsonp: CALLBACK_NAME,
             url: LOGIN_ROUTE,
             timeout: 10000
@@ -68,7 +68,7 @@ function generateGravatar(email) {
         $.ajax(
           {
             method: 'POST',
-            jsonp: CALLBACK_NAME,
+            dataType: 'json',
             url: LOGIN_ROUTE,
             data: {
               email: options.identification,
