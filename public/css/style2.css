@@ -25,10 +25,12 @@
 .bt-overlay {
   position: absolute;
   width: 100%;
+  height: 100%;
+  display: none;
 }
 
 .bt-menu-open .bt-overlay {
-  height: 100%;
+  display: block;
 }
 
 .bt-menu-trigger {
@@ -141,7 +143,6 @@
 .bt-menu ul li i:before {
   color: #04a466;
   font-size: 48px;
-  transition: color 0.20s;
 }
 
 .bt-menu ul li i:hover:before,
