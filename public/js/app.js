@@ -106,11 +106,22 @@ function generateGravatar(email) {
       });
     },
     invalidate: function() {
-      toastr.error('Lost the connection, redirecting to login...');
       return new Ember.RSVP.Promise(function(resolve) {
         if (NopeGame.serverManager) {
           NopeGame.serverManager.endPrimus();
         }
+
+        // Workarounds to reset the state of the app
+        delete NopeGame.notificationManager;
+        delete NopeGame.serverManager;
+        delete NopeGame.achievementsManager;
+
+        ['User', 'Opponent', 'Nope'].forEach(function(modelName) {
+          NopeGame[modelName].find().toArray().map(function(element) {
+            NopeGame[modelName].unload(element);
+          });
+        });
+
         window.localStorage.clear();
         resolve();
       });

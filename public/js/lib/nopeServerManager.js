@@ -20,7 +20,7 @@ NopeGame.NopeServerManager = Ember.Object.extend({
   },
 
   initPrimus: function() {
-    this.primus = Primus.connect(
+    this.primus = new Primus(
       PRIMUS_ROUTE,
       {
          // Using timeout is unadvised but to get here, you must be logged
@@ -149,7 +149,7 @@ NopeGame.NopeServerManager = Ember.Object.extend({
 
   endPrimus: function() {
     if (!this.primus) return;
-    this.primus.end();
+    this.primus.destroy();
   },
 
   setTimeDiff: function(timeDiff) {
